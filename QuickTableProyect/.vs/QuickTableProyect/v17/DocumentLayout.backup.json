@@ -3,6 +3,9 @@
   "WorkspaceRootPath": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CE73D734-A8C2-4DD9-9995-F09A923DC2E8}|..\\QuickTableProyect.Persistencia\\QuickTableProyect.Persistencia.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\pogramacion web\\quicktableproject\\quicktableproyect.persistencia\\sistemaquicktablecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\pogramacion web\\quicktableproject\\quicktableproyect\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -22,11 +25,24 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "SistemaQuickTableContext.cs",
+              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Pogramacion web\\QuickTableProject\\QuickTableProyect.Persistencia\\SistemaQuickTableContext.cs",
+              "RelativeDocumentMoniker": "..\\QuickTableProyect.Persistencia\\SistemaQuickTableContext.cs",
+              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Pogramacion web\\QuickTableProject\\QuickTableProyect.Persistencia\\SistemaQuickTableContext.cs",
+              "RelativeToolTip": "..\\QuickTableProyect.Persistencia\\SistemaQuickTableContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-30T23:46:49.637Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -38,7 +54,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -51,7 +67,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\Views\\Cocina\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Cocina\\Index.cshtml",
