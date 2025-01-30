@@ -9,7 +9,7 @@ namespace QuickTableProyect.Persistencia.Datos
         static string connectionString =
             "Server=localhost;" +
             "Database=QuickTableProyectDB;" +
-            "Trusted_Connection=True;";
+            "Trusted_Connection=True;"; //chinga tu madre
 
         public SistemaQuickTableContext() : base(connectionString)
         {
