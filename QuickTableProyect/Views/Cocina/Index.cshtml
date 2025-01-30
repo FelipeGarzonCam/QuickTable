@@ -1,0 +1,157 @@
+﻿@{
+    ViewData["Title"] = "Pedidos Activos - Cocina";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <!-- Estilos CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Estilos para apilar los pedidos horizontalmente */
+        #pedidosContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .pedido {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 15%;
+            box-sizing: border-box;
+        }
+
+            .pedido h3 {
+                font-size: 1.5em;
+            }
+
+            .pedido h4 {
+                font-size: 1.2em;
+            }
+
+            .pedido table {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+                .pedido table th, .pedido table td {
+                    text-align: left;
+                }
+
+                    .pedido table td.cantidad {
+                        text-align: right;
+                        padding-left: 20px; /* Espacio adicional para separar la cantidad */
+                    }
+
+        .btn-listo {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="mt-4">
+        <h2 class="text-center">@ViewBag.Title</h2>
+
+        <div id="pedidosContainer">
+            <!-- Los pedidos se cargarán aquí -->
+        </div>
+    </div>
+
+    <!-- Scripts JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <!-- Bootstrap 4 JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            function loadPedidos() {
+                $.ajax({
+                    url: '@Url.Action("ObtenerPedidosCocina", "Cocina")',
+                    type: 'GET',
+                    success: function (data) {
+                        renderPedidos(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Ocurrió un error al cargar los datos: ' + error);
+                    }
+                });
+            }
+
+            function renderPedidos(items) {
+                var container = $('#pedidosContainer');
+                container.empty();
+
+                if (items.length === 0) {
+                    container.append('<p>No hay pedidos activos.</p>');
+                    return;
+                }
+
+                $.each(items, function (index, item) {
+                    var pedidoDiv = $('<div class="pedido"></div>');
+                    pedidoDiv.append('<h3>Mesa ' + item.numeroMesa + '</h3>');
+                    pedidoDiv.append('<h4>Pedido ID: ' + item.id + '</h4>');
+
+                    // Crear tabla para detalles
+                    var table = $('<table class="table table-bordered"></table>');
+                    var tbody = $('<tbody></tbody>');
+
+                    $.each(item.detalles, function (i, detalle) {
+                        var row = $('<tr></tr>');
+                        row.append('<td>' + detalle.nombre + '</td>');
+                        row.append('<td class="cantidad">' + detalle.cantidadPendiente + '</td>');
+                        tbody.append(row);
+                    });
+
+                    table.append(tbody);
+                    pedidoDiv.append(table);
+
+                    var botonListo = $('<button class="btn btn-success btn-listo">Marcar como Listo</button>');
+                    botonListo.click(function () {
+                        marcarPedidoListo(item.id);
+                    });
+                    pedidoDiv.append(botonListo);
+
+                    container.append(pedidoDiv);
+                });
+            }
+
+            // Función para marcar pedido como listo
+            function marcarPedidoListo(pedidoId) {
+                $.ajax({
+                    url: '@Url.Action("MarcarPedidoListo", "Cocina")',
+                    type: 'POST',
+                    data: { pedidoId: pedidoId },
+                    success: function (response) {
+                        if (response.success) {
+
+                            loadPedidos();
+                        } else {
+                            console.log('Error al marcar el pedido como listo.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Ocurrió un error: ' + error);
+                    }
+                });
+            }
+
+            // Cargar pedidos al inicio y cada cierto tiempo
+            loadPedidos();
+            setInterval(loadPedidos, 5000); // Actualiza cada 5 segundos
+        });
+    </script>
+</body>
+</html>
+

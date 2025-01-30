@@ -1,0 +1,153 @@
+﻿@model List<QuickTableProyect.Dominio.MenuItem>
+@{
+    ViewData["Title"] = "Editar Pedido";
+}
+
+<div class="container">
+    <h2>Editar Pedido</h2>
+    <p>ID Empleado: @ViewData["MeseroId"], Nombre: @ViewData["MeseroNombre"]</p>
+    <p>Total del Pedido: $<span id="totalPedido">0</span></p>
+   
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="searchBar" placeholder="Buscar por nombre de comida" oninput="filterItems()" />
+        </div>
+        <div class="col-md-6">
+            <select id="categoryDropdown" class="form-control" onchange="filterItems()">
+                <option value="">Selecciona una categoría</option>
+                @foreach (var categoria in ViewBag.Categorias)
+                {
+                    <option value="@categoria">@categoria</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <a href="@Url.Action("Index", "Mesero")" class="btn btn-secondary">Cancelar</a>
+        <button class="btn btn-primary" onclick="confirmarPedido()">Confirmar Cambios</button>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody id="menuItemsTable">
+            @foreach (var item in Model)
+            {
+                int cantidadExistente = ViewBag.DetallesPedido.ContainsKey(item.Id)
+                    ? ViewBag.DetallesPedido[item.Id]
+                    : 0;
+
+                <tr data-name="@item.Nombre" data-category="@item.Categoria" data-id="@item.Id" data-precio="@item.Precio">
+                    <td>@item.Nombre</td>
+                    <td>@item.Descripcion</td>
+                    <td><strong>$@item.Precio.ToString("N0")</strong></td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" style="width: 40px; height: 40px" onclick="decreaseQuantity('@item.Id')">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                        <input type="text" id="quantity-@item.Id" value="@cantidadExistente" class="text-center" style="width: 40px; margin: 5px 0 5px 0;" readonly />
+                        <button class="btn btn-sm btn-success" style="width: 40px; height: 40px;" onclick="increaseQuantity('@item.Id')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function filterItems() {
+        const searchQuery = document.getElementById("searchBar").value.toLowerCase();
+        const selectedCategory = document.getElementById("categoryDropdown").value;
+        const rows = document.querySelectorAll("#menuItemsTable tr");
+
+        rows.forEach(row => {
+            const itemName = row.getAttribute("data-name").toLowerCase();
+            const itemCategory = row.getAttribute("data-category");
+
+            const matchesSearch = !searchQuery || itemName.includes(searchQuery);
+            const matchesCategory = !selectedCategory || itemCategory === selectedCategory;
+
+            row.style.display = (matchesSearch && matchesCategory) ? "" : "none";
+        });
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        const rows = document.querySelectorAll("#menuItemsTable tr");
+
+        rows.forEach(row => {
+            const itemId = row.getAttribute("data-id");
+            const precio = parseFloat(row.getAttribute("data-precio"));
+            const cantidad = parseInt(document.getElementById("quantity-" + itemId).value || 0);
+
+            total += precio * cantidad;
+        });
+
+        document.getElementById("totalPedido").innerText = total.toFixed(2);
+    }
+
+    function increaseQuantity(itemId) {
+        const quantityInput = document.getElementById("quantity-" + itemId);
+        quantityInput.value = parseInt(quantityInput.value || 0) + 1;
+        calculateTotal();
+    }
+
+    function decreaseQuantity(itemId) {
+        const quantityInput = document.getElementById("quantity-" + itemId);
+        const currentQuantity = parseInt(quantityInput.value || 0);
+        if (currentQuantity > 0) {
+            quantityInput.value = currentQuantity - 1;
+            calculateTotal();
+        }
+    }
+
+    function confirmarPedido() {
+        const pedidoId = @ViewData["PedidoId"];
+        const items = [];
+        const rows = document.querySelectorAll("#menuItemsTable tr");
+
+        rows.forEach(row => {
+            const itemId = row.getAttribute("data-id");
+            const quantity = parseInt(document.getElementById("quantity-" + itemId).value);
+            if (quantity > 0) {
+                items.push({ MenuItemId: itemId, Cantidad: quantity });
+            }
+        });
+
+        if (items.length === 0) {
+            alert("Selecciona al menos un ítem para el pedido.");
+            return;
+        }
+
+        fetch(`@Url.Action("ConfirmarCambios", "Mesero")?pedidoId=${pedidoId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(items)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '@Url.Action("Index", "Mesero")';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error("Error en la confirmación del pedido:", error));
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        calculateTotal();
+    });
+</script>
+
