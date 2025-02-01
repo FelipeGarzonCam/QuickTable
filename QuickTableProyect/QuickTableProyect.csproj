@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\QuickTableProyect.Aplicacion\QuickTableProyect.Aplicacion.csproj" />
     <ProjectReference Include="..\QuickTableProyect.Dominio\QuickTableProyect.Dominio.csproj" />
   </ItemGroup>

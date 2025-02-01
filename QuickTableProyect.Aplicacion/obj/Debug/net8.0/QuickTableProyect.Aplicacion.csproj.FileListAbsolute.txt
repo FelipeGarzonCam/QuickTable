@@ -49,6 +49,7 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTablePro
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.AssemblyInfoInputs.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.AssemblyInfo.cs
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.csproj.CoreCompileInputs.cache
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.sourcelink.json
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTab.9C5BF737.Up2Date
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\refint\QuickTableProyect.Aplicacion.dll

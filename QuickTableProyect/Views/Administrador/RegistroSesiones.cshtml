@@ -1,0 +1,231 @@
+﻿@model IEnumerable<QuickTableProyect.Dominio.RegistroSesion>
+@{
+    ViewData["Title"] = "Registro de Sesiones";
+}
+
+<div class="container mt-4">
+    <h2>@ViewData["Title"]</h2>
+
+    <!-- Botón de Exportar -->
+    <a asp-action="DescargarRegistrosSesionesExcel" id="btnExportarExcel" class="btn btn-success mb-3">
+        <i class="fas fa-file-export"></i> Exportar a Excel
+    </a>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="filterForm">
+                <div class="form-row">
+                    <div class="form-group col-md-3">
+                        <label for="fecha">Fecha:</label>
+                        <input type="date" id="fecha" name="fecha" class="form-control">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="rol">Rol:</label>
+                        <select id="rol" name="rol" class="form-control">
+                            <option value="">Todos</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Mesero">Mesero</option>
+                            <option value="Cocina">Cocina</option>
+                            <option value="Cajero">Cajero</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label for="empleadoId">ID Empleado:</label>
+                        <input type="number" id="empleadoId" name="empleadoId" class="form-control">
+                    </div>
+                    <div class="form-group col-md-3">
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control">
+                    </div>
+                    <div class="form-group col-md-2 align-self-end">
+                        <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <table class="table table-striped" id="sesionesTable">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" data-column="EmpleadoId" data-order="asc" class="sortable">ID Empleado <i class="bi"></i></th>
+                <th scope="col" data-column="Nombre" data-order="asc" class="sortable">Nombre <i class="bi"></i></th>
+                <th scope="col" data-column="Rol" data-order="asc" class="sortable">Rol <i class="bi"></i></th>
+                <th scope="col" data-column="FechaHoraConexion" data-order="asc" class="sortable">Conexión <i class="bi"></i></th>
+                <th scope="col" data-column="FechaHoraDesconexion" data-order="asc" class="sortable">Desconexión <i class="bi"></i></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Datos dinámicos -->
+        </tbody>
+    </table>
+
+    <!-- Paginación -->
+    <nav>
+        <ul class="pagination justify-content-center" id="pagination">
+            <!-- Páginas dinámicas -->
+        </ul>
+    </nav>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            let currentPage = 1;
+            const pageSize = 10;
+            let sortColumn = 'FechaHoraConexion';
+            let sortOrder = 'desc';
+            let filters = {};
+
+            // Cargar datos iniciales
+            loadData();
+
+            // Función para cargar datos
+            function loadData() {
+                const params = {
+                    page: currentPage,
+                    pageSize: pageSize,
+                    sortColumn: sortColumn,
+                    sortOrder: sortOrder,
+                    ...filters
+                };
+
+                $.ajax({
+                    url: '@Url.Action("ObtenerRegistrosSesiones", "Administrador")',
+                    type: 'GET',
+                    data: params,
+                    success: function (response) {
+                        if (response.registros) {
+                            renderTable(response.registros);
+                            renderPagination(response.currentPage, response.totalPages);
+                        } else {
+                            console.error("No se recibieron datos válidos.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error en la solicitud AJAX:", error);
+                    }
+                });
+            }
+
+            // Renderizar tabla
+            function renderTable(registros) {
+                const tbody = $('#sesionesTable tbody');
+                tbody.empty();
+
+                registros.forEach(sesion => {
+                    const fechaConexion = formatDate(sesion.fechaHoraConexion);
+                    const fechaDesconexion = sesion.fechaHoraDesconexion ? formatDate(sesion.fechaHoraDesconexion) : 'En línea';
+
+                    tbody.append(`
+                            <tr>
+                                <td>${sesion.empleadoId}</td>
+                                <td>${sesion.nombre}</td>
+                                <td>${sesion.rol}</td>
+                                <td>${fechaConexion}</td>
+                                <td>${fechaDesconexion}</td>
+                            </tr>
+                        `);
+                });
+            }
+
+            // Formatear fecha
+            function formatDate(dateString) {
+                if (!dateString) return 'En línea'; // Si no hay fecha, mostrar "En línea"
+                const date = new Date(dateString);
+                if (isNaN(date)) return dateString; // Si no es una fecha válida, devolver el valor original
+                return date.toLocaleString(); // Formato legible
+            }
+
+            // Renderizar paginación
+            function renderPagination(currentPage, totalPages) {
+                const pagination = $('#pagination');
+                pagination.empty();
+
+                // Botón "Anterior"
+                if (currentPage > 1) {
+                    pagination.append(`
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="${currentPage - 1}">Anterior</a>
+                            </li>
+                        `);
+                } else {
+                    pagination.append(`
+                            <li class="page-item disabled">
+                                <span class="page-link">Anterior</span>
+                            </li>
+                        `);
+                }
+
+                // Botones de páginas
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === currentPage) {
+                        pagination.append(`
+                                <li class="page-item active">
+                                    <span class="page-link">${i}</span>
+                                </li>
+                            `);
+                    } else {
+                        pagination.append(`
+                                <li class="page-item">
+                                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                                </li>
+                            `);
+                    }
+                }
+
+                // Botón "Siguiente"
+                if (currentPage < totalPages) {
+                    pagination.append(`
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="${currentPage + 1}">Siguiente</a>
+                            </li>
+                        `);
+                } else {
+                    pagination.append(`
+                            <li class="page-item disabled">
+                                <span class="page-link">Siguiente</span>
+                            </li>
+                        `);
+                }
+            }
+
+            // Evento para cambiar de página
+            $('#pagination').on('click', 'a.page-link', function (e) {
+                e.preventDefault();
+                currentPage = parseInt($(this).data('page'));
+                loadData();
+            });
+
+            // Evento para ordenar columnas
+            $('#sesionesTable thead').on('click', 'th.sortable', function () {
+                const column = $(this).data('column');
+
+                if (sortColumn === column) {
+                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = column;
+                    sortOrder = 'asc';
+                }
+
+                currentPage = 1;
+                loadData();
+            });
+
+            // Manejar filtros
+            $('#filterForm').on('submit', function (e) {
+                e.preventDefault();
+                filters = {
+                    fecha: $('#fecha').val(),
+                    rol: $('#rol').val(),
+                    empleadoId: $('#empleadoId').val(),
+                    nombre: $('#nombre').val()
+                };
+                currentPage = 1;
+                loadData();
+            });
+        });
+    </script>
+}

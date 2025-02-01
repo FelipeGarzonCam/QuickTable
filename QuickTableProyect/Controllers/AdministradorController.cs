@@ -2,38 +2,36 @@
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Aplicacion;
 using System.Collections.Generic;
-using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Data.SqlClient;
-using System.Drawing.Printing;
+using System.Linq;
+using OfficeOpenXml;
 
-namespace QuickTableProyect.Interface
+namespace QuickTableProyect.Controllers
 {
     public class AdministradorController : Controller
     {
         private readonly MenuService _menuService;
         private readonly EmpleadoService _empleadoService;
+        private readonly RegistroSesionService _registroSesionService;
 
-        public AdministradorController(MenuService menuService, EmpleadoService empleadoService)
+        public AdministradorController(MenuService menuService, EmpleadoService empleadoService, RegistroSesionService registroSesionService)
         {
             _menuService = menuService;
             _empleadoService = empleadoService;
+            _registroSesionService = registroSesionService;
+            // Establecer el contexto de licencia de EPPlus
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
         }
 
         public IActionResult Index()
         {
             var rol = HttpContext.Session.GetString("Rol");
-
-            // Verificar si el rol es Admin
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
             }
-
-           
             return View();
-           
         }
+
         [HttpGet]
         public IActionResult ObtenerMenuItemsTest()
         {
@@ -47,18 +45,13 @@ namespace QuickTableProyect.Interface
             var rol = HttpContext.Session.GetString("Rol");
             if (rol != "Admin")
             {
-                return Unauthorized();
+                return RedirectToAction("Index", "Login");
             }
-
             var query = _menuService.ObtenerMenuItems().AsQueryable();
-
-            // Aplicar filtro de búsqueda si existe
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 query = query.Where(m => m.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
             }
-
-            // Ordenar según los parámetros recibidos
             switch (sortColumn)
             {
                 case "Nombre":
@@ -74,35 +67,26 @@ namespace QuickTableProyect.Interface
                     query = sortOrder == "asc" ? query.OrderBy(m => m.Id) : query.OrderByDescending(m => m.Id);
                     break;
             }
-
-            // Total de registros después del filtrado
             var totalItems = query.Count();
-
-            // Calcular total de páginas
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
-            // Obtener los registros para la página actual
             var items = query
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(m => new {
+                .Select(m => new
+                {
                     m.Id,
                     m.Nombre,
                     m.Categoria,
                     m.Descripcion,
-                    Precio = m.Precio.ToString("N0") // Formatear el precio sin decimales
+                    Precio = m.Precio.ToString("N0")
                 })
                 .ToList();
-
             return Json(new { items, totalPages });
         }
-
 
         public IActionResult ModificarMenu()
         {
             var rol = HttpContext.Session.GetString("Rol");
-
-            // Verificar si el rol es Admin
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
@@ -114,7 +98,6 @@ namespace QuickTableProyect.Interface
         public IActionResult CrearMenuItem()
         {
             var rol = HttpContext.Session.GetString("Rol");
-           
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
@@ -127,14 +110,13 @@ namespace QuickTableProyect.Interface
         public IActionResult CrearMenuItem(MenuItem menuItem)
         {
             var rol = HttpContext.Session.GetString("Rol");
-            
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
             }
             if (ModelState.IsValid)
             {
-                menuItem.Precio = decimal.Truncate(menuItem.Precio); // Precio sin decimales
+                menuItem.Precio = decimal.Truncate(menuItem.Precio);
                 _menuService.CrearMenuItem(menuItem);
                 return RedirectToAction(nameof(ModificarMenu));
             }
@@ -145,7 +127,6 @@ namespace QuickTableProyect.Interface
         public IActionResult EditarMenuItem(int id)
         {
             var rol = HttpContext.Session.GetString("Rol");
-           
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
@@ -159,14 +140,13 @@ namespace QuickTableProyect.Interface
         public IActionResult EditarMenuItem(MenuItem menuItem)
         {
             var rol = HttpContext.Session.GetString("Rol");
-
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
             }
             if (ModelState.IsValid)
             {
-                menuItem.Precio = decimal.Truncate(menuItem.Precio); 
+                menuItem.Precio = decimal.Truncate(menuItem.Precio);
                 _menuService.ActualizarMenuItem(menuItem);
                 return RedirectToAction(nameof(ModificarMenu));
             }
@@ -183,8 +163,6 @@ namespace QuickTableProyect.Interface
         public IActionResult ModificarEmpleados()
         {
             var rol = HttpContext.Session.GetString("Rol");
-
-            // Verificar si el rol es Admin
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
@@ -196,8 +174,6 @@ namespace QuickTableProyect.Interface
         public IActionResult CrearEmpleado()
         {
             var rol = HttpContext.Session.GetString("Rol");
-
-            // Verificar si el rol es Admin
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
@@ -210,7 +186,6 @@ namespace QuickTableProyect.Interface
         public IActionResult CrearEmpleado(Empleado empleado)
         {
             var rol = HttpContext.Session.GetString("Rol");
-
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
@@ -227,7 +202,6 @@ namespace QuickTableProyect.Interface
         public IActionResult EditarEmpleado(int id)
         {
             var rol = HttpContext.Session.GetString("Rol");
-
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
@@ -241,12 +215,10 @@ namespace QuickTableProyect.Interface
         public IActionResult EditarEmpleado(Empleado empleado)
         {
             var rol = HttpContext.Session.GetString("Rol");
-
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
             }
-
             if (ModelState.IsValid)
             {
                 _empleadoService.ActualizarEmpleado(empleado);
@@ -261,6 +233,96 @@ namespace QuickTableProyect.Interface
             _empleadoService.EliminarEmpleado(id);
             return RedirectToAction(nameof(ModificarEmpleados));
         }
-       
+
+        [HttpGet]
+        public IActionResult RegistroSesiones()
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+            var registros = _registroSesionService.ObtenerRegistrosPorFechaRolIdNombre(null, "", null, "");
+            return View(registros);
+        }     
+        [HttpGet]
+        public IActionResult ObtenerRegistrosSesiones(DateTime? fecha, string rol, int? empleadoId, string nombre, int pageNumber = 1, int pageSize = 10)
+        {
+            // Verificar si el usuario es Admin
+            var rolSession = HttpContext.Session.GetString("Rol");
+            if (rolSession != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            // Obtener registros filtrados
+            var registros = _registroSesionService.ObtenerRegistrosPorFechaRolIdNombre(fecha, rol, empleadoId, nombre);
+
+            // Calcular paginación
+            var totalItems = registros.Count();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            // Aplicar paginación y seleccionar campos necesarios
+            var paginatedRegistros = registros
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(r => new
+                {
+                    empleadoId = r.EmpleadoId,
+                    nombre = r.Empleado.Nombre,
+                    rol = r.Empleado.Rol,
+                    fechaHoraConexion = r.FechaHoraConexion.ToString("yyyy-MM-ddTHH:mm:ss"), // Formato ISO 8601
+                    fechaHoraDesconexion = r.FechaHoraDesconexion?.ToString("yyyy-MM-ddTHH:mm:ss") ?? null // Null si está en línea
+                })
+                .ToList();
+
+            // Devolver respuesta JSON
+            return Json(new
+            {
+                registros = paginatedRegistros,
+                currentPage = pageNumber,
+                totalPages = totalPages
+            });
+        }
+
+        [HttpGet]
+        public IActionResult DescargarRegistrosSesionesExcel(DateTime? fecha, string rol, int? empleadoId, string nombre)
+        {
+            var rolSession = HttpContext.Session.GetString("Rol");
+            if (rolSession != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            var registros = _registroSesionService.ObtenerRegistrosPorFechaRolIdNombre(fecha, rol, empleadoId, nombre);
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Registros de Sesiones");
+
+                worksheet.Cells[1, 1].Value = "ID Empleado";
+                worksheet.Cells[1, 2].Value = "Nombre Empleado";
+                worksheet.Cells[1, 3].Value = "Rol";
+                worksheet.Cells[1, 4].Value = "Fecha y Hora Conexión";
+                worksheet.Cells[1, 5].Value = "Fecha y Hora Desconexión";
+
+                int row = 2;
+                foreach (var registro in registros)
+                {
+                    worksheet.Cells[row, 1].Value = registro.EmpleadoId;
+                    worksheet.Cells[row, 2].Value = registro.Empleado.Nombre;
+                    worksheet.Cells[row, 3].Value = registro.Empleado.Rol;
+                    worksheet.Cells[row, 4].Value = registro.FechaHoraConexion.ToString("dd/MM/yyyy HH:mm:ss");
+                    worksheet.Cells[row, 5].Value = registro.FechaHoraDesconexion?.ToString("dd/MM/yyyy HH:mm:ss") ?? "En línea";
+                    row++;
+                }
+
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "RegistrosSesiones.xlsx");
+            }
+        }
     }
 }

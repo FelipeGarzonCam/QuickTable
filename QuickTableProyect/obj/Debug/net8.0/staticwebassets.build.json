@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "MiMHhD56X3fb+swwpRw7eLADsXjmsJWkaOxWBbgH9Z8=",
+  "Hash": "tJFeqEOSnuZE0GAmwah/8UvgxU2w7MvahStA73rQ2TI=",
   "Source": "QuickTableProyect",
   "BasePath": "_content/QuickTableProyect",
   "Mode": "Default",
@@ -40143,6 +40143,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Identity": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\wwwroot\\lib\\jquery-deparam\\jquery.deparam.js",
+      "SourceId": "QuickTableProyect",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\wwwroot\\",
+      "BasePath": "_content/QuickTableProyect",
+      "RelativePath": "lib/jquery-deparam/jquery.deparam.js",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\lib\\jquery-deparam\\jquery.deparam.js"
     },
     {
       "Identity": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",

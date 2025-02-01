@@ -11,23 +11,16 @@ namespace QuickTableProyect.Aplicacion
 
         public MenuService(SistemaQuickTableContext context)
         {
-            _context = context;
+            _context = context; // Corregir la asignación
         }
 
-        // Obtener todos los elementos del menú
         public List<MenuItem> ObtenerMenuItems() => _context.MenuItems.ToList();
-
-        // Obtener un elemento específico por su Id
         public MenuItem ObtenerMenuItemPorId(int id) => _context.MenuItems.Find(id);
-
-        // Agregar un nuevo elemento al menú
         public void CrearMenuItem(MenuItem menuItem)
         {
             _context.MenuItems.Add(menuItem);
             _context.SaveChanges();
         }
-
-        // Modificar un elemento existente en el menú
         public void ActualizarMenuItem(MenuItem menuItem)
         {
             var existingItem = _context.MenuItems.Find(menuItem.Id);
@@ -40,8 +33,6 @@ namespace QuickTableProyect.Aplicacion
                 _context.SaveChanges();
             }
         }
-
-        // Eliminar un elemento del menú por su Id
         public void EliminarMenuItem(int id)
         {
             var menuItem = _context.MenuItems.Find(id);

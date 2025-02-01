@@ -47,11 +47,14 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTablePro
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations._12am.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.Estados.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.Caja.resources
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.exit.resources
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.RegistroSesion.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.GenerateResource.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.AssemblyInfoInputs.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.AssemblyInfo.cs
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.CoreCompileInputs.cache
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.sourcelink.json
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTab.551E8909.Up2Date
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\refint\QuickTableProyect.Persistencia.dll

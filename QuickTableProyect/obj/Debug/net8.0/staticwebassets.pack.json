@@ -8429,6 +8429,10 @@
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
     },
     {
+      "Id": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\wwwroot\\lib\\jquery-deparam\\jquery.deparam.js",
+      "PackagePath": "staticwebassets\\lib\\jquery-deparam\\jquery.deparam.js"
+    },
+    {
       "Id": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
     },
