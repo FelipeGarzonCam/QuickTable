@@ -49,10 +49,28 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTablePro
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.AssemblyInfoInputs.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.AssemblyInfo.cs
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.csproj.CoreCompileInputs.cache
-C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.sourcelink.json
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTab.9C5BF737.Up2Date
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\refint\QuickTableProyect.Aplicacion.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.pdb
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.genruntimeconfig.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Aplicacion\obj\Debug\net8.0\ref\QuickTableProyect.Aplicacion.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Aplicacion.deps.json
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Aplicacion.runtimeconfig.json
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Aplicacion.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Aplicacion.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Persistencia.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\bin\Debug\net8.0\QuickTableProyect.Persistencia.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.csproj.AssemblyReference.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.GeneratedMSBuildEditorConfig.editorconfig
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.AssemblyInfoInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.AssemblyInfo.cs
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.csproj.CoreCompileInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTab.9C5BF737.Up2Date
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\refint\QuickTableProyect.Aplicacion.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\QuickTableProyect.Aplicacion.genruntimeconfig.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Aplicacion\obj\Debug\net8.0\ref\QuickTableProyect.Aplicacion.dll

@@ -9,16 +9,17 @@ namespace QuickTableProyect.Persistencia.Datos
         static string connectionString =
             "Server=localhost;" +
             "Database=QuickTableProyectDB;" +
-            "Trusted_Connection=True;";
+            "Trusted_Connection=True;"; //chinga tu madre
 
         public SistemaQuickTableContext() : base(connectionString)
         {
         }
 
-        public DbSet<Empleado> Empleados { get; set; }
         public DbSet<MenuItem> MenuItems { get; set; }
+        public DbSet<Empleado> Empleados { get; set; }
         public DbSet<PedidosActivos> PedidosActivos { get; set; }
         public DbSet<ItemDetalle> ItemDetalles { get; set; }
+
         public DbSet<HistorialPedido> HistorialPedidos { get; set; }
         public DbSet<HistorialDetalle> HistorialDetalles { get; set; }
 
@@ -31,4 +32,7 @@ namespace QuickTableProyect.Persistencia.Datos
             base.OnModelCreating(modelBuilder);
         }
     }
-}
+} //masterrrr
+
+
+

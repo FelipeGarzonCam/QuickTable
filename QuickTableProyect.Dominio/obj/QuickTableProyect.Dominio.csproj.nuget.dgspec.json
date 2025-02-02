@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj": {}
+    "P:\\Escritorio\\QuickTable-master\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj": {
+    "P:\\Escritorio\\QuickTable-master\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj",
+        "projectUniqueName": "P:\\Escritorio\\QuickTable-master\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj",
         "projectName": "QuickTableProyect.Dominio",
-        "projectPath": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj",
+        "projectPath": "P:\\Escritorio\\QuickTable-master\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj",
         "packagesPath": "C:\\Users\\Felip\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tomás\\Pogramacion web\\QuickTableProject\\QuickTableProyect.Dominio\\obj\\",
+        "outputPath": "P:\\Escritorio\\QuickTable-master\\QuickTableProyect.Dominio\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

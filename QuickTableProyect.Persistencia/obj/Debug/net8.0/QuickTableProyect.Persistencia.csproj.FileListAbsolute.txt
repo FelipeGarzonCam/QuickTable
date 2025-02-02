@@ -47,17 +47,37 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTablePro
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations._12am.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.Estados.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.Caja.resources
-C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.exit.resources
-C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.RegistroSesion.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.GenerateResource.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.AssemblyInfoInputs.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.AssemblyInfo.cs
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.CoreCompileInputs.cache
-C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.sourcelink.json
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTab.551E8909.Up2Date
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\refint\QuickTableProyect.Persistencia.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.pdb
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.genruntimeconfig.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Persistencia\obj\Debug\net8.0\ref\QuickTableProyect.Persistencia.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\bin\Debug\net8.0\QuickTableProyect.Persistencia.deps.json
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\bin\Debug\net8.0\QuickTableProyect.Persistencia.runtimeconfig.json
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\bin\Debug\net8.0\QuickTableProyect.Persistencia.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\bin\Debug\net8.0\QuickTableProyect.Persistencia.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\bin\Debug\net8.0\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\bin\Debug\net8.0\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.AssemblyReference.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.Estado.resources
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations._12am.resources
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.Estados.resources
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.Caja.resources
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.GenerateResource.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.GeneratedMSBuildEditorConfig.editorconfig
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.AssemblyInfoInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.AssemblyInfo.cs
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.CoreCompileInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTab.551E8909.Up2Date
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\refint\QuickTableProyect.Persistencia.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.genruntimeconfig.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\ref\QuickTableProyect.Persistencia.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.RegristroSesion2.resources

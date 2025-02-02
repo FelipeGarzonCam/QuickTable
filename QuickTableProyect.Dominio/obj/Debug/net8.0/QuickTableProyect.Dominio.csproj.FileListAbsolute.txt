@@ -27,8 +27,18 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTablePro
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.AssemblyInfoInputs.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.AssemblyInfo.cs
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.csproj.CoreCompileInputs.cache
-C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.sourcelink.json
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\refint\QuickTableProyect.Dominio.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.pdb
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\obj\Debug\net8.0\ref\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Debug\net8.0\QuickTableProyect.Dominio.deps.json
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Debug\net8.0\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Debug\net8.0\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.GeneratedMSBuildEditorConfig.editorconfig
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.AssemblyInfoInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.AssemblyInfo.cs
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.csproj.CoreCompileInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\refint\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Debug\net8.0\ref\QuickTableProyect.Dominio.dll

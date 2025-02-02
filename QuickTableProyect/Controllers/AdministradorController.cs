@@ -244,7 +244,7 @@ namespace QuickTableProyect.Controllers
             }
             var registros = _registroSesionService.ObtenerRegistrosPorFechaRolIdNombre(null, "", null, "");
             return View(registros);
-        }     
+        }
         [HttpGet]
         public IActionResult ObtenerRegistrosSesiones(DateTime? fecha, string rol, int? empleadoId, string nombre, int pageNumber = 1, int pageSize = 10)
         {

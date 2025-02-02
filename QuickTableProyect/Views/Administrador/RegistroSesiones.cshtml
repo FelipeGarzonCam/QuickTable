@@ -120,14 +120,14 @@
                     const fechaDesconexion = sesion.fechaHoraDesconexion ? formatDate(sesion.fechaHoraDesconexion) : 'En línea';
 
                     tbody.append(`
-                            <tr>
-                                <td>${sesion.empleadoId}</td>
-                                <td>${sesion.nombre}</td>
-                                <td>${sesion.rol}</td>
-                                <td>${fechaConexion}</td>
-                                <td>${fechaDesconexion}</td>
-                            </tr>
-                        `);
+                                    <tr>
+                                        <td>${sesion.empleadoId}</td>
+                                        <td>${sesion.nombre}</td>
+                                        <td>${sesion.rol}</td>
+                                        <td>${fechaConexion}</td>
+                                        <td>${fechaDesconexion}</td>
+                                    </tr>
+                                `);
                 });
             }
 
@@ -147,48 +147,48 @@
                 // Botón "Anterior"
                 if (currentPage > 1) {
                     pagination.append(`
-                            <li class="page-item">
-                                <a class="page-link" href="#" data-page="${currentPage - 1}">Anterior</a>
-                            </li>
-                        `);
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" data-page="${currentPage - 1}">Anterior</a>
+                                    </li>
+                                `);
                 } else {
                     pagination.append(`
-                            <li class="page-item disabled">
-                                <span class="page-link">Anterior</span>
-                            </li>
-                        `);
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Anterior</span>
+                                    </li>
+                                `);
                 }
 
                 // Botones de páginas
                 for (let i = 1; i <= totalPages; i++) {
                     if (i === currentPage) {
                         pagination.append(`
-                                <li class="page-item active">
-                                    <span class="page-link">${i}</span>
-                                </li>
-                            `);
+                                        <li class="page-item active">
+                                            <span class="page-link">${i}</span>
+                                        </li>
+                                    `);
                     } else {
                         pagination.append(`
-                                <li class="page-item">
-                                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                                </li>
-                            `);
+                                        <li class="page-item">
+                                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                                        </li>
+                                    `);
                     }
                 }
 
                 // Botón "Siguiente"
                 if (currentPage < totalPages) {
                     pagination.append(`
-                            <li class="page-item">
-                                <a class="page-link" href="#" data-page="${currentPage + 1}">Siguiente</a>
-                            </li>
-                        `);
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" data-page="${currentPage + 1}">Siguiente</a>
+                                    </li>
+                                `);
                 } else {
                     pagination.append(`
-                            <li class="page-item disabled">
-                                <span class="page-link">Siguiente</span>
-                            </li>
-                        `);
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Siguiente</span>
+                                    </li>
+                                `);
                 }
             }
 
