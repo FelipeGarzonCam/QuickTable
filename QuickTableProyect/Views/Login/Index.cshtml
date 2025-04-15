@@ -1,0 +1,155 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="#"><b>QuickTable</b> Login</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg">Inicia sesión</p>
+
+                <!-- Mostrar el clientId -->
+                <p>Client ID: <span id="clientIdDisplay"></span></p>
+
+                <form id="loginForm">
+                    <!-- Campo de nombre de usuario -->
+                    <div class="input-group mb-3">
+                        <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Campo de contraseña -->
+                    <div class="input-group mb-3">
+                        <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  campo oculto en el formulario -->
+                    <input type="hidden" name="clientId" id="clientId" value="">
+                    <!-- Botón de iniciar sesión -->
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts necesarios -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- SignalR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.7/signalr.min.js"></script>
+<!-- Toastr JS y CSS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<script>
+    $(document).ready(function () {
+        // Generar o recuperar el clientId y mostrarlo
+        var clientId = localStorage.getItem('clientId');
+        if (!clientId) {
+            // Generar un número aleatorio de 6 dígitos
+            clientId = Math.floor(100000 + Math.random() * 900000).toString();
+            localStorage.setItem('clientId', clientId);
+        }
+        $('#clientIdDisplay').text(clientId);
+        // Asignar el clientId al campo oculto
+        $('#clientId').val(clientId);
+
+
+        // Conexión al Hub de SignalR
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/comunicacionHub")
+            .build();
+
+        connection.start().then(function () {
+            // Unirse al grupo con el clientId
+            connection.invoke("UnirseAlGrupo", clientId);
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        // Escuchar mensajes del servidor
+        connection.on("ActualizarCampos", function (data) {
+            // Actualizar los campos según los datos recibidos
+            if (data.usuarioInput !== undefined) {
+                $("input[name='nombre']").val(data.usuarioInput);
+            }
+            if (data.contrasenaInput !== undefined) {
+                $("input[name='contrasena']").val(data.contrasenaInput);
+            }
+        });
+
+        connection.on("Redirigir", function (data) {
+            // Redirigir a la URL proporcionada
+            window.location.href = data.url;
+        });
+
+        connection.on("MostrarError", function (data) {
+            // Mostrar mensaje de error con Toastr
+            toastr.error(data.message, 'Error');
+        });
+
+        // Nuevo manejador para iniciar sesión cuando se recibe la señal
+        connection.on("IniciarSesion", function () {
+            // Enviar el formulario de inicio de sesión
+            $("#loginForm").submit();
+        });
+        connection.on("Logout", function () {
+            // Redirigir al logout del servidor
+            window.location.href = '@Url.Action("Logout", "Login")';
+        });
+
+
+        // Manejador del evento submit del formulario de login
+        $("#loginForm").submit(function (event) {
+            event.preventDefault();
+
+            var nombre = $("input[name='nombre']").val().trim();
+            var contrasena = $("input[name='contrasena']").val().trim();
+
+            if (nombre === "" || contrasena === "") {
+                toastr.warning('Por favor, completa todos los campos.', 'Advertencia');
+                return;
+            }
+
+            // Enviar la solicitud de autenticación al servidor
+            $.ajax({
+                url: '@Url.Action("Autenticar", "Login")',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    nombre: nombre,
+                    contrasena: contrasena,
+                    clientId: clientId // Agregar el clientId aquí
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success('Inicio de sesión exitoso.', 'Éxito');
+                        setTimeout(function () {
+                            window.location.href = response.redirectUrl;
+                        }, 500); // Redirige después de medio segundo
+                    } else {
+                        toastr.error(response.message, 'Error');
+                    }
+                },
+                error: function () {
+                    toastr.error('Ocurrió un error al procesar la solicitud.', 'Error');
+                }
+            });
+        });
+    });
+</script>

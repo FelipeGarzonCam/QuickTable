@@ -1,0 +1,233 @@
+﻿@{
+    ViewData["Title"] = "Pedidos Activos - Cocina";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>  
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>       
+        
+        #pedidosContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .pedido {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 20%; 
+            box-sizing: border-box;
+        }
+
+            .pedido h3 {
+                font-size: 1.5em;
+            }
+
+            .pedido h4 {
+                font-size: 1.2em;
+            }
+
+            .pedido table {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+                .pedido table th,
+                .pedido table td {
+                    text-align: left;
+                }
+
+                    .pedido table td.cantidad {
+                        text-align: right;
+                        padding-left: 20px;
+                    }
+
+        .btn-listo {
+            font-size: 1em;
+            padding: 10px 20px;
+            margin-top: 10px;
+        }   
+    </style>
+</head>
+<body>
+    <div class="mt-4">
+        <h2 class="text-center">@ViewData["Title"]</h2>
+
+        <div id="pedidosContainer">
+            <!-- Los pedidos se cargarán aquí -->
+        </div>
+    </div>
+
+    <!-- Modal para ingresar ID de pedido -->
+    <div class="modal fade" id="modalPedido" tabindex="-1" role="dialog" aria-labelledby="modalPedidoLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Cabecera -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPedidoLabel">Ingresar ID de Pedido</h5>
+                </div>
+                <!-- Cuerpo -->
+                <div class="modal-body">
+                    <!-- Campo para mostrar el ID del pedido -->
+                    <input type="text" id="pedidoIdInput" class="form-control" readonly>
+
+                    <!-- Leyenda de las acciones -->
+                    <div class="mt-3">
+                        <p><strong>Funciones de las teclas:</strong></p>
+                        <ul>                            
+                            <li><strong>B</strong>: Cerrar modal</li>
+                            <li><strong>C</strong>: Borrar contenido</li>
+                            <li><strong>D</strong>: Marcar pedido como listo</li>
+                            <li><strong>Números</strong>: Ingresar ID de pedido</li>
+                        </ul>
+                    </div>
+                </div>                
+                
+            </div>
+        </div>
+    </div>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.7/signalr.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            // Obtener el clientId almacenado
+            var clientId = localStorage.getItem('clientId');
+
+            // Conexión al Hub de SignalR
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/comunicacionHub")
+                .build();
+
+            connection.start().then(function () {
+                // Unirse al grupo con el clientId
+                connection.invoke("UnirseAlGrupo", clientId);
+            }).catch(function (err) {
+                return console.error(err.toString());
+            });
+            // Variable para mantener el estado del modal
+            var modalAbierto = false;
+
+            // Escuchar mensajes del servidor para actualizar el modal
+            connection.on("ActualizarModal", function (data) {
+                if (data.modalAbierto) {
+                    // Mostrar el modal si no está abierto
+                    if (!modalAbierto) {
+                        $('#modalPedido').modal('show');
+                        modalAbierto = true;
+                    }
+                } else {
+                    // Ocultar el modal si está abierto
+                    if (modalAbierto) {
+                        $('#modalPedido').modal('hide');
+                        modalAbierto = false;
+                    }
+                }
+                // Actualizar el contenido del input
+                $('#pedidoIdInput').val(data.pedidoIdModal);
+            });
+
+            connection.on("MostrarError", function (data) {
+                // Mostrar mensaje de error (puedes usar Toastr si lo tienes incluido)
+                alert(data.message);
+            });
+
+            connection.on("Logout", function () {
+                // Redirigir al logout del servidor
+                window.location.href = '@Url.Action("Logout", "Login")';
+            });
+
+            // Función para cargar los pedidos
+            function loadPedidos() {
+                $.ajax({
+                    url: '@Url.Action("ObtenerPedidosCocina", "Cocina")',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        if (Array.isArray(data) && data.length > 0) {
+                            renderPedidos(data);
+                        } else {
+                            $('#pedidosContainer').html('<p>No hay pedidos activos.</p>');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error al cargar los pedidos: ', error);
+                        $('#pedidosContainer').html('<p>Ocurrió un error al cargar los pedidos.</p>');
+                    }
+                });
+            }
+
+            // Función para renderizar pedidos
+            function renderPedidos(items) {
+                var container = $('#pedidosContainer');
+                container.empty(); // Limpia el contenedor antes de renderizar
+
+                items.forEach(function (item) {
+                    var pedidoDiv = $('<div class="pedido"></div>');
+                    pedidoDiv.append('<h3>Mesa ' + item.numeroMesa + '</h3>');
+                    pedidoDiv.append('<h4>Pedido ID: ' + item.id + '</h4>');
+
+                    // Crear tabla para los detalles
+                    var table = $('<table class="table table-bordered"></table>');
+                    var tbody = $('<tbody></tbody>');
+
+                    item.detalles.forEach(function (detalle) {
+                        var row = $('<tr></tr>');
+                        row.append('<td>' + detalle.nombre + '</td>');
+                        row.append('<td class="cantidad">' + detalle.cantidadPendiente + '</td>');
+                        tbody.append(row);
+                    });
+
+                    table.append(tbody);
+                    pedidoDiv.append(table);
+
+                    var botonListo = $('<button class="btn btn-success btn-listo">Marcar como Listo</button>');
+                    botonListo.click(function () {
+                        marcarPedidoListo(item.id);
+                    });
+                    // pedidoDiv.append(botonListo);
+
+                    container.append(pedidoDiv);
+                });
+            }
+
+            // Función para marcar pedido como listo
+            function marcarPedidoListo(pedidoId) {
+                $.ajax({
+                    url: '@Url.Action("MarcarPedidoListo", "Cocina")',
+                    type: 'POST',
+                    data: { pedidoId: pedidoId }, // Enviar como datos de formulario
+                    success: function (response) {
+                        if (response.success) {
+                            loadPedidos(); // Recarga los pedidos después de actualizar
+                        } else {
+                            console.warn('No se pudo marcar el pedido como listo.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error al marcar el pedido como listo: ', error);
+                    }
+                });
+            }
+
+            // Cargar los pedidos al inicio
+            loadPedidos();
+
+            // Actualizar cada 5 segundos
+            setInterval(loadPedidos, 3000);
+        });
+    </script>
+</body>
+</html>

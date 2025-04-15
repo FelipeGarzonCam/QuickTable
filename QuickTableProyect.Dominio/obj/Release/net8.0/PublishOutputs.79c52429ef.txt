@@ -1,0 +1,3 @@
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\bin\Release\net8.0\publish\QuickTableProyect.Dominio.dll
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\bin\Release\net8.0\publish\QuickTableProyect.Dominio.deps.json
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Pogramacion web\QuickTableProject\QuickTableProyect.Dominio\bin\Release\net8.0\publish\QuickTableProyect.Dominio.pdb

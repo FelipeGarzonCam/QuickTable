@@ -1,0 +1,74 @@
+﻿@model QuickTableProyect.Dominio.Empleado
+
+<div class="container">
+    <h2>Editar Empleado</h2>
+
+    <form asp-action="EditarEmpleado" method="post">
+        <div class="form-group">
+            <label for="Nombre">Nombre</label>
+            <input type="text" class="form-control" id="Nombre" name="Nombre" value="@Model.Nombre" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Rol">Rol</label>
+            <select asp-for="Rol" class="form-control" asp-items="@(new SelectList(new List<string> { "Mesero", "Cocina", "Admin", "Cajero" }, Model.Rol))" required>
+                <option value="">Seleccione un rol</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="Contrasena">Contraseña</label>
+            <input type="password" class="form-control" id="Contrasena" name="Contrasena" value="@Model.Contrasena" readonly />
+            <button type="button" class="btn btn-link" onclick="showPasswordModal()">Editar Contraseña</button>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <a href="@Url.Action("ModificarEmpleados", "Administrador")" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<!-- Modal para confirmar la contraseña actual -->
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordModalLabel">Confirmar Contraseña Actual</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="currentPassword">Ingrese su contraseña actual para confirmar</label>
+                    <input type="password" class="form-control" id="currentPassword" />
+                </div>
+                <div id="errorAlert" class="alert alert-danger mt-3" style="display: none;">Contraseña actual incorrecta</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmPassword()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
+<script>
+    function showPasswordModal() {
+        $('#passwordModal').modal('show');
+    }
+
+    function confirmPassword() {
+        const enteredPassword = document.getElementById("currentPassword").value;
+        const actualPassword = '@Model.Contrasena';
+
+        if (enteredPassword === actualPassword) {
+            document.getElementById("Contrasena").readOnly = false;
+            document.getElementById("Contrasena").value = ''; // Limpia el campo para ingresar la nueva contraseña
+            document.getElementById("errorAlert").style.display = "none";
+            $('#passwordModal').modal('hide'); 
+        } else {
+            document.getElementById("errorAlert").style.display = "block";
+            document.getElementById("currentPassword").value = '';
+        }
+    }
+</script>
