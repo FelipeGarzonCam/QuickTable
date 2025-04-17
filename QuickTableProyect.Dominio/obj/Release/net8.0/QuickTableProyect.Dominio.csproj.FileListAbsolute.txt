@@ -1,0 +1,11 @@
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Release\net8.0\QuickTableProyect.Dominio.deps.json
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Release\net8.0\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Release\net8.0\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.GeneratedMSBuildEditorConfig.editorconfig
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.AssemblyInfoInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.AssemblyInfo.cs
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.csproj.CoreCompileInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\refint\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\ref\QuickTableProyect.Dominio.dll

@@ -1,0 +1,65 @@
+﻿@model List<QuickTableProyect.Dominio.Empleado>
+
+<div class="container">
+    <h2>Lista de Empleados</h2>
+
+    <a asp-action="CrearEmpleado" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Agregar Empleado</a>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var empleado in Model)
+            {
+                <tr>
+                    <td>@empleado.Id</td>
+                    <td>@empleado.Nombre</td>
+                    <td>@empleado.Rol</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" href="@Url.Action("EditarEmpleado", "Administrador", new { id = empleado.Id })">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <button class="btn btn-danger btn-sm" onclick="showDeleteModal(@empleado.Id)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmación de eliminación</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                ¿Está seguro de que desea eliminar este empleado?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <a id="confirmDeleteButton" class="btn btn-danger">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showDeleteModal(id) {
+        const confirmDeleteButton = document.getElementById("confirmDeleteButton");
+        confirmDeleteButton.href = '@Url.Action("EliminarEmpleado", "Administrador")' + "?id=" + id;
+
+        const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+        deleteModal.show();
+    }
+</script>

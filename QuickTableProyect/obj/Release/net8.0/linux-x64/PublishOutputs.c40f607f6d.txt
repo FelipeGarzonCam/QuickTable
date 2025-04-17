@@ -1,0 +1,7 @@
+P:\Escritorio\QuickTable-master\QuickTableProyect\bin\Release\net8.0\linux-x64\publish\appsettings.Development.json
+P:\Escritorio\QuickTable-master\QuickTableProyect\bin\Release\net8.0\linux-x64\publish\appsettings.json
+P:\Escritorio\QuickTable-master\QuickTableProyect\bin\Release\net8.0\linux-x64\publish\QuickTableProyect.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect\bin\Release\net8.0\linux-x64\publish\QuickTableProyect.Aplicacion.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect\bin\Release\net8.0\linux-x64\publish\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect\bin\Release\net8.0\linux-x64\publish\QuickTableProyect.Persistencia.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect\bin\Release\net8.0\linux-x64\publish\QuickTableProyect

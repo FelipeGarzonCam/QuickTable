@@ -1,0 +1,11 @@
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Release\net8.0\linux-x64\QuickTableProyect.Dominio.deps.json
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Release\net8.0\linux-x64\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\bin\Release\net8.0\linux-x64\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\QuickTableProyect.Dominio.GeneratedMSBuildEditorConfig.editorconfig
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\QuickTableProyect.Dominio.AssemblyInfoInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\QuickTableProyect.Dominio.AssemblyInfo.cs
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\QuickTableProyect.Dominio.csproj.CoreCompileInputs.cache
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\refint\QuickTableProyect.Dominio.dll
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\QuickTableProyect.Dominio.pdb
+P:\Escritorio\QuickTable-master\QuickTableProyect.Dominio\obj\Release\net8.0\linux-x64\ref\QuickTableProyect.Dominio.dll
