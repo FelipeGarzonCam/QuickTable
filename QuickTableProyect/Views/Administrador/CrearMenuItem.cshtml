@@ -1,0 +1,36 @@
+﻿@model QuickTableProyect.Dominio.MenuItem
+
+<div class="container">
+    <h2>Crear Menu Item</h2>
+
+    <form asp-action="CrearMenuItem" method="post">
+        <div class="form-group">
+            <label for="Nombre">Nombre</label>
+            <input type="text" class="form-control" id="Nombre" name="Nombre" required />
+        </div>
+
+        <div class="form-group">
+            <label for="Categoria">Categoría</label>
+            <select asp-for="Categoria" class="form-control" required>
+                <option value="">Seleccione una categoría</option>
+                @foreach (var categoria in ViewBag.Categorias)
+                {
+                    <option value="@categoria">@categoria</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="Descripcion">Descripción</label>
+            <textarea class="form-control" id="Descripcion" name="Descripcion" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="Precio">Precio</label>
+            <input type="number" class="form-control" id="Precio" name="Precio" min="0" step="1" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="@Url.Action("ModificarMenu", "Administrador")" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

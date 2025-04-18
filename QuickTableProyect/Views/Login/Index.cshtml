@@ -1,0 +1,79 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="#"><b>QuickTable</b> Login</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body login-card-body">
+                <p class="login-box-msg"> </p>
+
+                <form id="loginForm">
+                    <div class="input-group mb-3">
+                        <input type="text" name="nombre" class="form-control" placeholder="Usuario" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3">
+                        <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<script>
+    $("#loginForm").submit(function (event) {
+        event.preventDefault();
+
+        var nombre = $("input[name='nombre']").val().trim();
+        var contrasena = $("input[name='contrasena']").val().trim();
+
+        if (nombre === "" || contrasena === "") {
+            toastr.warning('Por favor, completa todos los campos.', 'Advertencia');
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("Autenticar", "Login")',
+            type: 'POST',
+            dataType: 'json',
+            data: { nombre: nombre, contrasena: contrasena },
+            success: function (response) {
+                if (response.success) {
+                    toastr.success('Inicio de sesión exitoso.', 'Éxito');
+                    setTimeout(function () {
+                        window.location.href = response.redirectUrl;
+                    }, 500); // Redirige después de medio segundo
+                } else {
+                    toastr.error(response.message, 'Error');
+                }
+            },
+            error: function () {
+                toastr.error('Ocurrió un error al procesar la solicitud.', 'Error');
+            }
+        });
+    });
+</script>

@@ -1,0 +1,373 @@
+﻿@model IEnumerable<QuickTableProyect.Dominio.RegistroSesion>
+@{
+    ViewData["Title"] = "Registro de Sesiones";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        /* Estilo para la tabla con fondo oscuro - similar a ModificarMenu */
+        #sesionesTable {
+            background-color: #343a40;
+            color: white;
+        }
+
+            #sesionesTable thead th {
+                border-bottom: 1px solid #6c757d;
+                padding: 8px 16px;
+                position: relative;
+            }
+
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Estilo minimalista para las flechas */
+        .sort-icon {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.5;
+        }
+
+            .sort-icon.active {
+                opacity: 1;
+                color: #45aaf2;
+            }
+
+        /* Filtros con estilo oscuro */
+        .filter-form {
+            background-color: #2d3339;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+            .filter-form .form-control {
+                background-color: #383f45;
+                border: none;
+                color: white;
+                padding: 10px 15px;
+            }
+
+                .filter-form .form-control::placeholder {
+                    color: #adb5bd;
+                }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .online-status {
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <h2>@ViewData["Title"]</h2>
+
+        <!-- El botón de exportar ahora es un elemento normal, no un enlace -->
+        <button id="exportarExcel" class="btn btn-success mb-3">
+            <i class="fas fa-file-export"></i> Exportar a Excel
+        </button>
+
+        <!-- Formulario de filtros -->
+        <div class="filter-form">
+            <form id="filterForm" class="row">
+                <div class="form-group col-md-3">
+                    <label for="fecha" class="text-light">Fecha:</label>
+                    <input type="date" id="fecha" class="form-control">
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="rol" class="text-light">Rol:</label>
+                    <select id="rol" class="form-control">
+                        <option value="">Todos</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Mesero">Mesero</option>
+                        <option value="Cocina">Cocina</option>
+                        <option value="Cajero">Cajero</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label for="empleadoId" class="text-light">ID Empleado:</label>
+                    <input type="number" id="empleadoId" class="form-control">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="nombre" class="text-light">Nombre:</label>
+                    <input type="text" id="nombre" class="form-control">
+                </div>
+                <div class="form-group col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
+                </div>
+            </form>
+        </div>
+
+        <table class="table" id="sesionesTable">
+            <thead>
+                <tr>
+                    <th scope="col" data-column="EmpleadoId" data-order="asc" class="sortable">
+                        ID Empleado
+                        <span class="sort-icon">
+                            <i class="bi bi-caret-up-fill"></i>
+                        </span>
+                    </th>
+                    <th scope="col" data-column="Nombre" data-order="asc" class="sortable">
+                        Nombre
+                        <span class="sort-icon">
+                            <i class="bi bi-caret-up-fill"></i>
+                        </span>
+                    </th>
+                    <th scope="col" data-column="Rol" data-order="asc" class="sortable">
+                        Rol
+                        <span class="sort-icon">
+                            <i class="bi bi-caret-up-fill"></i>
+                        </span>
+                    </th>
+                    <th scope="col" data-column="FechaHoraConexion" data-order="asc" class="sortable">
+                        Conexión
+                        <span class="sort-icon">
+                            <i class="bi bi-caret-up-fill"></i>
+                        </span>
+                    </th>
+                    <th scope="col" data-column="FechaHoraDesconexion" data-order="asc" class="sortable">
+                        Desconexión
+                        <span class="sort-icon">
+                            <i class="bi bi-caret-up-fill"></i>
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se insertan dinámicamente -->
+            </tbody>
+        </table>
+
+        <!-- Controles de paginación -->
+        <nav>
+            <ul class="pagination justify-content-center" id="pagination">
+                <!-- Páginas generadas dinámicamente -->
+            </ul>
+        </nav>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            var currentPage = 1;
+            var totalPages = 1;
+            var pageSize = 10;
+            var sortColumn = 'FechaHoraConexion';
+            var sortOrder = 'desc';
+            var filters = {
+                fecha: '',
+                rol: '',
+                empleadoId: '',
+                nombre: ''
+            };
+
+            // Función para cargar los datos
+            function loadData() {
+                $.ajax({
+                    url: '@Url.Action("ObtenerRegistrosSesiones", "Administrador")',
+                    type: 'GET',
+                    data: {
+                        pageNumber: currentPage,
+                        pageSize: pageSize,
+                        sortColumn: sortColumn,
+                        sortOrder: sortOrder,
+                        fecha: filters.fecha || '',
+                        rol: filters.rol || '',
+                        empleadoId: filters.empleadoId || '',
+                        nombre: filters.nombre || ''
+                    },
+                    success: function (response) {
+                        totalPages = response.totalPages;
+                        renderTable(response.registros);
+                        renderPagination();
+                        updateSortIcons();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Ocurrió un error al cargar los datos: ' + error);
+                    }
+                });
+            }
+
+            // Función para renderizar la tabla
+            function renderTable(registros) {
+                var rows = '';
+                $.each(registros, function (index, sesion) {
+                    var fechaConexion = formatDate(new Date(sesion.fechaHoraConexion));
+                    var fechaDesconexion = sesion.fechaHoraDesconexion ?
+                        formatDate(new Date(sesion.fechaHoraDesconexion)) :
+                        '<span class="online-status">En línea</span>';
+
+                    rows += '<tr>';
+                    rows += '<td>' + sesion.empleadoId + '</td>';
+                    rows += '<td>' + sesion.nombre + '</td>';
+                    rows += '<td>' + sesion.rol + '</td>';
+                    rows += '<td>' + fechaConexion + '</td>';
+                    rows += '<td>' + fechaDesconexion + '</td>';
+                    rows += '</tr>';
+                });
+                $('#sesionesTable tbody').html(rows);
+            }
+
+            // Función para formatear fecha
+            function formatDate(date) {
+                if (!(date instanceof Date) || isNaN(date)) {
+                    return '';
+                }
+
+                return date.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+
+            // Función para renderizar la paginación
+            function renderPagination() {
+                var pagination = '';
+
+                // Rango de páginas a mostrar
+                var maxPagesToShow = 5;
+                var startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+                // Ajustar el inicio si cerca del final
+                if (endPage - startPage < maxPagesToShow - 1) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+
+                // "Anterior"
+                if (currentPage > 1) {
+                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Anterior</a></li>';
+                } else {
+                    pagination += '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
+                }
+
+                // Páginas
+                for (var i = startPage; i <= endPage; i++) {
+                    if (i === currentPage) {
+                        pagination += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
+                    } else {
+                        pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+                    }
+                }
+
+                //"Siguiente"
+                if (currentPage < totalPages) {
+                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Siguiente</a></li>';
+                } else {
+                    pagination += '<li class="page-item disabled"><span class="page-link">Siguiente</span></li>';
+                }
+
+                // Mostrar la página actual y la cantidad total de páginas
+                if (totalPages > 0) {
+                    pagination += '<li class="page-item disabled"><span class="page-link">Página ' + currentPage + ' de ' + totalPages + '</span></li>';
+                }
+
+                $('#pagination').html(pagination);
+            }
+
+            // Evento de clic en los enlaces de paginación
+            $('#pagination').on('click', 'a.page-link', function (e) {
+                e.preventDefault();
+                var selectedPage = parseInt($(this).data('page'));
+                if (selectedPage !== currentPage) {
+                    currentPage = selectedPage;
+                    loadData();
+                }
+            });
+
+            // Evento para ordenar las columnas
+            $('#sesionesTable thead').on('click', 'th.sortable', function () {
+                var column = $(this).data('column');
+
+                // Si se hace clic en la misma columna, alternar el orden
+                if (sortColumn === column) {
+                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = column;
+                    sortOrder = 'asc';
+                }
+
+                currentPage = 1; // Reiniciar a la primera página
+                loadData();
+            });
+
+            // Actualizar los iconos de ordenamiento
+            function updateSortIcons() {
+                // Primero eliminar todas las clases y restablecer todos los iconos
+                $('.sort-icon i').removeClass('bi-caret-up-fill bi-caret-down-fill').addClass('bi-caret-up-fill');
+                $('.sort-icon').removeClass('active');
+
+                // Luego actualizar solo la columna activa
+                var activeHeader = $('th[data-column="' + sortColumn + '"]');
+                var sortIcon = activeHeader.find('.sort-icon');
+                sortIcon.addClass('active');
+
+                // Cambiar el ícono según el orden
+                if (sortOrder === 'asc') {
+                    sortIcon.find('i').removeClass('bi-caret-down-fill').addClass('bi-caret-up-fill');
+                } else {
+                    sortIcon.find('i').removeClass('bi-caret-up-fill').addClass('bi-caret-down-fill');
+                }
+            }
+
+            // Evento para el formulario de filtros
+            $('#filterForm').submit(function (e) {
+                e.preventDefault();
+                filters = {
+                    fecha: $('#fecha').val(),
+                    rol: $('#rol').val(),
+                    empleadoId: $('#empleadoId').val(),
+                    nombre: $('#nombre').val()
+                };
+                currentPage = 1; // Reiniciar a la primera página
+                loadData();
+            });
+
+            // Evento para el botón de exportar a Excel
+            $('#exportarExcel').click(function () {
+                // Construir la URL con todos los filtros y ordenamiento
+                var url = '@Url.Action("DescargarRegistrosSesionesExcel", "Administrador")' +
+                    '?fecha=' + encodeURIComponent(filters.fecha || '') +
+                    '&rol=' + encodeURIComponent(filters.rol || '') +
+                    '&empleadoId=' + encodeURIComponent(filters.empleadoId || '') +
+                    '&nombre=' + encodeURIComponent(filters.nombre || '') +
+                    '&sortColumn=' + encodeURIComponent(sortColumn) +
+                    '&sortOrder=' + encodeURIComponent(sortOrder);
+
+                // Redirigir al método de descarga con todos los parámetros
+                window.location.href = url;
+            });
+
+            // Carga inicial de datos
+            loadData();
+        });
+    </script>
+</body>
+</html>

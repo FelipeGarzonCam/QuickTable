@@ -1,0 +1,219 @@
+﻿@{
+    ViewData["Title"] = "Pedidos Activos";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"]</title>
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 100%; 
+            padding: 10px 20px; 
+
+        .pedido {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+            .pedido h4 {
+                font-size: 1.2em;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .pedido h6 {
+                font-size: 1em;
+            }
+
+            .pedido table {
+                width: 100%;
+            }
+
+            .pedido .totales {
+                text-align: right;
+                margin-right: 10px;
+            }
+
+
+            .pedido.estado-listo {
+                border: 2px solid #28a745; 
+            }
+
+
+        .btn-editar {
+            margin-left: auto;
+        }        
+        #pedidosListos {
+            margin-top: 20px;
+        }
+
+            #pedidosListos .pedido-listo {
+                border: #d4edda;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+
+            #pedidosListos .btn-aceptar {
+                margin-top: 10px;
+            }
+
+        .totales {
+            text-align: right;
+            margin-right: 10px;
+        }
+
+            .totales p, .totales h4 {
+                margin: 0;
+            }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h4>Nombre: @ViewData["NombreMesero"]</h4>
+        <h5>ID Empleado: @ViewData["MeseroId"]</h5>
+
+        <a href="@Url.Action("NuevoPedido", "Mesero")" class="btn btn-primary mb-3">Nuevo Pedido</a>
+
+        <!-- Sección de pedidos listos -->
+        <div id="pedidosListos">
+            <!-- Los pedidos listos se cargarán aquí -->
+        </div>
+
+        <div id="pedidosContainer">
+            <!-- Los pedidos se cargarán aquí -->
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            var previousEstados = {};
+            var pedidosListos = {};
+
+            function loadPedidos() {
+                $.ajax({
+                    url: '@Url.Action("ObtenerPedidosMesero", "Mesero")',
+                    type: 'GET',
+                    success: function (data) {
+                        renderPedidos(data);
+                    },
+                    error: function (xhr, status, error) {
+                        console.log('Ocurrió un error al cargar los datos: ' + error);
+                    }
+                });
+            }
+
+            function renderPedidos(items) {
+                var container = $('#pedidosContainer');
+                container.empty();
+
+                if (items.length === 0) {
+                    container.append('<p>No tienes pedidos activos.</p>');
+                    return;
+                }
+                var pedidosListosIds = Object.keys(pedidosListos);
+
+                $.each(items, function (index, item) {
+                    var pedidoDiv = $('<div class="pedido"></div>');
+                    var header = $('<h4></h4>');
+                    header.append('Mesa N°: ' + item.numeroMesa);
+
+                    // Botón de edición
+                    var btnEditar = $('<a href="/Mesero/EditarPedido?pedidoId=' + item.id + '" class="btn btn-warning btn-sm btn-editar" title="Editar"></a>');
+                    btnEditar.append('<i class="fas fa-edit"></i>'); // Usar icono de edición
+                    header.append(btnEditar);
+
+                    pedidoDiv.append(header);
+                    pedidoDiv.append('<h6>Pedido N°: ' + item.id + '</h6>');
+
+                    var table = $('<table class="table table-striped"></table>');
+                    var thead = $('<thead><tr><th>Nombre</th><th>Cantidad</th><th>Subtotal</th></tr></thead>');
+                    var tbody = $('<tbody></tbody>');
+
+                    $.each(item.detalles, function (i, detalle) {
+                        var row = $('<tr></tr>');
+                        row.append('<td>' + detalle.nombre + '</td>');
+                        row.append('<td>' + detalle.cantidad + '</td>');
+                        row.append('<td><strong>$' + parseInt(detalle.subtotal).toLocaleString() + '</strong></td>');
+                        tbody.append(row);
+                    });
+
+                    table.append(thead);
+                    table.append(tbody);
+                    pedidoDiv.append(table);
+
+                    // Totales alineados a la derecha
+                    var totalDiv = $('<div class="totales"></div>');
+                    totalDiv.append('<p>SubTotal: $' + parseInt(item.subtotal).toLocaleString() + '</p>');
+                    totalDiv.append('<p>IVA 19%: $' + parseInt(item.iva).toLocaleString() + '</p>');
+                    totalDiv.append('<h4 class="totales" >Total: $' + parseInt(item.total).toLocaleString() + '</h4>');
+                    pedidoDiv.append(totalDiv);
+
+                    var estado = item.estado;
+                    if (estado === "Listo") {
+                        pedidoDiv.addClass('estado-listo');
+
+                        if (previousEstados[item.id] !== "Listo" && !pedidosListos[item.id]) {
+                            // Agregar a la lista de pedidos listos
+                            pedidosListos[item.id] = item;
+                            renderPedidosListos();
+                        }
+                    } else {
+                        // Si el estado no es "Listo" y el pedido estaba en pedidosListos, eliminarlo
+                        if (pedidosListos[item.id]) {
+                            delete pedidosListos[item.id];
+                            renderPedidosListos();
+                        }
+                    }
+
+                    container.append(pedidoDiv);
+
+                    // Actualizar el estado previo
+                    previousEstados[item.id] = estado;
+                });
+            }
+
+            // Renderizar la lista de pedidos listos
+            function renderPedidosListos() {
+                var listosContainer = $('#pedidosListos');
+                listosContainer.empty();
+
+                if (Object.keys(pedidosListos).length === 0) {
+                    return;
+                }
+
+                $.each(pedidosListos, function (id, item) {
+                    var pedidoListoDiv = $('<div class="pedido-listo"></div>');
+                    pedidoListoDiv.append('<p>¡El pedido de la mesa ' + item.numeroMesa + ' está listo!</p>');
+
+                    var btnAceptar = $('<button class="btn btn-success btn-aceptar">Aceptar</button>');
+                    btnAceptar.click(function () {
+                        delete pedidosListos[id];
+                        renderPedidosListos();
+                    });
+
+                    pedidoListoDiv.append(btnAceptar);
+                    listosContainer.append(pedidoListoDiv);
+                });
+            }
+            loadPedidos();
+            setInterval(loadPedidos, 500);
+        });
+    </script>
+</body>
+</html>

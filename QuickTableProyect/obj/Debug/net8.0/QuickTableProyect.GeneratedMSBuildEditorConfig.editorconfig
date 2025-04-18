@@ -1,0 +1,111 @@
+is_global = true
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = QuickTableProyect
+build_property.RootNamespace = QuickTableProyect
+build_property.ProjectDir = C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect
+build_property._RazorSourceGeneratorDebug = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/CrearEmpleado.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxDcmVhckVtcGxlYWRvLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/CrearMenuItem.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxDcmVhck1lbnVJdGVtLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/EditarEmpleado.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxFZGl0YXJFbXBsZWFkby5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/EditarMenuItem.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxFZGl0YXJNZW51SXRlbS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/ModificarEmpleados.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxNb2RpZmljYXJFbXBsZWFkb3MuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/ModificarMenu.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxNb2RpZmljYXJNZW51LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Administrador/RegistroSesiones.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5pc3RyYWRvclxSZWdpc3Ryb1Nlc2lvbmVzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Caja/Factura.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FqYVxGYWN0dXJhLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Caja/Historial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FqYVxIaXN0b3JpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Caja/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2FqYVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Cocina/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29jaW5hXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Login/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTG9naW5cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Mesero/EditarPedido.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVzZXJvXEVkaXRhclBlZGlkby5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Mesero/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVzZXJvXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Mesero/NuevoPedido.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTWVzZXJvXE51ZXZvUGVkaWRvLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Felip/OneDrive - Universidad Santo Tomás/Tesis/Quick Table Registro Sesion/QuickTableProyect/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-45rdwqknbt

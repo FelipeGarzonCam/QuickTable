@@ -1,0 +1,89 @@
+﻿@model QuickTableProyect.Dominio.HistorialPedido
+
+@using QuickTableProyect.Dominio
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Factura - Pedido @Model.Id</title>
+    <style>     
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .factura {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+            .factura h1 {
+                text-align: center;
+            }
+
+            .factura table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+                .factura table th, .factura table td {
+                    border: 1px solid #000;
+                    padding: 5px;
+                }
+
+        .totales {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="factura">
+        <div class="text-right mb-3">
+            <a href="@Url.Action("Index", "Caja")" class="btn btn-secondary">
+                <i class="fa fa-desktop" aria-hidden="true"></i> Vista Principal
+            </a>
+        </div>
+        <h1>Factura</h1>
+        <p>Pedido N°: @Model.Id</p>
+        <p>Mesa N°: @Model.NumeroMesa</p>
+        <p>Mesero: @Model.MeseroNombre</p>
+        <p>Fecha y Hora: @Model.FechaHora.ToString("dd/MM/yyyy HH:mm")</p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Valor</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var detalle in Model.Detalles)
+                {
+                    <tr>
+                        <td>@detalle.Nombre</td>
+                        <td>@detalle.Cantidad</td>
+                        <td>$@detalle.Valor.ToString("N0")</td>
+                        <td>$@detalle.Subtotal.ToString("N0")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="totales">
+            <p>SubTotal: $@Model.Subtotal.ToString("N0")</p>
+            <p>IVA 19%: $@Model.IVA.ToString("N0")</p>
+            <p>Propina: $@Model.Propina.ToString("N0")</p>
+            <h3>Total: $@((Model.Total + Model.Propina).ToString("N0"))</h3>
+            <p>Método de Pago: @Model.MetodoPago</p>
+            @if (Model.MetodoPago == "Efectivo")
+            {
+                <p>Efectivo Recibido: $@Model.EfectivoRecibido.Value.ToString("N0")</p>
+                <p>Cambio: $@Model.Cambio.Value.ToString("N0")</p>
+            }
+        </div>
+    </div>
+</body>
+</html>
