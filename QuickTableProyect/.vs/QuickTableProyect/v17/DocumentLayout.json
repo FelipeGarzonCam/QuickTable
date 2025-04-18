@@ -3,12 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\controllers\\administradorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:controllers\\administradorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\views\\administrador\\modificarmenu.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\administrador\\modificarmenu.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\views\\administrador\\registrosesiones.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\administrador\\registrosesiones.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\controllers\\administradorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:controllers\\administradorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{0FD2AE1B-B463-4A51-9172-6219570D929A}|..\\QuickTableProyect.Dominio\\QuickTableProyect.Dominio.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect.dominio\\registrosesion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -36,10 +44,6 @@
       "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\administrador\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\views\\cocina\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\cocina\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
@@ -50,10 +54,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\views\\mesero\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\mesero\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\views\\administrador\\modificarmenu.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|solutionrelative:views\\administrador\\modificarmenu.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{35180CF4-D518-4C69-8272-2B246026A266}|QuickTableProyect.csproj|c:\\users\\felip\\onedrive - universidad santo tom\u00E1s\\tesis\\quick table registro sesion\\quicktableproyect\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -86,37 +86,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "MeseroController.cs",
-              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\MeseroController.cs",
-              "RelativeDocumentMoniker": "Controllers\\MeseroController.cs",
-              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\MeseroController.cs",
-              "RelativeToolTip": "Controllers\\MeseroController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-18T22:09:10.202Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "LoginController.cs",
-              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\LoginController.cs",
-              "RelativeDocumentMoniker": "Controllers\\LoginController.cs",
-              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\LoginController.cs",
-              "RelativeToolTip": "Controllers\\LoginController.cs",
-              "ViewState": "AgIAADkAAAAAAAAAAAAIwFQAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-18T21:46:35.848Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
               "Title": "RegistroSesionService.cs",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect.Aplicacion\\RegistroSesionService.cs",
               "RelativeDocumentMoniker": "..\\QuickTableProyect.Aplicacion\\RegistroSesionService.cs",
@@ -124,12 +98,11 @@
               "RelativeToolTip": "..\\QuickTableProyect.Aplicacion\\RegistroSesionService.cs",
               "ViewState": "AgIAAB4AAAAAAAAAAAAowDcAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-18T21:45:01.102Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-18T21:45:01.102Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "RegistroSesion.cs",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect.Dominio\\RegistroSesion.cs",
               "RelativeDocumentMoniker": "..\\QuickTableProyect.Dominio\\RegistroSesion.cs",
@@ -137,12 +110,11 @@
               "RelativeToolTip": "..\\QuickTableProyect.Dominio\\RegistroSesion.cs",
               "ViewState": "AgIAAAIAAAAAAAAAAAAxwAcAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-18T21:43:51.885Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-18T21:43:51.885Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Login\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Login\\Index.cshtml",
@@ -150,8 +122,7 @@
               "RelativeToolTip": "Views\\Login\\Index.cshtml",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAE4AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-18T01:18:50.534Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-18T01:18:50.534Z"
             },
             {
               "$type": "Document",
@@ -175,7 +146,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "AdministradorController.cs",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\AdministradorController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdministradorController.cs",
@@ -194,14 +165,64 @@
               "RelativeDocumentMoniker": "Views\\Administrador\\RegistroSesiones.cshtml",
               "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Administrador\\RegistroSesiones.cshtml",
               "RelativeToolTip": "Views\\Administrador\\RegistroSesiones.cshtml",
-              "ViewState": "AgIAAO4AAAAAAAAAAAAqwPwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAALoAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-02-02T02:15:15.967Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAGAAAAAAAAAAAAAAAAoBAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-18T01:16:33.41Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ModificarMenu.cshtml",
+              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Administrador\\ModificarMenu.cshtml",
+              "RelativeDocumentMoniker": "Views\\Administrador\\ModificarMenu.cshtml",
+              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Administrador\\ModificarMenu.cshtml",
+              "RelativeToolTip": "Views\\Administrador\\ModificarMenu.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADEBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-04-18T01:08:50.497Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "LoginController.cs",
+              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\LoginController.cs",
+              "RelativeDocumentMoniker": "Controllers\\LoginController.cs",
+              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\LoginController.cs",
+              "RelativeToolTip": "Controllers\\LoginController.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAIwFQAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-18T21:46:35.848Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 6,
+              "Title": "MeseroController.cs",
+              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\MeseroController.cs",
+              "RelativeDocumentMoniker": "Controllers\\MeseroController.cs",
+              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Controllers\\MeseroController.cs",
+              "RelativeToolTip": "Controllers\\MeseroController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-18T22:09:10.202Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "202504182148135_CambiarDesconexionAString.cs",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect.Persistencia\\Migrations\\202504182148135_CambiarDesconexionAString.cs",
               "RelativeDocumentMoniker": "..\\QuickTableProyect.Persistencia\\Migrations\\202504182148135_CambiarDesconexionAString.cs",
@@ -209,12 +230,11 @@
               "RelativeToolTip": "..\\QuickTableProyect.Persistencia\\Migrations\\202504182148135_CambiarDesconexionAString.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-18T21:48:14.387Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-18T21:48:14.387Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Mesero\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Mesero\\Index.cshtml",
@@ -226,7 +246,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Caja\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Caja\\Index.cshtml",
@@ -262,7 +282,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Administrador\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Administrador\\Index.cshtml",
@@ -271,18 +291,6 @@
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-02-02T02:15:42.582Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAOcAAAAAAAAAAAAmwAoBAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-18T01:16:33.41Z"
             },
             {
               "$type": "Document",
@@ -296,7 +304,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "Index.cshtml",
               "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Cocina\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Cocina\\Index.cshtml",
@@ -305,18 +313,6 @@
               "ViewState": "AgIAAIgAAAAAAAAAAAAAAJcAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2024-11-16T19:04:52.66Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "ModificarMenu.cshtml",
-              "DocumentMoniker": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Administrador\\ModificarMenu.cshtml",
-              "RelativeDocumentMoniker": "Views\\Administrador\\ModificarMenu.cshtml",
-              "ToolTip": "C:\\Users\\Felip\\OneDrive - Universidad Santo Tom\u00E1s\\Tesis\\Quick Table Registro Sesion\\QuickTableProyect\\Views\\Administrador\\ModificarMenu.cshtml",
-              "RelativeToolTip": "Views\\Administrador\\ModificarMenu.cshtml",
-              "ViewState": "AgIAABUBAAAAAAAAAAAcwDwBAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-04-18T01:08:50.497Z"
             },
             {
               "$type": "Document",

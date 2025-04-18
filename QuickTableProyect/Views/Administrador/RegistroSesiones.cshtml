@@ -1,18 +1,11 @@
 ﻿@model IEnumerable<QuickTableProyect.Dominio.RegistroSesion>
-@{
-    ViewData["Title"] = "Registro de Sesiones";
-}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>
+@section Styles {  
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <style>
-        /* Estilo para la tabla con fondo oscuro - similar a ModificarMenu */
+    <!-- Tus estilos personalizados aquí -->
+    <style>        
         #sesionesTable {
             background-color: #343a40;
             color: white;
@@ -83,99 +76,98 @@
         }
 
     </style>
-</head>
-<body>
-    <div class="container-fluid mt-4">
-        <h2>@ViewData["Title"]</h2>
+}
 
-        <!-- El botón de exportar ahora es un elemento normal, no un enlace -->
-        <button id="exportarExcel" class="btn btn-success mb-3">
-            <i class="fas fa-file-export"></i> Exportar a Excel
-        </button>
+<div class="container-fluid mt-4">
+    <h2>@ViewData["Title"]</h2>
 
-        <!-- Formulario de filtros -->
-        <div class="filter-form">
-            <form id="filterForm" class="row">
-                <div class="form-group col-md-3">
-                    <label for="fecha" class="text-light">Fecha:</label>
-                    <input type="date" id="fecha" class="form-control">
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="rol" class="text-light">Rol:</label>
-                    <select id="rol" class="form-control">
-                        <option value="">Todos</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Mesero">Mesero</option>
-                        <option value="Cocina">Cocina</option>
-                        <option value="Cajero">Cajero</option>
-                    </select>
-                </div>
-                <div class="form-group col-md-2">
-                    <label for="empleadoId" class="text-light">ID Empleado:</label>
-                    <input type="number" id="empleadoId" class="form-control">
-                </div>
-                <div class="form-group col-md-3">
-                    <label for="nombre" class="text-light">Nombre:</label>
-                    <input type="text" id="nombre" class="form-control">
-                </div>
-                <div class="form-group col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
-                </div>
-            </form>
-        </div>
+    <!-- El botón de exportar ahora es un elemento normal, no un enlace -->
+    <button id="exportarExcel" class="btn btn-success mb-3">
+        <i class="fas fa-file-export"></i> Exportar a Excel
+    </button>
 
-        <table class="table" id="sesionesTable">
-            <thead>
-                <tr>
-                    <th scope="col" data-column="EmpleadoId" data-order="asc" class="sortable">
-                        ID Empleado
-                        <span class="sort-icon">
-                            <i class="bi bi-caret-up-fill"></i>
-                        </span>
-                    </th>
-                    <th scope="col" data-column="Nombre" data-order="asc" class="sortable">
-                        Nombre
-                        <span class="sort-icon">
-                            <i class="bi bi-caret-up-fill"></i>
-                        </span>
-                    </th>
-                    <th scope="col" data-column="Rol" data-order="asc" class="sortable">
-                        Rol
-                        <span class="sort-icon">
-                            <i class="bi bi-caret-up-fill"></i>
-                        </span>
-                    </th>
-                    <th scope="col" data-column="FechaHoraConexion" data-order="asc" class="sortable">
-                        Conexión
-                        <span class="sort-icon">
-                            <i class="bi bi-caret-up-fill"></i>
-                        </span>
-                    </th>
-                    <th scope="col" data-column="FechaHoraDesconexion" data-order="asc" class="sortable">
-                        Desconexión
-                        <span class="sort-icon">
-                            <i class="bi bi-caret-up-fill"></i>
-                        </span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Los datos se insertan dinámicamente -->
-            </tbody>
-        </table>
-
-        <!-- Controles de paginación -->
-        <nav>
-            <ul class="pagination justify-content-center" id="pagination">
-                <!-- Páginas generadas dinámicamente -->
-            </ul>
-        </nav>
+    <!-- Formulario de filtros -->
+    <div class="filter-form">
+        <form id="filterForm" class="row">
+            <div class="form-group col-md-3">
+                <label for="fecha" class="text-light">Fecha:</label>
+                <input type="date" id="fecha" class="form-control">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="rol" class="text-light">Rol:</label>
+                <select id="rol" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Mesero">Mesero</option>
+                    <option value="Cocina">Cocina</option>
+                    <option value="Cajero">Cajero</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label for="empleadoId" class="text-light">ID Empleado:</label>
+                <input type="number" id="empleadoId" class="form-control">
+            </div>
+            <div class="form-group col-md-3">
+                <label for="nombre" class="text-light">Nombre:</label>
+                <input type="text" id="nombre" class="form-control">
+            </div>
+            <div class="form-group col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
+            </div>
+        </form>
     </div>
 
+    <table class="table" id="sesionesTable">
+        <thead>
+            <tr>
+                <th scope="col" data-column="EmpleadoId" data-order="asc" class="sortable">
+                    ID Empleado
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="Nombre" data-order="asc" class="sortable">
+                    Nombre
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="Rol" data-order="asc" class="sortable">
+                    Rol
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="FechaHoraConexion" data-order="asc" class="sortable">
+                    Conexión
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="FechaHoraDesconexion" data-order="asc" class="sortable">
+                    Desconexión
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se insertan dinámicamente -->
+        </tbody>
+    </table>
+
+    <!-- Controles de paginación -->
+    <nav>
+        <ul class="pagination justify-content-center" id="pagination">
+            <!-- Páginas generadas dinámicamente -->
+        </ul>
+    </nav>
+</div>
+@section Scripts {    
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script>
-
     <script>
         $(document).ready(function () {
             var currentPage = 1;
@@ -391,5 +383,8 @@
             loadData();
         });
     </script>
-</body>
-</html>
+}
+
+  
+
+   
