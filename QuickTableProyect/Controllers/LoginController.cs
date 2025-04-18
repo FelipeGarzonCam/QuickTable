@@ -7,10 +7,12 @@ namespace QuickTableProyect.Interface
     public class LoginController : Controller
     {
         private readonly EmpleadoService _empleadoService;
+        private readonly RegistroSesionService _sesionService;
 
-        public LoginController(EmpleadoService empleadoService)
+        public LoginController(EmpleadoService empleadoService, RegistroSesionService sesionService)
         {
             _empleadoService = empleadoService;
+            _sesionService = sesionService;
         }
 
         public IActionResult Index()
@@ -39,17 +41,21 @@ namespace QuickTableProyect.Interface
         [HttpPost]
         public JsonResult Autenticar(string nombre, string contrasena)
         {
-            // Obtiene el empleado por nombre
-            var empleado = _empleadoService.ObtenerEmpleadoPorNombre(nombre); // Verifica que el método exista en EmpleadoService
-
+            var empleado = _empleadoService.ObtenerEmpleadoPorNombre(nombre);
             if (empleado != null && empleado.Contrasena == contrasena)
             {
-                // Almacena en sesión Rol, Id y Nombre del empleado
+                // 1) Marca como error las sesiones previas
+                _sesionService.MarcarErroresPendientes(empleado.Id);
+
+                // 2) Registra la nueva conexión
+                int registroId = _sesionService.RegistrarConexion(empleado.Id);
+
+                // 3) Guarda en sesión ASP.NET
                 HttpContext.Session.SetString("Rol", empleado.Rol);
                 HttpContext.Session.SetString("Id", empleado.Id.ToString());
                 HttpContext.Session.SetString("Nombre", empleado.Nombre);
+                HttpContext.Session.SetInt32("RegistroSesionId", registroId);
 
-                // Define la URL de redirección según el rol del empleado
                 string redirectUrl = empleado.Rol switch
                 {
                     "Admin" => Url.Action("Index", "Administrador"),
@@ -61,12 +67,19 @@ namespace QuickTableProyect.Interface
 
                 return Json(new { success = true, redirectUrl });
             }
-
             return Json(new { success = false, message = "Nombre o contraseña incorrectos." });
         }
 
         public IActionResult Logout()
         {
+            // Desconexión normal
+            var regId = HttpContext.Session.GetInt32("RegistroSesionId");
+            if (regId.HasValue)
+            {
+                _sesionService.RegistrarDesconexion(regId.Value);
+            }
+
+            // Limpia sesión y redirige al login
             HttpContext.Session.Clear();
             return RedirectToAction("Index");
         }

@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Text.RegularExpressions;
 
 namespace QuickTableProyect.Aplicacion
 {
@@ -15,24 +17,41 @@ namespace QuickTableProyect.Aplicacion
         {
             _context = context;
         }
+        // Marca como ERROR todas las sesiones previas "En línea"
+        public void MarcarErroresPendientes(int empleadoId)
+        {
+            var abiertas = _context.RegistroSesiones
+                 .Where(r => r.EmpleadoId == empleadoId
+                          && r.FechaHoraDesconexion == null)
+                 .ToList();
 
-        public void RegistrarConexion(int empleadoId)
+            foreach (var reg in abiertas)
+            {
+                reg.FechaHoraDesconexion = "Error al cerrar sesión";
+            }
+            _context.SaveChanges();
+        }
+
+        public int RegistrarConexion(int empleadoId)
         {
             var registro = new RegistroSesion
             {
                 EmpleadoId = empleadoId,
-                FechaHoraConexion = DateTime.Now
+                FechaHoraConexion = DateTime.Now,
+                FechaHoraDesconexion = null
             };
             _context.RegistroSesiones.Add(registro);
             _context.SaveChanges();
+            return registro.Id;
         }
 
         public void RegistrarDesconexion(int registroId)
         {
             var registro = _context.RegistroSesiones.Find(registroId);
-            if (registro != null)
+            if (registro != null && registro.FechaHoraDesconexion == null)
             {
-                registro.FechaHoraDesconexion = DateTime.Now;
+                registro.FechaHoraDesconexion = DateTime.Now
+                    .ToString("yyyy-MM-dd HH:mm:ss");
                 _context.SaveChanges();
             }
         }

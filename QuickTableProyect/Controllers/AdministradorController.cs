@@ -278,9 +278,19 @@ namespace QuickTableProyect.Controllers
                         registros.OrderByDescending(r => r.Empleado.Rol);
                     break;
                 case "FechaHoraDesconexion":
-                    sortedRegistros = sortOrder == "asc" ?
-                        registros.OrderBy(r => r.FechaHoraDesconexion ?? DateTime.MaxValue) :
-                        registros.OrderByDescending(r => r.FechaHoraDesconexion ?? DateTime.MaxValue);
+                    sortedRegistros = sortOrder == "asc"
+                      ? registros.OrderBy(r =>
+                          r.FechaHoraDesconexion == "Error al cerrar sesión"
+                            ? DateTime.MinValue
+                          : r.FechaHoraDesconexion is null
+                            ? DateTime.MaxValue
+                          : DateTime.Parse(r.FechaHoraDesconexion))
+                      : registros.OrderByDescending(r =>
+                          r.FechaHoraDesconexion is null
+                            ? DateTime.MinValue
+                          : r.FechaHoraDesconexion == "Error al cerrar sesión"
+                            ? DateTime.MaxValue
+                          : DateTime.Parse(r.FechaHoraDesconexion));
                     break;
                 case "FechaHoraConexion":
                 default:
@@ -304,7 +314,7 @@ namespace QuickTableProyect.Controllers
                     nombre = r.Empleado.Nombre,
                     rol = r.Empleado.Rol,
                     fechaHoraConexion = r.FechaHoraConexion.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    fechaHoraDesconexion = r.FechaHoraDesconexion?.ToString("yyyy-MM-ddTHH:mm:ss")
+                    fechaHoraDesconexion = r.FechaHoraDesconexion
                 })
                 .ToList();
 
@@ -349,9 +359,19 @@ namespace QuickTableProyect.Controllers
                         registros.OrderByDescending(r => r.Empleado.Rol);
                     break;
                 case "FechaHoraDesconexion":
-                    sortedRegistros = sortOrder == "asc" ?
-                        registros.OrderBy(r => r.FechaHoraDesconexion ?? DateTime.MaxValue) :
-                        registros.OrderByDescending(r => r.FechaHoraDesconexion ?? DateTime.MaxValue);
+                    sortedRegistros = sortOrder == "asc"
+                      ? registros.OrderBy(r =>
+                          r.FechaHoraDesconexion == "Error al cerrar sesión"
+                            ? DateTime.MinValue
+                          : r.FechaHoraDesconexion is null
+                            ? DateTime.MaxValue
+                          : DateTime.Parse(r.FechaHoraDesconexion))
+                      : registros.OrderByDescending(r =>
+                          r.FechaHoraDesconexion is null
+                            ? DateTime.MinValue
+                          : r.FechaHoraDesconexion == "Error al cerrar sesión"
+                            ? DateTime.MaxValue
+                          : DateTime.Parse(r.FechaHoraDesconexion));
                     break;
                 case "FechaHoraConexion":
                 default:
@@ -378,7 +398,9 @@ namespace QuickTableProyect.Controllers
                     worksheet.Cells[row, 2].Value = registro.Empleado.Nombre;
                     worksheet.Cells[row, 3].Value = registro.Empleado.Rol;
                     worksheet.Cells[row, 4].Value = registro.FechaHoraConexion.ToString("dd/MM/yyyy HH:mm:ss");
-                    worksheet.Cells[row, 5].Value = registro.FechaHoraDesconexion?.ToString("dd/MM/yyyy HH:mm:ss") ?? "En línea";
+                    worksheet.Cells[row, 5].Value = registro.FechaHoraDesconexion is null ? "En línea": registro.FechaHoraDesconexion == "Error al cerrar sesión"
+                          ? registro.FechaHoraDesconexion
+                        : registro.FechaHoraDesconexion;
                     row++;
                 }
 

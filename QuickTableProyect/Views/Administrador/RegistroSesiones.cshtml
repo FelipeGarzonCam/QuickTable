@@ -76,6 +76,12 @@
             color: #28a745;
             font-weight: bold;
         }
+
+        .text-danger {
+            color: #dc3545 !important;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -216,20 +222,36 @@
                 var rows = '';
                 $.each(registros, function (index, sesion) {
                     var fechaConexion = formatDate(new Date(sesion.fechaHoraConexion));
-                    var fechaDesconexion = sesion.fechaHoraDesconexion ?
-                        formatDate(new Date(sesion.fechaHoraDesconexion)) :
-                        '<span class="online-status">En línea</span>';
 
-                    rows += '<tr>';
-                    rows += '<td>' + sesion.empleadoId + '</td>';
-                    rows += '<td>' + sesion.nombre + '</td>';
-                    rows += '<td>' + sesion.rol + '</td>';
-                    rows += '<td>' + fechaConexion + '</td>';
-                    rows += '<td>' + fechaDesconexion + '</td>';
-                    rows += '</tr>';
+                    // Ahora tratamos explícitamente el null
+                    var fechaDesconexion;
+                    if (sesion.fechaHoraDesconexion === null) {
+                        // null → “En línea”
+                        fechaDesconexion = '<span class="online-status">En línea</span>';
+                    }
+                    else if (sesion.fechaHoraDesconexion === "Error al cerrar sesión") {
+                        // Error → en rojo
+                        fechaDesconexion = '<span class="text-danger font-weight-bold">'
+                            + sesion.fechaHoraDesconexion +
+                            '</span>';
+                    }
+                    else {
+                        // Fecha válida → formatear
+                        fechaDesconexion = formatDate(new Date(sesion.fechaHoraDesconexion));
+                    }
+
+                    rows += '<tr>'
+                        + '<td>' + sesion.empleadoId + '</td>'
+                        + '<td>' + sesion.nombre + '</td>'
+                        + '<td>' + sesion.rol + '</td>'
+                        + '<td>' + fechaConexion + '</td>'
+                        + '<td>' + fechaDesconexion + '</td>'
+                        + '</tr>';
                 });
                 $('#sesionesTable tbody').html(rows);
             }
+
+
 
             // Función para formatear fecha
             function formatDate(date) {
