@@ -7,5 +7,6 @@
         public DateTime FechaHoraConexion { get; set; }
         public DateTime? FechaHoraDesconexion { get; set; }
         public Empleado Empleado { get; set; } // Relación con Empleado
+
     }
 }

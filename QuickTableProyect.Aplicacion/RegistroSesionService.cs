@@ -16,7 +16,7 @@ namespace QuickTableProyect.Aplicacion
             _context = context;
         }
 
-        public void RegistrarConexion(int empleadoId)
+        public int RegistrarConexion(int empleadoId)
         {
             var registro = new RegistroSesion
             {
@@ -25,6 +25,8 @@ namespace QuickTableProyect.Aplicacion
             };
             _context.RegistroSesiones.Add(registro);
             _context.SaveChanges();
+
+            return registro.Id;
         }
 
         public void RegistrarDesconexion(int registroId)
@@ -71,5 +73,6 @@ namespace QuickTableProyect.Aplicacion
 
             return query.ToList();
         }
+
     }
 }

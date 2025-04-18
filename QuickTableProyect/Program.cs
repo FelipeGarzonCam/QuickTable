@@ -29,6 +29,13 @@ builder.WebHost.ConfigureKestrel(options =>
     options.Listen(IPAddress.Parse(localIp), port);
 });
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromDays(1); // Tiempo de sesión
+    options.Cookie.HttpOnly = true; // Mejora la seguridad
+    options.Cookie.IsEssential = true; // Necesario para GDPR
+});
+
 var app = builder.Build();
 
 // Configuración de la aplicación
@@ -50,12 +57,7 @@ app.MapControllerRoute(
 
 app.Run();
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromDays(1); // Tiempo de sesión
-    options.Cookie.HttpOnly = true; // Mejora la seguridad
-    options.Cookie.IsEssential = true; // Necesario para GDPR
-});
+
 
 // Método para obtener la IP local de la máquina
 string GetLocalIPAddress()

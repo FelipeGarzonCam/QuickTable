@@ -7,10 +7,12 @@ namespace QuickTableProyect.Interface
     public class LoginController : Controller
     {
         private readonly EmpleadoService _empleadoService;
+        private readonly RegistroSesionService _registroSesionService;
 
-        public LoginController(EmpleadoService empleadoService)
+        public LoginController(EmpleadoService empleadoService,RegistroSesionService registroSesionService)        
         {
             _empleadoService = empleadoService;
+            _registroSesionService = registroSesionService;
         }
 
         public IActionResult Index()
@@ -49,6 +51,10 @@ namespace QuickTableProyect.Interface
                 HttpContext.Session.SetString("Id", empleado.Id.ToString());
                 HttpContext.Session.SetString("Nombre", empleado.Nombre);
 
+                // registro la conexión y guardo el registroId en sesión
+                int registroId = _registroSesionService.RegistrarConexion(empleado.Id);
+                HttpContext.Session.SetInt32("RegistroSesionId", registroId);
+
                 // Define la URL de redirección según el rol del empleado
                 string redirectUrl = empleado.Rol switch
                 {
@@ -67,6 +73,11 @@ namespace QuickTableProyect.Interface
 
         public IActionResult Logout()
         {
+            // antes de limpiar, cierro la sesión en BD
+            var regId = HttpContext.Session.GetInt32("RegistroSesionId");
+            if (regId.HasValue)
+                _registroSesionService.RegistrarDesconexion(regId.Value);
+
             HttpContext.Session.Clear();
             return RedirectToAction("Index");
         }
