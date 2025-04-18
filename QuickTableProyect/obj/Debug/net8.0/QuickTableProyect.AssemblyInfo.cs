@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuickTableProyect")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c9711f4d0d9df45a110311fd80222783c16753fe")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuickTableProyect")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuickTableProyect")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
