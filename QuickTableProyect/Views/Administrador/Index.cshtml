@@ -7,7 +7,7 @@
 }
 
 <div class="container text-center my-5">
-    <div class="row justify-content-center">
+    <div class="row justify-content-around justify-content-md-center">
         <!-- Botón para Modificar Menú -->
         <div class="col-6 col-md-3 mb-3">
             <a href="@Url.Action("ModificarMenu", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
@@ -28,6 +28,13 @@
             <a href="@Url.Action("RegistroSesiones", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
                 <i class="fas fa-calendar-check fa-3x mb-2"></i>
                 <span style="font-size: 1.2em;">Registro de Sesiones</span>
+            </a>
+        </div>
+        <!-- Botón para Historial pedidos -->
+        <div class="col-6 col-md-3 mb-3">
+            <a href="@Url.Action("HistorialPedidos", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
+                <i class="fas fa-history fa-3x mb-2"></i>
+                <span style="font-size: 1.2em;">Historial De Pedidos</span>
             </a>
         </div>
     </div>

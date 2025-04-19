@@ -19,18 +19,46 @@ namespace QuickTableProyect.Aplicacion
             _context = context;
         }
 
-        public void CrearHistorialPedido(HistorialPedido historialPedido)
+        public void CrearHistorialPedido(HistorialPedido historialPedido, PedidosActivos pedido = null)
         {
+            if (pedido != null)
+            {
+                // Copy FechaCreacion from PedidosActivos to FechaHora in HistorialPedido
+                historialPedido.FechaHora = pedido.FechaCreacion;
+
+                // Copy timestamps for preparation and acceptance
+                historialPedido.CocinaListoAt = pedido.CocinaListoAt;
+                historialPedido.MeseroAceptadoAt = pedido.MeseroAceptadoAt;
+            }
+            else
+            {
+                // If we don't have the source pedido, try to get it from the database
+                var pedidoActivo = _context.PedidosActivos
+                    .FirstOrDefault(p => p.MeseroId == historialPedido.MeseroId &&
+                                        p.NumeroMesa == historialPedido.NumeroMesa &&
+                                        p.Estado == EstadosPedido.Listo);
+
+                if (pedidoActivo != null)
+                {
+                    // Copy the timestamps
+                    historialPedido.FechaHora = pedidoActivo.FechaCreacion;
+                    historialPedido.CocinaListoAt = pedidoActivo.CocinaListoAt;
+                    historialPedido.MeseroAceptadoAt = pedidoActivo.MeseroAceptadoAt;
+                }
+            }
+
             _context.HistorialPedidos.Add(historialPedido);
             _context.SaveChanges();
         }
 
         public List<HistorialPedido> ObtenerHistorialPedidos()
         {
-            return _context.HistorialPedidos
+            var historial = _context.HistorialPedidos
                 .Include(h => h.Detalles)
                 .OrderByDescending(h => h.FechaHora)
                 .ToList();
+
+            return historial;
         }
 
         // Método para obtener pedidos paginados

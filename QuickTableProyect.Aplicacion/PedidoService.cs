@@ -3,10 +3,11 @@ using QuickTableProyect.Persistencia.Datos;
 using System.Collections.Generic;
 using System.Data.Entity; 
 using System.Linq;
+using QuickTableProyect.Aplicacion;        
 
 namespace QuickTableProyect.Aplicacion
 {
-    public class PedidoService
+    public class PedidoService : IPedidoService
     {
         private readonly SistemaQuickTableContext _context;
 
@@ -27,6 +28,7 @@ namespace QuickTableProyect.Aplicacion
         // Crear un nuevo pedido
         public void CrearPedido(PedidosActivos pedido)
         {
+            pedido.FechaCreacion = DateTime.Now;
             pedido.Estado = "En Preparación"; // Estado inicial
 
             foreach (var detalle in pedido.Detalles)
@@ -194,8 +196,18 @@ namespace QuickTableProyect.Aplicacion
                     }
 
                     pedido.Estado = EstadosPedido.Listo;
+                    pedido.CocinaListoAt = DateTime.Now;
                     _context.SaveChanges();
                 }
+            }
+        }
+        public void MarcarPedidoComoAceptado(int pedidoId)
+        {
+            var pedido = _context.PedidosActivos.Find(pedidoId);
+            if (pedido != null && pedido.MeseroAceptadoAt == null)
+            {
+                pedido.MeseroAceptadoAt = DateTime.Now;
+                _context.SaveChanges();
             }
         }
         public List<PedidosActivos> ObtenerPedidosPendientesCocina()
@@ -205,6 +217,70 @@ namespace QuickTableProyect.Aplicacion
                 .Where(p => (p.Estado == EstadosPedido.EnPreparacion || p.Estado == EstadosPedido.Editado)
                             && p.Detalles.Any(d => d.Cantidad > d.CantidadPreparada))
                 .ToList();
+        }
+        public class PedidoFilter
+        {
+            public int? PedidoId { get; set; }
+            public string Mesa { get; set; }
+            public int? MeseroId { get; set; }
+            public DateTime? FechaDesde { get; set; }
+            public DateTime? FechaHasta { get; set; }
+        }
+
+        public async Task<(IEnumerable<PedidoHistorialViewModel> Items, int TotalCount)>
+            ObtenerHistorialAsync(PedidoFilter filter, int skip, int take)
+        {
+            var query = _context.PedidosActivos
+                .Include(p => p.EmpleadoNombre)
+                .AsQueryable();
+
+            // filtros
+            if (filter.PedidoId.HasValue)
+                query = query.Where(p => p.Id == filter.PedidoId.Value);
+            if (!string.IsNullOrWhiteSpace(filter.Mesa))
+                query = query.Where(p => p.NumeroMesa.ToString().Contains(filter.Mesa));
+            if (filter.MeseroId.HasValue)
+                query = query.Where(p => p.MeseroId == filter.MeseroId.Value);
+            if (filter.FechaDesde.HasValue)
+                query = query.Where(p => p.FechaCreacion >= filter.FechaDesde.Value);
+            if (filter.FechaHasta.HasValue)
+                query = query.Where(p => p.FechaCreacion <= filter.FechaHasta.Value);
+
+            var total = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(p => p.FechaCreacion)
+                .Skip(skip).Take(take)
+                .Select(p => new PedidoHistorialViewModel
+                {
+                    PedidoId = p.Id,
+                    Mesa = p.NumeroMesa.ToString(),
+
+                    MeseroId = p.MeseroId,
+                    NombreMesero = p.EmpleadoNombre,
+                    FechaCreacion = p.FechaCreacion,
+                    TiempoCocinaAListo = p.CocinaListoAt.HasValue
+                                          ? p.CocinaListoAt.Value - p.FechaCreacion
+                                          : TimeSpan.Zero,
+                    TiempoListoAAceptado = (p.MeseroAceptadoAt.HasValue && p.CocinaListoAt.HasValue)
+                                          ? p.MeseroAceptadoAt.Value - p.CocinaListoAt.Value
+                                          : TimeSpan.Zero,
+                    Total = p.Total,
+                    MedioPago = p.MedioPago
+                })
+                .ToListAsync();
+
+
+            return (items, total);
+        }
+        public void AceptarPedido(int pedidoId)
+        {
+            var pedido = _context.PedidosActivos.Find(pedidoId);
+            if (pedido != null)
+            {
+                pedido.MeseroAceptadoAt = DateTime.Now;
+                _context.SaveChanges();
+            }
         }
 
     }

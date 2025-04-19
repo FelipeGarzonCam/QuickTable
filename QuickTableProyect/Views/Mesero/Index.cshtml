@@ -101,7 +101,6 @@
 
     <script>
         $(document).ready(function () {
-
             var previousEstados = {};
             var pedidosListos = {};
 
@@ -126,7 +125,6 @@
                     container.append('<p>No tienes pedidos activos.</p>');
                     return;
                 }
-                var pedidosListosIds = Object.keys(pedidosListos);
 
                 $.each(items, function (index, item) {
                     var pedidoDiv = $('<div class="pedido"></div>');
@@ -177,15 +175,10 @@
                     if (estado === "Listo") {
                         pedidoDiv.addClass('estado-listo');
 
-                        if (previousEstados[item.id] !== "Listo" && !pedidosListos[item.id]) {
-                            // Agregar a la lista de pedidos listos
+                        // Solo mostrar notificación si no está aceptado y no está ya en la lista
+                        if (!item.aceptado && previousEstados[item.id] !== "Listo" && !pedidosListos[item.id]) {
+                            // Agregar a la lista de pedidos listos que necesitan notificación
                             pedidosListos[item.id] = item;
-                            renderPedidosListos();
-                        }
-                    } else {
-                        // Si el estado no es "Listo" y el pedido estaba en pedidosListos, eliminarlo
-                        if (pedidosListos[item.id]) {
-                            delete pedidosListos[item.id];
                             renderPedidosListos();
                         }
                     }
@@ -212,16 +205,23 @@
 
                     var btnAceptar = $('<button class="btn btn-success btn-aceptar">Aceptar</button>');
                     btnAceptar.click(function () {
-                        delete pedidosListos[id];
-                        renderPedidosListos();
+                        // Llamar servidor para registrar aceptación
+                        $.post('@Url.Action("MarcarPedidoAceptado", "Mesero")', { pedidoId: id })
+                            .done(function () {
+                                // Solo eliminar de la lista de notificaciones
+                                delete pedidosListos[id];
+                                renderPedidosListos();
+                                // No eliminar de la lista principal
+                            });
                     });
 
                     pedidoListoDiv.append(btnAceptar);
                     listosContainer.append(pedidoListoDiv);
                 });
             }
+
             loadPedidos();
-            setInterval(loadPedidos, 500);
+            setInterval(loadPedidos, 1000);
         });
     </script>
 </body>
