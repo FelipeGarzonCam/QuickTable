@@ -571,8 +571,12 @@ namespace QuickTableProyect.Controllers
                     NombreMesero = h.MeseroNombre,
                     FechaCreacion = h.FechaHora,
                     // Campos calculados - aquí puedes usar datos reales si los tienes
-                    TiempoCocinaAListo = TimeSpan.FromMinutes(new Random().Next(3, 20)),
-                    TiempoListoAAceptado = TimeSpan.FromMinutes(new Random().Next(1, 10)),
+                    TiempoCocinaAListo = h.CocinaListoAt.HasValue
+                        ? h.CocinaListoAt.Value - h.FechaHora
+                        : TimeSpan.Zero,
+                    TiempoListoAAceptado = (h.MeseroAceptadoAt.HasValue && h.CocinaListoAt.HasValue)
+                        ? h.MeseroAceptadoAt.Value - h.CocinaListoAt.Value
+                        : TimeSpan.Zero,
                     Total = h.Total,
                     MedioPago = h.MetodoPago
                 })

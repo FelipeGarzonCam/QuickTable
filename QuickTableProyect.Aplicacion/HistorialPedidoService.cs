@@ -19,8 +19,16 @@ namespace QuickTableProyect.Aplicacion
             _context = context;
         }
 
-        public void CrearHistorialPedido(HistorialPedido historialPedido)
+        public void CrearHistorialPedido(HistorialPedido historialPedido, PedidosActivos pedido = null)
         {
+            
+            if (pedido != null)
+            {
+                // These can be added to the model class directly
+                historialPedido.CocinaListoAt = pedido.CocinaListoAt;
+                historialPedido.MeseroAceptadoAt = pedido.MeseroAceptadoAt;
+            }
+
             _context.HistorialPedidos.Add(historialPedido);
             _context.SaveChanges();
         }

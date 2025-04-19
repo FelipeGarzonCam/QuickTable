@@ -65,8 +65,23 @@ namespace QuickTableProyect.Dominio
         public decimal? EfectivoRecibido { get; set; } // Solo si es efectivo
         public decimal? Cambio { get; set; }           // Solo si es efectivo
 
+
+
         // Relación con los detalles del pedido
         public virtual ICollection<HistorialDetalle> Detalles { get; set; }
+
+        public DateTime? CocinaListoAt { get; set; }
+        public DateTime? MeseroAceptadoAt { get; set; }
+
+        [NotMapped]
+        public TimeSpan TiempoPreparacion =>
+        CocinaListoAt.HasValue ? CocinaListoAt.Value - FechaHora : TimeSpan.Zero;
+
+        [NotMapped]
+        public TimeSpan TiempoEntrega =>
+            (MeseroAceptadoAt.HasValue && CocinaListoAt.HasValue)
+                ? MeseroAceptadoAt.Value - CocinaListoAt.Value
+                : TimeSpan.Zero;
     }
     public class HistorialDetalle
     {
@@ -76,6 +91,8 @@ namespace QuickTableProyect.Dominio
         public string Nombre { get; set; }
         public decimal Valor { get; set; }
         public int Cantidad { get; set; }
+        public DateTime? CocinaListoAt { get; set; }
+        public DateTime? MeseroAceptadoAt { get; set; }
 
         public decimal Subtotal => Cantidad * Valor;
     }
