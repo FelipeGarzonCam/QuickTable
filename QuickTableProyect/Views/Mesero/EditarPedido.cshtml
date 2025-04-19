@@ -35,6 +35,7 @@
                 <th>Descripción</th>
                 <th>Precio</th>
                 <th>Cantidad</th>
+                <th>Observacion</th>
             </tr>
         </thead>
         <tbody id="menuItemsTable">
@@ -56,6 +57,9 @@
                         <button class="btn btn-sm btn-success" style="width: 40px; height: 40px;" onclick="increaseQuantity('@item.Id')">
                             <i class="fas fa-plus"></i>
                         </button>
+                    </td>
+                    <td>
+                        <input type="text" id="comment-@item.Id" class="form-control" placeholder="Comentario (opcional)" />
                     </td>
                 </tr>
             }
@@ -119,8 +123,13 @@
             const itemId = row.getAttribute("data-id");
             const quantity = parseInt(document.getElementById("quantity-" + itemId).value);
             if (quantity > 0) {
-                items.push({ MenuItemId: itemId, Cantidad: quantity });
+                items.push({
+                    menuItemId: itemId,
+                    cantidad: quantity,
+                    comentario: document.getElementById("comment-" + itemId).value
+                });
             }
+
         });
 
         if (items.length === 0) {

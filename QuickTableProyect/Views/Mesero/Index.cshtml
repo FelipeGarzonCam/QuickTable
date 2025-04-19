@@ -142,12 +142,21 @@
                     pedidoDiv.append('<h6>Pedido N°: ' + item.id + '</h6>');
 
                     var table = $('<table class="table table-striped"></table>');
-                    var thead = $('<thead><tr><th>Nombre</th><th>Cantidad</th><th>Subtotal</th></tr></thead>');
+                    var thead = $('<thead><tr><th>Plato</th><th>Cantidad</th><th>Subtotal</th></tr></thead>');
                     var tbody = $('<tbody></tbody>');
 
                     $.each(item.detalles, function (i, detalle) {
                         var row = $('<tr></tr>');
-                        row.append('<td>' + detalle.nombre + '</td>');
+                        row.append(
+                            '<td>' +
+                            detalle.nombre +
+                            // Si existe comentario, lo añadimos en línea nueva y en cursiva
+                            (detalle.comentario
+                                ? '<br/><em>' + detalle.comentario + '</em>'
+                                : ''
+                            ) +
+                            '</td>'
+                        );
                         row.append('<td>' + detalle.cantidad + '</td>');
                         row.append('<td><strong>$' + parseInt(detalle.subtotal).toLocaleString() + '</strong></td>');
                         tbody.append(row);

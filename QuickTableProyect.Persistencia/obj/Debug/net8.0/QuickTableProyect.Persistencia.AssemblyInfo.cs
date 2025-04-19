@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuickTableProyect.Persistencia")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+35a49b87d2461e618b600fe72ec7e19f20ccb3da")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9352c3d73787584e26ed86d9d765377e8ef59905")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuickTableProyect.Persistencia")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuickTableProyect.Persistencia")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

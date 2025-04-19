@@ -40,6 +40,7 @@ namespace QuickTableProyect.Interface
                         .Select(d => new
                         {
                             d.Nombre,
+                            comentario = d.Comentario,
                             cantidadPendiente = d.Cantidad - d.CantidadPreparada
                         })
                         .ToList()
