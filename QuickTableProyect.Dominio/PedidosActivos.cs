@@ -31,6 +31,8 @@ namespace QuickTableProyect.Dominio
 
         public decimal Subtotal => Cantidad * Valor;
         public int CantidadPreparada { get; set; }
+        public string Comentario { get; set; }
+
     }
     public static class EstadosPedido
     {

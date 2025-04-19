@@ -57,6 +57,8 @@ namespace QuickTableProyect.Interface
             ViewBag.Categorias = categorias;
             ViewData["MeseroId"] = empleadoId;
             ViewData["MeseroNombre"] = HttpContext.Session.GetString("Nombre");
+            ViewBag.DetallesComentario = new Dictionary<int, string>();
+
 
             return View(menuItems);
         }        
@@ -101,6 +103,9 @@ namespace QuickTableProyect.Interface
             }
 
             var pedido = _pedidoService.ObtenerPedidoPorId(pedidoId);
+            var detallesComentario = pedido.Detalles.ToDictionary(d => d.MenuItemId, d => d.Comentario ?? "");
+
+            ViewBag.DetallesComentario = detallesComentario;
 
             if (pedido == null || pedido.MeseroId != empleadoId)
             {
@@ -166,17 +171,25 @@ namespace QuickTableProyect.Interface
             }
 
             var pedidos = _pedidoService.ObtenerPedidosPorMesero(empleadoId)
-                .Select(p => new
-                {
-                    p.Id,
-                    p.NumeroMesa,
-                    p.Estado,
-                    p.Subtotal,
-                    p.IVA,
-                    p.Total,
-                    Detalles = p.Detalles.Select(d => new { d.Nombre, d.Cantidad, d.Subtotal }).ToList()
-                })
-                .ToList();
+                 .Select(p => new
+                 {
+                     p.Id,
+                     p.NumeroMesa,
+                     p.Estado,
+                     p.Subtotal,
+                     p.IVA,
+                     p.Total,
+                     Detalles = p.Detalles
+                         .Select(d => new
+                         {
+                             d.Nombre,
+                             d.Cantidad,
+                             d.Subtotal,
+                             comentario = d.Comentario ?? ""   // ← aquí agregas el comentario
+                         })
+                         .ToList()
+                 })
+                 .ToList();
 
             return Json(pedidos);
         }
