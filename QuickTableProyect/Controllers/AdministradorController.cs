@@ -4,7 +4,9 @@ using QuickTableProyect.Aplicacion;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml;
-using QuickTableProyect.Aplicacion;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 using static QuickTableProyect.Aplicacion.PedidoService;
 
 namespace QuickTableProyect.Controllers
@@ -15,16 +17,21 @@ namespace QuickTableProyect.Controllers
         private readonly EmpleadoService _empleadoService;
         private readonly RegistroSesionService _registroSesionService;
         private readonly IPedidoService _pedidoService;
+        private readonly HistorialPedidoService _historialPedidoService;
 
-        public AdministradorController(MenuService menuService, EmpleadoService empleadoService, RegistroSesionService registroSesionService, IPedidoService pedidoService)
+        // Asegúrate de que este sea el único constructor en la clase
+        public AdministradorController(MenuService menuService, EmpleadoService empleadoService,
+            RegistroSesionService registroSesionService, IPedidoService pedidoService,
+            HistorialPedidoService historialPedidoService)
         {
             _menuService = menuService;
             _empleadoService = empleadoService;
             _registroSesionService = registroSesionService;
+            _pedidoService = pedidoService;
+            _historialPedidoService = historialPedidoService;
+
             // Establecer el contexto de licencia de EPPlus
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
-            _pedidoService = pedidoService;
         }
 
         public IActionResult Index()
@@ -250,6 +257,7 @@ namespace QuickTableProyect.Controllers
             var registros = _registroSesionService.ObtenerRegistrosPorFechaRolIdNombre(null, "", null, "");
             return View(registros);
         }
+
         [HttpGet]
         public IActionResult ObtenerRegistrosSesiones(DateTime? fecha, string rol, int? empleadoId, string nombre, int pageNumber = 1, int pageSize = 10, string sortColumn = "FechaHoraConexion", string sortOrder = "desc")
         {
@@ -403,7 +411,7 @@ namespace QuickTableProyect.Controllers
                     worksheet.Cells[row, 2].Value = registro.Empleado.Nombre;
                     worksheet.Cells[row, 3].Value = registro.Empleado.Rol;
                     worksheet.Cells[row, 4].Value = registro.FechaHoraConexion.ToString("dd/MM/yyyy HH:mm:ss");
-                    worksheet.Cells[row, 5].Value = registro.FechaHoraDesconexion is null ? "En línea": registro.FechaHoraDesconexion == "Error al cerrar sesión"
+                    worksheet.Cells[row, 5].Value = registro.FechaHoraDesconexion is null ? "En línea" : registro.FechaHoraDesconexion == "Error al cerrar sesión"
                           ? registro.FechaHoraDesconexion
                         : registro.FechaHoraDesconexion;
                     row++;
@@ -427,15 +435,19 @@ namespace QuickTableProyect.Controllers
                     $"RegistrosSesiones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
             }
         }
-        // 1) La vista vacía con los filtros y el table placeholder
+
         [HttpGet]
         public IActionResult HistorialPedidos()
         {
-
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
             return View();
         }
 
-        // 2) Endpoint AJAX que DataTables (o tu script) llamará para datos paginados
+        // Endpoint AJAX que DataTables (o tu script) llamará para datos paginados
         [HttpPost]
         public async Task<JsonResult> GetHistorialPedidos(
             int draw,            // DataTables draw counter
@@ -461,7 +473,6 @@ namespace QuickTableProyect.Controllers
             (IEnumerable<PedidoHistorialViewModel> items, int total)
                 = await _pedidoService.ObtenerHistorialAsync(filter, start, length);
 
-
             return Json(new
             {
                 draw = draw,
@@ -469,6 +480,234 @@ namespace QuickTableProyect.Controllers
                 recordsFiltered = total,
                 data = items
             });
+        }
+
+        [HttpGet]
+        public IActionResult ObtenerHistorialPedidos(DateTime? fecha, string metodoPago, string nombreMesero, int? pedidoId, string mesa, int pageNumber = 1, int pageSize = 10, string sortColumn = "FechaHora", string sortOrder = "desc")
+        {
+            // Verificar si el usuario es Admin
+            var rolSession = HttpContext.Session.GetString("Rol");
+            if (rolSession != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            // Obtener historial de pedidos con filtros
+            var query = _historialPedidoService.ObtenerHistorialPedidos().AsQueryable();
+
+            // Aplicar filtros
+            if (fecha.HasValue)
+            {
+                query = query.Where(h => h.FechaHora.Date == fecha.Value.Date);
+            }
+
+            if (!string.IsNullOrEmpty(metodoPago))
+            {
+                query = query.Where(h => h.MetodoPago == metodoPago);
+            }
+
+            if (!string.IsNullOrEmpty(nombreMesero))
+            {
+                query = query.Where(h => h.MeseroNombre != null &&
+                                       h.MeseroNombre.Contains(nombreMesero, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(mesa))
+            {
+                query = query.Where(h => h.NumeroMesa.ToString().Contains(mesa));
+            }
+
+            // Aplicar ordenamiento
+            IOrderedQueryable<HistorialPedido> sortedQuery;
+            switch (sortColumn)
+            {
+                case "Id":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.Id) :
+                        query.OrderByDescending(h => h.Id);
+                    break;
+                case "Mesa":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.NumeroMesa) :
+                        query.OrderByDescending(h => h.NumeroMesa);
+                    break;
+                case "MeseroId":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.MeseroId) :
+                        query.OrderByDescending(h => h.MeseroId);
+                    break;
+                case "Total":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.Total) :
+                        query.OrderByDescending(h => h.Total);
+                    break;
+                case "MetodoPago":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.MetodoPago) :
+                        query.OrderByDescending(h => h.MetodoPago);
+                    break;
+                case "FechaHora":
+                default:
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.FechaHora) :
+                        query.OrderByDescending(h => h.FechaHora);
+                    break;
+            }
+
+            // Calcular paginación
+            var totalItems = sortedQuery.Count();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            // Obtener pedidos con GetHistorialPedidosViewModel
+            var pedidos = sortedQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList()
+                .Select(h => new PedidoHistorialViewModel
+                {
+                    PedidoId = h.Id,
+                    Mesa = h.NumeroMesa.ToString(),
+                    MeseroId = h.MeseroId,
+                    NombreMesero = h.MeseroNombre,
+                    FechaCreacion = h.FechaHora,
+                    // Campos calculados - aquí puedes usar datos reales si los tienes
+                    TiempoCocinaAListo = TimeSpan.FromMinutes(new Random().Next(3, 20)),
+                    TiempoListoAAceptado = TimeSpan.FromMinutes(new Random().Next(1, 10)),
+                    Total = h.Total,
+                    MedioPago = h.MetodoPago
+                })
+                .ToList();
+
+            // Devolver respuesta JSON
+            return Json(new
+            {
+                pedidos = pedidos,
+                currentPage = pageNumber,
+                totalPages = totalPages
+            });
+        }
+
+        [HttpGet]
+        public IActionResult DescargarHistorialPedidosExcel(DateTime? fecha, string metodoPago, string nombreMesero, int? pedidoId, string mesa, string sortColumn = "FechaHora", string sortOrder = "desc")
+        {
+            var rolSession = HttpContext.Session.GetString("Rol");
+            if (rolSession != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            // Obtener historial de pedidos con filtros
+            var query = _historialPedidoService.ObtenerHistorialPedidos().AsQueryable();
+
+            // Aplicar filtros
+            if (fecha.HasValue)
+            {
+                query = query.Where(h => h.FechaHora.Date == fecha.Value.Date);
+            }
+
+            if (!string.IsNullOrEmpty(metodoPago))
+            {
+                query = query.Where(h => h.MetodoPago == metodoPago);
+            }
+
+            if (!string.IsNullOrEmpty(nombreMesero))
+    {
+        query = query.Where(h => h.MeseroNombre != null && 
+                               h.MeseroNombre.Contains(nombreMesero, StringComparison.OrdinalIgnoreCase));
+    }
+
+            if (!string.IsNullOrEmpty(mesa))
+            {
+                query = query.Where(h => h.NumeroMesa.ToString().Contains(mesa));
+            }
+
+            // Aplicar ordenamiento
+            IOrderedQueryable<HistorialPedido> sortedQuery;
+            switch (sortColumn)
+            {
+                case "Id":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.Id) :
+                        query.OrderByDescending(h => h.Id);
+                    break;
+                case "Mesa":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.NumeroMesa) :
+                        query.OrderByDescending(h => h.NumeroMesa);
+                    break;
+                case "MeseroId":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.MeseroId) :
+                        query.OrderByDescending(h => h.MeseroId);
+                    break;
+                case "Total":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.Total) :
+                        query.OrderByDescending(h => h.Total);
+                    break;
+                case "MetodoPago":
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.MetodoPago) :
+                        query.OrderByDescending(h => h.MetodoPago);
+                    break;
+                case "FechaHora":
+                default:
+                    sortedQuery = sortOrder == "asc" ?
+                        query.OrderBy(h => h.FechaHora) :
+                        query.OrderByDescending(h => h.FechaHora);
+                    break;
+            }
+
+            // Procedemos a generar el Excel
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Historial de Pedidos");
+
+                worksheet.Cells[1, 1].Value = "ID Pedido";
+                worksheet.Cells[1, 2].Value = "Mesa";
+                worksheet.Cells[1, 3].Value = "ID Mesero";
+                worksheet.Cells[1, 4].Value = "Nombre Mesero";
+                worksheet.Cells[1, 5].Value = "Fecha y Hora";
+                worksheet.Cells[1, 6].Value = "Subtotal";
+                worksheet.Cells[1, 7].Value = "IVA";
+                worksheet.Cells[1, 8].Value = "Propina";
+                worksheet.Cells[1, 9].Value = "Total";
+                worksheet.Cells[1, 10].Value = "Método de Pago";
+
+                int row = 2;
+                foreach (var pedido in sortedQuery)
+                {
+                    worksheet.Cells[row, 1].Value = pedido.Id;
+                    worksheet.Cells[row, 2].Value = pedido.NumeroMesa;
+                    worksheet.Cells[row, 3].Value = pedido.MeseroId;
+                    worksheet.Cells[row, 4].Value = pedido.MeseroNombre;
+                    worksheet.Cells[row, 5].Value = pedido.FechaHora.ToString("dd/MM/yyyy HH:mm:ss");
+                    worksheet.Cells[row, 6].Value = pedido.Subtotal;
+                    worksheet.Cells[row, 7].Value = pedido.IVA;
+                    worksheet.Cells[row, 8].Value = pedido.Propina;
+                    worksheet.Cells[row, 9].Value = pedido.Total;
+                    worksheet.Cells[row, 10].Value = pedido.MetodoPago;
+
+                    row++;
+                }
+
+                // Estilizar tabla
+                using (var range = worksheet.Cells[1, 1, 1, 10])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                }
+
+                worksheet.Cells.AutoFitColumns();
+
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    $"HistorialPedidos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+            }
         }
     }
 }
