@@ -171,29 +171,31 @@ namespace QuickTableProyect.Interface
             }
 
             var pedidos = _pedidoService.ObtenerPedidosPorMesero(empleadoId)
-                .Where(p => p.MeseroAceptadoAt == null)
-                 .Select(p => new
-                 {
-                     p.Id,
-                     p.NumeroMesa,
-                     p.Estado,
-                     p.Subtotal,
-                     p.IVA,
-                     p.Total,
-                     Detalles = p.Detalles
-                         .Select(d => new
-                         {
-                             d.Nombre,
-                             d.Cantidad,
-                             d.Subtotal,
-                             comentario = d.Comentario ?? ""   // ← aquí agregas el comentario
-                         })
-                         .ToList()
-                 })
-                 .ToList();
+                // Quitar el filtro para obtener todos los pedidos
+                .Select(p => new
+                {
+                    p.Id,
+                    p.NumeroMesa,
+                    p.Estado,
+                    p.Subtotal,
+                    p.IVA,
+                    p.Total,
+                    Aceptado = p.MeseroAceptadoAt != null, // Añadir indicador de aceptado
+                    Detalles = p.Detalles
+                        .Select(d => new
+                        {
+                            d.Nombre,
+                            d.Cantidad,
+                            d.Subtotal,
+                            comentario = d.Comentario ?? ""
+                        })
+                        .ToList()
+                })
+                .ToList();
 
             return Json(pedidos);
         }
+
         [HttpPost]
         public JsonResult MarcarPedidoAceptado(int pedidoId)
         {
