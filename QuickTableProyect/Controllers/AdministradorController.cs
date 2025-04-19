@@ -4,6 +4,8 @@ using QuickTableProyect.Aplicacion;
 using System.Collections.Generic;
 using System.Linq;
 using OfficeOpenXml;
+using QuickTableProyect.Aplicacion;
+using static QuickTableProyect.Aplicacion.PedidoService;
 
 namespace QuickTableProyect.Controllers
 {
@@ -12,14 +14,17 @@ namespace QuickTableProyect.Controllers
         private readonly MenuService _menuService;
         private readonly EmpleadoService _empleadoService;
         private readonly RegistroSesionService _registroSesionService;
+        private readonly IPedidoService _pedidoService;
 
-        public AdministradorController(MenuService menuService, EmpleadoService empleadoService, RegistroSesionService registroSesionService)
+        public AdministradorController(MenuService menuService, EmpleadoService empleadoService, RegistroSesionService registroSesionService, IPedidoService pedidoService)
         {
             _menuService = menuService;
             _empleadoService = empleadoService;
             _registroSesionService = registroSesionService;
             // Establecer el contexto de licencia de EPPlus
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+            _pedidoService = pedidoService;
         }
 
         public IActionResult Index()
@@ -421,6 +426,49 @@ namespace QuickTableProyect.Controllers
                 return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     $"RegistrosSesiones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
             }
+        }
+        // 1) La vista vacía con los filtros y el table placeholder
+        [HttpGet]
+        public IActionResult HistorialPedidos()
+        {
+
+            return View();
+        }
+
+        // 2) Endpoint AJAX que DataTables (o tu script) llamará para datos paginados
+        [HttpPost]
+        public async Task<JsonResult> GetHistorialPedidos(
+            int draw,            // DataTables draw counter
+            int start,           // offset
+            int length,          // page size
+            int? pedidoId,
+            string mesa,
+            int? meseroId,
+            DateTime? fechaDesde,
+            DateTime? fechaHasta
+        )
+        {
+            var filter = new PedidoFilter
+            {
+                PedidoId = pedidoId,
+                Mesa = mesa,
+                MeseroId = meseroId,
+                FechaDesde = fechaDesde,
+                FechaHasta = fechaHasta
+            };
+
+            // Desencapsulamos la tupla con tipos concretos
+            (IEnumerable<PedidoHistorialViewModel> items, int total)
+                = await _pedidoService.ObtenerHistorialAsync(filter, start, length);
+
+
+            return Json(new
+            {
+                draw = draw,
+                recordsTotal = total,
+                recordsFiltered = total,
+                data = items
+            });
         }
     }
 }

@@ -108,3 +108,5 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Se
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\ref\QuickTableProyect.Persistencia.dll
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.CambiarDesconexionAString.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.AddComentarioToItemDetalle.resources
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.AgregarTimestampsPedidos.resources
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.AgregarTimestampsPedidos2.resources

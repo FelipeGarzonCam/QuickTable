@@ -7,9 +7,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var services = builder.Services;
+services.AddScoped<IPedidoService, PedidoService>();
 // Registro del contexto de base de datos
 builder.Services.AddScoped<SistemaQuickTableContext>();
+
+
 
 // Otros servicios
 builder.Services.AddHttpContextAccessor();

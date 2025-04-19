@@ -212,8 +212,12 @@
 
                     var btnAceptar = $('<button class="btn btn-success btn-aceptar">Aceptar</button>');
                     btnAceptar.click(function () {
-                        delete pedidosListos[id];
-                        renderPedidosListos();
+                    // Llamar servidor para registrar aceptación
+                        $.post('@Url.Action("MarcarPedidoAceptado", "Mesero")', { pedidoId: id })
+                        .done(function () {
+                                delete pedidosListos[id];
+                                renderPedidosListos();
+                            });
                     });
 
                     pedidoListoDiv.append(btnAceptar);

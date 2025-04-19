@@ -171,6 +171,7 @@ namespace QuickTableProyect.Interface
             }
 
             var pedidos = _pedidoService.ObtenerPedidosPorMesero(empleadoId)
+                .Where(p => p.MeseroAceptadoAt == null)
                  .Select(p => new
                  {
                      p.Id,
@@ -193,7 +194,12 @@ namespace QuickTableProyect.Interface
 
             return Json(pedidos);
         }
-
+        [HttpPost]
+        public JsonResult MarcarPedidoAceptado(int pedidoId)
+        {
+            _pedidoService.MarcarPedidoComoAceptado(pedidoId);
+            return Json(new { success = true });
+        }
 
     }
 }

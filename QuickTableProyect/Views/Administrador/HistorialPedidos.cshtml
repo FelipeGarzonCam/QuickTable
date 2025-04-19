@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Historial de Pedidos";
+}
+
+<h2>Historial de Pedidos</h2>
+
+<form id="filtros">
+    <input type="number" name="pedidoId" placeholder="# Pedido" />
+    <input type="text" name="mesa" placeholder="Mesa" />
+    <input type="number" name="meseroId" placeholder="ID Mesero" />
+    <input type="date" name="fechaDesde" />
+    <input type="date" name="fechaHasta" />
+    <button type="submit">Filtrar</button>
+</form>
+
+<table id="tablaHistorial" class="display">
+    <thead>
+        <tr>
+            <th># Pedido</th>
+            <th>Mesa</th>
+            <th>ID Mesero</th>
+            <th>Mesero</th>
+            <th>Creación</th>
+            <th>Tiempo Cocina→Listo</th>
+            <th>Tiempo Listo→Aceptado</th>
+            <th>Total</th>
+            <th>Medio de Pago</th>
+        </tr>
+    </thead>
+</table>
+
+@section Scripts {
+    <script>
+        $(function(){
+            var table = $('#tablaHistorial').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: '@Url.Action("GetHistorialPedidos", "Admin")',
+                    type: 'POST',
+                    data: function(d){
+                        // añado filtros al payload
+                        return $.extend({}, d, {
+                            pedidoId   : $('input[name=pedidoId]').val(),
+                            mesa       : $('input[name=mesa]').val(),
+                            meseroId   : $('input[name=meseroId]').val(),
+                            fechaDesde : $('input[name=fechaDesde]').val(),
+                            fechaHasta : $('input[name=fechaHasta]').val()
+                        });
+                    }
+                },
+                columns: [
+                    { data: 'pedidoId' },
+                    { data: 'mesa' },
+                    { data: 'meseroId' },
+                    { data: 'nombreMesero' },
+                    { data: 'fechaCreacion',
+                      render: function(d){ return moment(d).format('DD/MM/YYYY HH:mm'); }
+                    },
+                    { data: 'tiempoCocinaAListo',
+                      render: function(d){
+                          var ts = moment.duration(d);
+                          return ts.hours()+'h '+ts.minutes()+'m';
+                      }
+                    },
+                    { data: 'tiempoListoAAceptado',
+                      render: function(d){
+                          var ts = moment.duration(d);
+                          return ts.hours()+'h '+ts.minutes()+'m';
+                      }
+                    },
+                    { data: 'total', render: $.fn.dataTable.render.number(',', '.', 2, '$') },
+                    { data: 'medioPago' }
+                ],
+                pageLength: 10,
+                lengthMenu: [ [10, 25, 50], [10, 25, 50] ]
+            });
+
+            // Al enviar el formulario de filtros, refresco la tabla
+            $('#filtros').on('submit', function(e){
+                e.preventDefault();
+                table.ajax.reload();
+            });
+        });
+    </script>
+}
