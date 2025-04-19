@@ -188,12 +188,19 @@
                         <i class="bi bi-caret-up-fill"></i>
                     </span>
                 </th>
+                <th scope="col" data-column="TiempoTotal" data-order="asc" class="sortable">
+                    T. Total
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
                 <th scope="col" data-column="Total" data-order="asc" class="sortable">
                     Total
                     <span class="sort-icon">
                         <i class="bi bi-caret-up-fill"></i>
                     </span>
                 </th>
+
                 <th scope="col" data-column="MetodoPago" data-order="asc" class="sortable">
                     Método Pago
                     <span class="sort-icon">
@@ -262,32 +269,68 @@
             // Función para renderizar la tabla
             function renderTable(pedidos) {
                 var rows = '';
+                if (!pedidos || pedidos.length === 0) {
+                    $('#pedidosTable tbody').html('<tr><td colspan="9" class="text-center">No hay datos disponibles</td></tr>');
+                    return;
+                }
+
                 $.each(pedidos, function (index, pedido) {
-                    var fechaHora = formatDate(new Date(pedido.fechaCreacion));
+                    try {
+                        var fechaHora = formatDate(new Date(pedido.fechaCreacion));
 
-                    // Formatear el tiempo de cocina
-                    var tiempoCocina = formatTimeSpan(pedido.tiempoCocinaAListo);
-                    var tiempoEntrega = formatTimeSpan(pedido.tiempoListoAAceptado);
+                        // Formatear los tiempos
+                        var tiempoCocina = formatTimeSpan(pedido.tiempoCocinaAListo);
+                        var tiempoEntrega = formatTimeSpan(pedido.tiempoListoAAceptado);
+                        var tiempoTotal = formatTimeSpan(pedido.tiempoTotal);  // Nueva línea
 
-                    // Clases para el tiempo
-                    var claseTiempoCocina = getTiempoClass(pedido.tiempoCocinaAListo);
-                    var claseTiempoEntrega = getTiempoClass(pedido.tiempoListoAAceptado);
+                        // Clases para el tiempo
+                        var claseTiempoCocina = getTiempoClass(pedido.tiempoCocinaAListo);
+                        var claseTiempoEntrega = getTiempoClass(pedido.tiempoListoAAceptado);
+                        var claseTiempoTotal = getTiempoClass(pedido.tiempoTotal);  // Nueva línea
 
-                    // Clase para método de pago
-                    var claseMetodoPago = getMetodoPagoClass(pedido.medioPago);
+                        // Clase para método de pago
+                        var claseMetodoPago = getMetodoPagoClass(pedido.medioPago);
 
-                    rows += '<tr>'
-                        + '<td>' + pedido.pedidoId + '</td>'
-                        + '<td>' + pedido.mesa + '</td>'
-                        + '<td>' + pedido.nombreMesero + ' (' + pedido.meseroId + ')</td>'
-                        + '<td>' + fechaHora + '</td>'
-                        + '<td><span class="tiempo-badge ' + claseTiempoCocina + '">' + tiempoCocina + '</span></td>'
-                        + '<td><span class="tiempo-badge ' + claseTiempoEntrega + '">' + tiempoEntrega + '</span></td>'
-                        + '<td>$' + pedido.total.toLocaleString('es-CO') + '</td>'
-                        + '<td><span class="metodo-pago-badge ' + claseMetodoPago + '">' + pedido.medioPago + '</span></td>'
-                        + '</tr>';
+                        rows += '<tr>'
+                            + '<td>' + pedido.pedidoId + '</td>'
+                            + '<td>' + pedido.mesa + '</td>'
+                            + '<td>' + pedido.nombreMesero + ' (' + pedido.meseroId + ')</td>'
+                            + '<td>' + fechaHora + '</td>'
+                            + '<td><span class="tiempo-badge ' + claseTiempoCocina + '">' + tiempoCocina + '</span></td>'
+                            + '<td><span class="tiempo-badge ' + claseTiempoEntrega + '">' + tiempoEntrega + '</span></td>'
+                            + '<td><span class="tiempo-badge ' + claseTiempoTotal + '">' + tiempoTotal + '</span></td>'  // Nueva columna
+                            + '<td>$' + pedido.total.toLocaleString('es-CO') + '</td>'
+                            + '<td><span class="metodo-pago-badge ' + claseMetodoPago + '">' + pedido.medioPago + '</span></td>'
+                            + '</tr>';
+                    } catch (e) {
+                        console.error("Error al procesar pedido:", e, pedido);
+                    }
                 });
                 $('#pedidosTable tbody').html(rows);
+            }
+        
+            // Helper to extract seconds from TimeSpan string or object
+            function extractSeconds(timespan) {
+                if (!timespan) return 0;
+
+                if (typeof timespan === 'string') {
+                    // Parse from string like "-00:00:25.0660000"
+                    var isNegative = timespan.startsWith('-');
+                    var cleanTime = timespan.replace('-', '');
+                    var parts = cleanTime.split(':');
+
+                    if (parts.length >= 3) {
+                        var hours = parseInt(parts[0]) || 0;
+                        var minutes = parseInt(parts[1]) || 0;
+                        var seconds = parseFloat(parts[2]) || 0;
+
+                        var totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                        return isNegative ? -totalSeconds : totalSeconds;
+                    }
+                    return 0;
+                }
+
+                return timespan.totalSeconds || 0;
             }
 
             // Función para obtener la clase CSS para el método de pago
@@ -325,18 +368,44 @@
             }
 
             // Función para formatear TimeSpan
+            // Función para formatear TimeSpan
             function formatTimeSpan(timespan) {
                 if (!timespan) return '00:00';
 
+                var totalSeconds;
+
                 if (typeof timespan === 'string') {
-                    return timespan; // Asumir que ya viene formateado
+                    // Parse the timespan string to extract total seconds
+                    var isNegative = timespan.startsWith('-');
+                    var cleanTime = timespan.replace('-', '');
+                    var parts = cleanTime.split(':');
+
+                    if (parts.length >= 3) {
+                        var hours = parseInt(parts[0]) || 0;
+                        var minutes = parseInt(parts[1]) || 0;
+                        // Handle decimal seconds
+                        var secondsParts = parts[2].split('.');
+                        var seconds = parseInt(secondsParts[0]) || 0;
+
+                        totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                        totalSeconds = Math.abs(totalSeconds); // Always use positive value for display
+                    } else {
+                        return '00:00';
+                    }
+                } else if (timespan.totalSeconds !== undefined) {
+                    totalSeconds = Math.abs(timespan.totalSeconds);
+                } else {
+                    return '00:00';
                 }
 
-                var minutes = Math.floor(timespan.totalSeconds / 60);
-                var seconds = Math.floor(timespan.totalSeconds % 60);
+                // Format the seconds into mm:ss
+                var minutes = Math.floor(totalSeconds / 60);
+                var seconds = Math.floor(totalSeconds % 60);
 
                 return pad(minutes) + ':' + pad(seconds);
             }
+
+
 
             function pad(num) {
                 return (num < 10 ? '0' : '') + num;

@@ -12,9 +12,6 @@ namespace QuickTableProyect.Aplicacion
         Task<(IEnumerable<PedidoHistorialViewModel> Items, int TotalCount)>
             ObtenerHistorialAsync(PedidoFilter filter, int skip, int take);
 
-        // Otros métodos que uses en AdminController:
-        // e.g. List<PedidosActivos> ObtenerPedidosPorMesero(int meseroId);
-        // void MarcarPedidoComoListo(int pedidoId);
-        // void MarcarPedidoComoAceptado(int pedidoId);
+   
     }
 }

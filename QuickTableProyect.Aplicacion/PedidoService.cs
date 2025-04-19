@@ -273,7 +273,15 @@ namespace QuickTableProyect.Aplicacion
 
             return (items, total);
         }
-
+        public void AceptarPedido(int pedidoId)
+        {
+            var pedido = _context.PedidosActivos.Find(pedidoId);
+            if (pedido != null)
+            {
+                pedido.MeseroAceptadoAt = DateTime.Now;
+                _context.SaveChanges();
+            }
+        }
 
     }
 }

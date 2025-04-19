@@ -435,7 +435,7 @@ namespace QuickTableProyect.Controllers
                     $"RegistrosSesiones_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
             }
         }
-
+        //AdministradorController:
         [HttpGet]
         public IActionResult HistorialPedidos()
         {
@@ -570,14 +570,22 @@ namespace QuickTableProyect.Controllers
                     MeseroId = h.MeseroId,
                     NombreMesero = h.MeseroNombre,
                     FechaCreacion = h.FechaHora,
-                    // Campos calculados - aquí puedes usar datos reales si los tienes
                     TiempoCocinaAListo = h.CocinaListoAt.HasValue
-                        ? h.CocinaListoAt.Value - h.FechaHora
+                        ? (h.CocinaListoAt.Value > h.FechaHora
+                           ? h.CocinaListoAt.Value - h.FechaHora
+                           : TimeSpan.Zero)
                         : TimeSpan.Zero,
                     TiempoListoAAceptado = (h.MeseroAceptadoAt.HasValue && h.CocinaListoAt.HasValue)
-                        ? h.MeseroAceptadoAt.Value - h.CocinaListoAt.Value
+                        ? (h.MeseroAceptadoAt.Value > h.CocinaListoAt.Value
+                           ? h.MeseroAceptadoAt.Value - h.CocinaListoAt.Value
+                           : TimeSpan.Zero)
                         : TimeSpan.Zero,
-                    Total = h.Total,
+                    TiempoTotal = h.MeseroAceptadoAt.HasValue
+                        ? (h.MeseroAceptadoAt.Value > h.FechaHora
+                           ? h.MeseroAceptadoAt.Value - h.FechaHora
+                           : TimeSpan.Zero)
+                        : TimeSpan.Zero,
+                    Total = h.Total + h.Propina,
                     MedioPago = h.MetodoPago
                 })
                 .ToList();
@@ -672,11 +680,14 @@ namespace QuickTableProyect.Controllers
                 worksheet.Cells[1, 3].Value = "ID Mesero";
                 worksheet.Cells[1, 4].Value = "Nombre Mesero";
                 worksheet.Cells[1, 5].Value = "Fecha y Hora";
-                worksheet.Cells[1, 6].Value = "Subtotal";
-                worksheet.Cells[1, 7].Value = "IVA";
-                worksheet.Cells[1, 8].Value = "Propina";
-                worksheet.Cells[1, 9].Value = "Total";
-                worksheet.Cells[1, 10].Value = "Método de Pago";
+                worksheet.Cells[1, 6].Value = "Tiempo en Cocina";
+                worksheet.Cells[1, 7].Value = "Tiempo de Entrega";
+                worksheet.Cells[1, 8].Value = "Tiempo Total";  // Nueva columna
+                worksheet.Cells[1, 9].Value = "Subtotal";
+                worksheet.Cells[1, 10].Value = "IVA";
+                worksheet.Cells[1, 11].Value = "Propina";
+                worksheet.Cells[1, 12].Value = "Total (con propina)";  // Modificado
+                worksheet.Cells[1, 13].Value = "Método de Pago";
 
                 int row = 2;
                 foreach (var pedido in sortedQuery)
@@ -686,17 +697,29 @@ namespace QuickTableProyect.Controllers
                     worksheet.Cells[row, 3].Value = pedido.MeseroId;
                     worksheet.Cells[row, 4].Value = pedido.MeseroNombre;
                     worksheet.Cells[row, 5].Value = pedido.FechaHora.ToString("dd/MM/yyyy HH:mm:ss");
-                    worksheet.Cells[row, 6].Value = pedido.Subtotal;
-                    worksheet.Cells[row, 7].Value = pedido.IVA;
-                    worksheet.Cells[row, 8].Value = pedido.Propina;
-                    worksheet.Cells[row, 9].Value = pedido.Total;
-                    worksheet.Cells[row, 10].Value = pedido.MetodoPago;
+
+                    // Calculos de tiempo
+                    var tiempoCocina = pedido.CocinaListoAt.HasValue ?
+                        (pedido.CocinaListoAt.Value - pedido.FechaHora).ToString(@"hh\:mm\:ss") : "00:00:00";
+                    var tiempoEntrega = (pedido.MeseroAceptadoAt.HasValue && pedido.CocinaListoAt.HasValue) ?
+                        (pedido.MeseroAceptadoAt.Value - pedido.CocinaListoAt.Value).ToString(@"hh\:mm\:ss") : "00:00:00";
+                    var tiempoTotal = pedido.MeseroAceptadoAt.HasValue ?
+                        (pedido.MeseroAceptadoAt.Value - pedido.FechaHora).ToString(@"hh\:mm\:ss") : "00:00:00";
+
+                    worksheet.Cells[row, 6].Value = tiempoCocina;
+                    worksheet.Cells[row, 7].Value = tiempoEntrega;
+                    worksheet.Cells[row, 8].Value = tiempoTotal;  // Nueva columna
+                    worksheet.Cells[row, 9].Value = pedido.Subtotal;
+                    worksheet.Cells[row, 10].Value = pedido.IVA;
+                    worksheet.Cells[row, 11].Value = pedido.Propina;
+                    worksheet.Cells[row, 12].Value = pedido.Total + pedido.Propina;  // Total con propina
+                    worksheet.Cells[row, 13].Value = pedido.MetodoPago;
 
                     row++;
                 }
 
                 // Estilizar tabla
-                using (var range = worksheet.Cells[1, 1, 1, 10])
+                using (var range = worksheet.Cells[1, 1, 1, 13])  // Ajustado a 13 columnas
                 {
                     range.Style.Font.Bold = true;
                     range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;

@@ -105,6 +105,8 @@ namespace QuickTableProyect.Dominio
         public DateTime FechaCreacion { get; set; }
         public TimeSpan TiempoCocinaAListo { get; set; }
         public TimeSpan TiempoListoAAceptado { get; set; }
+
+        public TimeSpan TiempoTotal { get; set; }
         public decimal Total { get; set; }
         public string MedioPago { get; set; }
     }

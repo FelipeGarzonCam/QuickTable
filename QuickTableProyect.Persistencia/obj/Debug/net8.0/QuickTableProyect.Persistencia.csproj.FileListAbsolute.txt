@@ -112,3 +112,4 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Se
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.AgregarTimestampsPedidos2.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.noRandom.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.noRandom2.resources
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.TeimpoOCmpletoPedido.resources
