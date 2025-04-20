@@ -18,8 +18,7 @@ namespace QuickTableProyect.Controllers
         private readonly RegistroSesionService _registroSesionService;
         private readonly IPedidoService _pedidoService;
         private readonly HistorialPedidoService _historialPedidoService;
-
-        // Asegúrate de que este sea el único constructor en la clase
+        
         public AdministradorController(MenuService menuService, EmpleadoService empleadoService,
             RegistroSesionService registroSesionService, IPedidoService pedidoService,
             HistorialPedidoService historialPedidoService)

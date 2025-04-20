@@ -11,6 +11,9 @@ var services = builder.Services;
 services.AddScoped<IPedidoService, PedidoService>();
 // Registro del contexto de base de datos
 builder.Services.AddScoped<SistemaQuickTableContext>();
+builder.Services.AddScoped<SuperAdminService>();
+
+// ...
 
 
 
@@ -24,7 +27,7 @@ builder.Services.AddScoped<RegistroSesionService>(); // Nuevo servicio
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();  // Para usar sesiones
 
-// Configurar Kestrel para obtener la IP local de la máquina
+// Configurar Kestrel para obtener la IP local de la mï¿½quina
 builder.WebHost.ConfigureKestrel(options =>
 {
     string localIp = GetLocalIPAddress();
@@ -34,7 +37,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 var app = builder.Build();
 
-// Configuración de la aplicación
+// Configuraciï¿½n de la aplicaciï¿½n
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -55,12 +58,12 @@ app.Run();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromDays(1); // Tiempo de sesión
+    options.IdleTimeout = TimeSpan.FromDays(1); // Tiempo de sesiï¿½n
     options.Cookie.HttpOnly = true; // Mejora la seguridad
     options.Cookie.IsEssential = true; // Necesario para GDPR
 });
 
-// Método para obtener la IP local de la máquina
+// Mï¿½todo para obtener la IP local de la mï¿½quina
 string GetLocalIPAddress()
 {
     var host = Dns.GetHostEntry(Dns.GetHostName());
@@ -71,5 +74,5 @@ string GetLocalIPAddress()
             return ip.ToString();
         }
     }
-    throw new Exception("No se pudo determinar la dirección IP local.");
+    throw new Exception("No se pudo determinar la direcciï¿½n IP local.");
 }

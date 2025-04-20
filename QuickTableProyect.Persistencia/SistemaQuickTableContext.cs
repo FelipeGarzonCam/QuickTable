@@ -31,6 +31,10 @@ namespace QuickTableProyect.Persistencia.Datos
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             base.OnModelCreating(modelBuilder);
         }
+
+        public DbSet<SuperAdmin> SuperAdmins { get; set; }
+        public DbSet<RfidTagAssignment> RfidTagAssignments { get; set; }
+
     }
 } //masterrrr
 

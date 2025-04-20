@@ -1,0 +1,106 @@
+@{
+    ViewData["Title"] = "Panel SuperAdmin";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/views/administrador/index.css" />
+    <style>
+            /* Estilos base */
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+            max-width: 100%;
+        }
+
+        /* Estilos para los botones */
+        .btn-primary {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px !important;
+            margin-bottom: 15px;
+        }
+
+        /* Ajustes para dispositivos móviles */
+        @@media (max-width: 767px) {
+            .row {
+                display: flex;
+                flex-wrap: wrap;
+                margin-right: -10px;
+                margin-left: -10px;
+                justify-content: space-between;
+            }
+
+            .col-6 {
+                padding-right: 10px;
+                padding-left: 10px;
+                margin-bottom: 20px;
+            }
+
+            .btn-primary {
+                padding: 15px 10px !important;
+            }
+
+            .btn-primary i {
+                font-size: 2em !important; /* Icono más pequeño en móvil */
+            }
+
+            .btn-primary span {
+                font-size: 0.9em !important; /* Texto más pequeño en móvil */
+                text-align: center;
+                margin-top: 10px;
+            }
+        }
+
+        /* Para pantallas muy pequeñas */
+        @@media (max-width: 360px) {
+            .col-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+
+}
+
+<div class="container text-center my-5">
+    <div class="row justify-content-around justify-content-md-center">
+        <!-- Botón para Modificar Menú -->
+        <div class="col-6 col-md-3 mb-3">
+            <a href="@Url.Action("ModificarMenu", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
+                <i class="fas fa-utensils fa-3x mb-2"></i>
+                <span style="font-size: 1.2em;">Modificar Menú</span>
+            </a>
+        </div>
+
+        <!-- Botón para Modificar Empleados -->
+        <div class="col-6 col-md-3 mb-3">
+            <a href="@Url.Action("ModificarEmpleados", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
+                <i class="fas fa-users-cog fa-3x mb-2"></i>
+                <span style="font-size: 1.2em;">Modificar Empleados</span>
+            </a>
+        </div>
+        <!-- Botón para Registro sesiones -->
+        <div class="col-6 col-md-3 mb-3">
+            <a href="@Url.Action("RegistroSesiones", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
+                <i class="fas fa-calendar-check fa-3x mb-2"></i>
+                <span style="font-size: 1.2em;">Registro de Sesiones</span>
+            </a>
+        </div>
+        <!-- Botón para Historial pedidos -->
+        <div class="col-6 col-md-3 mb-3">
+            <a href="@Url.Action("HistorialPedidos", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
+                <i class="fas fa-history fa-3x mb-2"></i>
+                <span style="font-size: 1.2em;">Historial De Pedidos</span>
+            </a>
+        </div>
+    </div>
+
+
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">

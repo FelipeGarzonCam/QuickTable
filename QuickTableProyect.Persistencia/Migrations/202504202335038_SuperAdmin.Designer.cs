@@ -7,13 +7,13 @@ namespace QuickTableProyect.Persistencia.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class TeimpoOCmpletoPedido : IMigrationMetadata
+    public sealed partial class SuperAdmin : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(TeimpoOCmpletoPedido));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(SuperAdmin));
         
         string IMigrationMetadata.Id
         {
-            get { return "202504191835119_TeimpoOCmpletoPedido"; }
+            get { return "202504202335038_SuperAdmin"; }
         }
         
         string IMigrationMetadata.Source
