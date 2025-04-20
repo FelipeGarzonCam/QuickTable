@@ -7,9 +7,11 @@
 <head>
     <meta charset="utf-8" />
     <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    
     <link rel="stylesheet" href="~/css/adminlte.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    <link href="~/AdminLTE/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/AdminLTE/dist/css/adminlte.min.css" rel="stylesheet" />
+
     <style>       
         .container-fluid{
             display: flex;
@@ -132,8 +134,9 @@
     </div>
     <div class="toasts-top-right fixed" id="toastContainer"></div>
 
-   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
    <script src="~/js/adminlte.min.js"></script>
 
     <script>
@@ -180,7 +183,7 @@
                     contentDiv.append('<span>ID Mesero: ' + item.meseroId + ' - ' + item.meseroNombre + '</span>');
                     contentDiv.append('<p>Estado: ' + item.estado + '</p>');
 
-                    var table = $('<table class="table table-striped"></table>');
+                    var table = $('<table class="table"></table>');
                     var thead = $('<thead><tr><th>Plato</th><th>#</th><th>Valor</th><th>Subtotal</th></tr></thead>');
                     var tbody = $('<tbody></tbody>');
 

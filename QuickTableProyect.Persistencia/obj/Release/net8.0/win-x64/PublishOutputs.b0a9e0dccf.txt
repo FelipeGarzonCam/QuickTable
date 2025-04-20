@@ -1,0 +1,17 @@
+P:\Escritorio\QT Laptop\QuickTableProyect.Persistencia.dll
+P:\Escritorio\QT Laptop\QuickTableProyect.Persistencia.deps.json
+P:\Escritorio\QT Laptop\QuickTableProyect.Persistencia.runtimeconfig.json
+P:\Escritorio\QT Laptop\QuickTableProyect.Persistencia.pdb
+P:\Escritorio\QT Laptop\EntityFramework.SqlServer.dll
+P:\Escritorio\QT Laptop\EntityFramework.dll
+P:\Escritorio\QT Laptop\Microsoft.Win32.SystemEvents.dll
+P:\Escritorio\QT Laptop\System.CodeDom.dll
+P:\Escritorio\QT Laptop\System.Configuration.ConfigurationManager.dll
+P:\Escritorio\QT Laptop\System.Data.SqlClient.dll
+P:\Escritorio\QT Laptop\System.Drawing.Common.dll
+P:\Escritorio\QT Laptop\System.Security.Cryptography.ProtectedData.dll
+P:\Escritorio\QT Laptop\System.Security.Permissions.dll
+P:\Escritorio\QT Laptop\System.Windows.Extensions.dll
+P:\Escritorio\QT Laptop\sni.dll
+P:\Escritorio\QT Laptop\QuickTableProyect.Dominio.dll
+P:\Escritorio\QT Laptop\QuickTableProyect.Dominio.pdb

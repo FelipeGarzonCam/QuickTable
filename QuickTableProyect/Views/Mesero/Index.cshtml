@@ -7,8 +7,8 @@
 <head>
     <meta charset="utf-8" />
     <title>@ViewData["Title"]</title>
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    <link href="~/AdminLTE/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/AdminLTE/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" />
     <style>
         body {
             margin: 0;
@@ -76,7 +76,6 @@
             .totales p, .totales h4 {
                 margin: 0;
             }
-
     </style>
 </head>
 <body>
@@ -95,9 +94,9 @@
             <!-- Los pedidos se cargarán aquí -->
         </div>
     </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
 
     <script>
         $(document).ready(function () {
@@ -139,7 +138,7 @@
                     pedidoDiv.append(header);
                     pedidoDiv.append('<h6>Pedido N°: ' + item.id + '</h6>');
 
-                    var table = $('<table class="table table-striped"></table>');
+                    var table = $('<table class="table  theme-text"></table>');
                     var thead = $('<thead><tr><th>Plato</th><th>Cantidad</th><th>Subtotal</th></tr></thead>');
                     var tbody = $('<tbody></tbody>');
 
@@ -221,7 +220,7 @@
             }
 
             loadPedidos();
-            setInterval(loadPedidos, 1000);
+            setInterval(loadPedidos, 1200);
         });
     </script>
 </body>

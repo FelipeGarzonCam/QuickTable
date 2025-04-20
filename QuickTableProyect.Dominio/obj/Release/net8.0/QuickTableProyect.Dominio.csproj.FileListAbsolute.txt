@@ -1,0 +1,12 @@
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\bin\Release\net8.0\QuickTableProyect.Dominio.deps.json
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\bin\Release\net8.0\QuickTableProyect.Dominio.dll
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\bin\Release\net8.0\QuickTableProyect.Dominio.pdb
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.AssemblyInfoInputs.cache
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.AssemblyInfo.cs
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.csproj.CoreCompileInputs.cache
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.sourcelink.json
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.dll
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\refint\QuickTableProyect.Dominio.dll
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\QuickTableProyect.Dominio.pdb
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\Quick Table Registro Sesion\QuickTableProyect.Dominio\obj\Release\net8.0\ref\QuickTableProyect.Dominio.dll
