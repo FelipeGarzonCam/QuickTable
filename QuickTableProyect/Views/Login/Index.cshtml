@@ -12,7 +12,7 @@
             <div class="card-body login-card-body">
                 <p class="login-box-msg">LOGIN</p>
 
-                <form id="loginForm">
+                <form id="loginForm" method="post" action='@Url.Action("Autenticar","Login")'>
                     <div class="input-group mb-3">
                         <input type="text" name="nombre" class="form-control" placeholder="Usuario" required>
                         <div class="input-group-append">
@@ -40,9 +40,10 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
+<script src="~/AdminLTE/plugins/toastr/toastr.min.js"></script>
+<link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css" />
+
 
 <script>
     $("#loginForm").submit(function (event) {
