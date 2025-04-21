@@ -120,6 +120,24 @@
                 </div>
             </aside>
         }
+        @if (HttpContextAccessor.HttpContext.Session.GetString("Rol") == "SuperAdmin")
+        {
+            <aside class="main-sidebar …">
+                <!-- Enlaces a Panel SuperAdmin -->
+                <nav>
+                    <ul class="nav nav-pills nav-sidebar …">
+                        <li class="nav-item">
+                            <a href="@Url.Action("Index","SuperAdmin")" class="nav-link">
+                                <i class="nav-icon fas fa-user-shield"></i>
+                                <p>Panel SuperAdmin</p>
+                            </a>
+                        </li>
+                        <!-- … otros enlaces … -->
+                    </ul>
+                </nav>
+            </aside>
+        }
+
 
         <!-- Contenedor principal de la página -->
         <div class="content-wrapper @((HttpContextAccessor.HttpContext.Session.GetString("Rol") == "Admin") ? "" : "no-sidebar")">

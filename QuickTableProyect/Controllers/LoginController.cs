@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QuickTableProyect.Aplicacion;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+
 
 namespace QuickTableProyect.Interface
 {
@@ -8,11 +10,13 @@ namespace QuickTableProyect.Interface
     {
         private readonly EmpleadoService _empleadoService;
         private readonly RegistroSesionService _sesionService;
+        private readonly ISuperAdminService _superAdminService;
 
-        public LoginController(EmpleadoService empleadoService, RegistroSesionService sesionService)
+        public LoginController(EmpleadoService empleadoService, RegistroSesionService sesionService, ISuperAdminService superAdminService)
         {
             _empleadoService = empleadoService;
             _sesionService = sesionService;
+            _superAdminService = superAdminService;
         }
 
         public IActionResult Index()
@@ -23,6 +27,8 @@ namespace QuickTableProyect.Interface
                 // Redirige al usuario a su vista según el rol
                 switch (rol)
                 {
+                    case "SuperAdmin":
+                         return RedirectToAction("Index", "SuperAdmin");
                     case "Admin":
                         return RedirectToAction("Index", "Administrador");
                     case "Mesero":
@@ -39,7 +45,7 @@ namespace QuickTableProyect.Interface
         }
 
         [HttpPost]
-        public JsonResult Autenticar(string nombre, string contrasena)
+        public async Task<JsonResult> Autenticar(string nombre, string contrasena)
         {
             var empleado = _empleadoService.ObtenerEmpleadoPorNombre(nombre);
             if (empleado != null && empleado.Contrasena == contrasena)
@@ -64,6 +70,20 @@ namespace QuickTableProyect.Interface
                     "Cajero" => Url.Action("Index", "Caja"),
                     _ => Url.Action("Index", "Login")
                 };
+
+                // Si no es empleado, pruebo con SuperAdmin
+                if (redirectUrl == Url.Action("Index", "Login"))
+                {
+                    var superAdmin = await _superAdminService.AuthenticateAsync(nombre, contrasena);
+                    if (superAdmin != null)
+                    {
+                        HttpContext.Session.SetString("Rol", "SuperAdmin");
+                        HttpContext.Session.SetString("Id", superAdmin.Id.ToString());
+                        HttpContext.Session.SetString("Nombre", superAdmin.Nombre);
+                        var redirectUrlSA = Url.Action("Index", "SuperAdmin");
+                        return Json(new { success = true, redirectUrl = redirectUrlSA });
+                    }
+                }
 
                 return Json(new { success = true, redirectUrl });
             }

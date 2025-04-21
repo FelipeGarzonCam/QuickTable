@@ -11,9 +11,7 @@ var services = builder.Services;
 services.AddScoped<IPedidoService, PedidoService>();
 // Registro del contexto de base de datos
 builder.Services.AddScoped<SistemaQuickTableContext>();
-builder.Services.AddScoped<SuperAdminService>();
-
-// ...
+builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
 
 
 

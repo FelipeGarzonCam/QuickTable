@@ -131,6 +131,7 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\Q
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.AgregarTimestampsPedidos2.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.noRandom.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.noRandom2.resources
+C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.SuperAdmin.resources
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.csproj.GenerateResource.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.AssemblyInfoInputs.cache
@@ -143,4 +144,3 @@ C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\Q
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.pdb
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.genruntimeconfig.cache
 C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\ref\QuickTableProyect.Persistencia.dll
-C:\Users\Felip\OneDrive - Universidad Santo Tomás\Tesis\QuickTable SuperAdmin\QuickTable\QuickTableProyect.Persistencia\obj\Debug\net8.0\QuickTableProyect.Persistencia.Migrations.SuperAdmin.resources
