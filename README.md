@@ -16,7 +16,7 @@
 
 ---
 
-## 🚀 Características Principales
+<!--## 🚀 Características Principales
 
 1. **Gestión de Comandas en Tiempo Real**: Actualizaciones dinámicas mediante AJAX para reflejar cambios sin recargar la página.  
 2. **Seguridad Avanzada**:  
@@ -29,8 +29,6 @@
 4. **Escalabilidad y Mantenimiento**:  
    - Estructura limpia en capas (Interface, Aplicación, Dominio, Persistencia).  
    - Migraciones y seed de datos automatizadas.  
-5. **Soporte IoT**:  
-   - Integración opcional con sensores (ultrasónico, infrarrojos, galgas velostat) para proyectos relacionados.  
 
 ---
 
@@ -87,4 +85,4 @@ Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE)
 ---
 
 *¡Gracias por usar QuickTable! Si tienes dudas, abre un issue o contáctanos.*
-```
+``` -->
