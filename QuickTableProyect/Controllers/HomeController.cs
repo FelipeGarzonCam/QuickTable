@@ -28,5 +28,19 @@ namespace QuickTableProyect.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        [HttpPost]
+        public IActionResult KeepAlive()
+        {
+            if (HttpContext.Session.IsAvailable)
+            {
+                // Tocar la sesión para renovar el timeout
+                HttpContext.Session.SetString("KeepAlive", DateTime.Now.ToString("o"));
+
+                var rol = HttpContext.Session.GetString("Rol");
+                return Ok(new { success = true, timestamp = DateTime.Now, rol = rol });
+            }
+            return Ok(new { success = false });
+        }
+
     }
 }

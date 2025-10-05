@@ -1,227 +1,387 @@
 ﻿@{
-    ViewData["Title"] = "Pedidos Activos";
+    ViewBag.Title = "Pedidos Activos";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>
-    <link href="~/AdminLTE/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/AdminLTE/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" />
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
+<link rel="stylesheet" href="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.css">
+<style>
+    /* Animaciones y efectos hover */
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
-        .container {
-            max-width: 100%; 
-            padding: 10px 20px; 
+    /* Info box personalizado */
+    .info-box-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
 
-        .pedido {
-            border: 1px solid #ccc;
+    /* Tabla responsive dentro de las cards */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* Botón de nuevo pedido destacado */
+    .btn-block {
+        font-size: 1.1rem;
+        padding: 12px;
+    }
+
+    .content-wrapper {
+        margin-left: 1% !important;
+        margin-right: 1% !important;
+    }
+
+    /* Estilos para móvil */
+    @@media (max-width: 768px) {
+        .card-body {
+            padding: 0.75rem;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .btn-block {
+            font-size: 1rem;
             padding: 10px;
-            margin: 10px 0;
+        }
+    }
+    /* Mejorar visualización de alertas de pedidos listos */
+    .callout.callout-success {
+        border-left: 5px solid #28a745;
+        background-color: #d4edda !important;
+        animation: pulse 1s infinite;
+    }
+
+    /* Modo oscuro */
+    body.dark-mode .callout.callout-success {
+        background-color: #063529 !important;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
         }
 
-            .pedido h4 {
-                font-size: 1.2em;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .pedido h6 {
-                font-size: 1em;
-            }
-
-            .pedido table {
-                width: 100%;
-            }
-
-            .pedido .totales {
-                text-align: right;
-                margin-right: 10px;
-            }
-
-
-            .pedido.estado-listo {
-                border: 2px solid #28a745; 
-            }
-
-
-        .btn-editar {
-            margin-left: auto;
-        }        
-        #pedidosListos {
-            margin-top: 20px;
+        50% {
+            box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
         }
+    }
 
-            #pedidosListos .pedido-listo {
-                border: #d4edda;
-                padding: 10px;
-                margin-bottom: 10px;
-            }
+    .callout h5 {
+        color: #155724 !important;
+        font-size: 1.3rem;
+    }
 
-            #pedidosListos .btn-aceptar {
-                margin-top: 10px;
-            }
+    body.dark-mode .callout h5 {
+        color: #28a745 !important;
+    }
 
-        .totales {
-            text-align: right;
-            margin-right: 10px;
-        }
+    .callout p {
+        color: #155724 !important;
+    }
 
-            .totales p, .totales h4 {
-                margin: 0;
-            }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h4>Nombre: @ViewData["NombreMesero"]</h4>
-        <h5>ID Empleado: @ViewData["MeseroId"]</h5>
+    body.dark-mode .callout p {
+        color: #d4edda !important;
+    }
 
-        <a href="@Url.Action("NuevoPedido", "Mesero")" class="btn btn-primary mb-3">Nuevo Pedido</a>
+    .callout .btn-lg {
+        font-size: 1.1rem;
+        padding: 12px;
+    }
 
-        <!-- Sección de pedidos listos -->
-        <div id="pedidosListos">
-            <!-- Los pedidos listos se cargarán aquí -->
+</style>
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1><i class="fas fa-clipboard-list"></i> Mis Pedidos</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item active">Pedidos Activos</li>
+                    </ol>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <div id="pedidosContainer">
-            <!-- Los pedidos se cargarán aquí -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Info del Mesero -->
+            <!-- Info del Mesero -->
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="small-box bg-dark">
+                        <div class="inner p-2">
+                            <p class="mb-0"><i class="fas fa-user"></i> <strong>@ViewBag.NombreMesero</strong> | ID: @ViewBag.MeseroId</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Botón Nuevo Pedido -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <a href="@Url.Action("NuevoPedido", "Mesero")" class="btn btn-success btn-lg btn-block">
+                        <i class="fas fa-plus-circle"></i> Nuevo Pedido
+                    </a>
+                </div>
+            </div>
+
+            <!-- Pedidos Listos (Alertas) -->
+            <div id="pedidosListos" class="row">
+                <!-- Los pedidos listos se cargarán aquí -->
+            </div>
+
+            <!-- Pedidos Activos -->
+            <div class="row" id="pedidosContainer">
+                <!-- Los pedidos se cargarán aquí -->
+            </div>
         </div>
-    </div>
-    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
-    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
+    </section>
+</div>
 
+@section Scripts {
+    <script src="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.js"></script>
     <script>
+        var previousEstados = {};
+        var pedidosListos = {};
+
         $(document).ready(function () {
-            var previousEstados = {};
-            var pedidosListos = {};
-
-            function loadPedidos() {
-                $.ajax({
-                    url: '@Url.Action("ObtenerPedidosMesero", "Mesero")',
-                    type: 'GET',
-                    success: function (data) {
-                        renderPedidos(data);
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('Ocurrió un error al cargar los datos: ' + error);
-                    }
-                });
-            }
-
-            function renderPedidos(items) {
-                var container = $('#pedidosContainer');
-                container.empty();
-
-                if (items.length === 0) {
-                    container.append('<p>No tienes pedidos activos.</p>');
-                    return;
-                }
-
-                $.each(items, function (index, item) {
-                    var pedidoDiv = $('<div class="pedido"></div>');
-                    var header = $('<h4></h4>');
-                    header.append('Mesa N°: ' + item.numeroMesa);
-
-                    // Botón de edición
-                    var btnEditar = $('<a href="/Mesero/EditarPedido?pedidoId=' + item.id + '" class="btn btn-warning btn-sm btn-editar" title="Editar"></a>');
-                    btnEditar.append('<i class="fas fa-edit"></i>'); // Usar icono de edición
-                    header.append(btnEditar);
-
-                    pedidoDiv.append(header);
-                    pedidoDiv.append('<h6>Pedido N°: ' + item.id + '</h6>');
-
-                    var table = $('<table class="table  theme-text"></table>');
-                    var thead = $('<thead><tr><th>Plato</th><th>Cantidad</th><th>Subtotal</th></tr></thead>');
-                    var tbody = $('<tbody></tbody>');
-
-                    $.each(item.detalles, function (i, detalle) {
-                        var row = $('<tr></tr>');
-                        row.append(
-                            '<td>' +
-                            detalle.nombre +
-                            // Si existe comentario, lo añadimos en línea nueva y en cursiva
-                            (detalle.comentario
-                                ? '<br/><em>' + detalle.comentario + '</em>'
-                                : ''
-                            ) +
-                            '</td>'
-                        );
-                        row.append('<td>' + detalle.cantidad + '</td>');
-                        row.append('<td><strong>$' + parseInt(detalle.subtotal).toLocaleString() + '</strong></td>');
-                        tbody.append(row);
-                    });
-
-                    table.append(thead);
-                    table.append(tbody);
-                    pedidoDiv.append(table);
-
-                    // Totales alineados a la derecha
-                    var totalDiv = $('<div class="totales"></div>');
-                    totalDiv.append('<p>SubTotal: $' + parseInt(item.subtotal).toLocaleString() + '</p>');
-                    totalDiv.append('<p>IVA 19%: $' + parseInt(item.iva).toLocaleString() + '</p>');
-                    totalDiv.append('<h4 class="totales" >Total: $' + parseInt(item.total).toLocaleString() + '</h4>');
-                    pedidoDiv.append(totalDiv);
-
-                    var estado = item.estado;
-                    if (estado === "Listo") {
-                        pedidoDiv.addClass('estado-listo');
-
-                        // Solo mostrar notificación si no está aceptado y no está ya en la lista
-                        if (!item.aceptado && previousEstados[item.id] !== "Listo" && !pedidosListos[item.id]) {
-                            // Agregar a la lista de pedidos listos que necesitan notificación
-                            pedidosListos[item.id] = item;
-                            renderPedidosListos();
-                        }
-                    }
-
-                    container.append(pedidoDiv);
-
-                    // Actualizar el estado previo
-                    previousEstados[item.id] = estado;
-                });
-            }
-
-            // Renderizar la lista de pedidos listos
-            function renderPedidosListos() {
-                var listosContainer = $('#pedidosListos');
-                listosContainer.empty();
-
-                if (Object.keys(pedidosListos).length === 0) {
-                    return;
-                }
-
-                $.each(pedidosListos, function (id, item) {
-                    var pedidoListoDiv = $('<div class="pedido-listo"></div>');
-                    pedidoListoDiv.append('<p>¡El pedido de la mesa ' + item.numeroMesa + ' está listo!</p>');
-
-                    var btnAceptar = $('<button class="btn btn-success btn-aceptar">Aceptar</button>');
-                    btnAceptar.click(function () {
-                        // Llamar servidor para registrar aceptación
-                        $.post('@Url.Action("MarcarPedidoAceptado", "Mesero")', { pedidoId: id })
-                            .done(function () {
-                                // Solo eliminar de la lista de notificaciones
-                                delete pedidosListos[id];
-                                renderPedidosListos();
-                                // No eliminar de la lista principal
-                            });
-                    });
-
-                    pedidoListoDiv.append(btnAceptar);
-                    listosContainer.append(pedidoListoDiv);
-                });
-            }
+            // Solicitar permisos de notificación al cargar
+            solicitarPermisosNotificacion();
 
             loadPedidos();
-            setInterval(loadPedidos, 1200);
+            setInterval(loadPedidos, 2000);
         });
+
+
+        function loadPedidos() {
+            $.ajax({
+                url: '@Url.Action("ObtenerPedidosMesero", "Mesero")',
+                type: 'GET',
+                success: function (data) {
+                    renderPedidos(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error al cargar datos:', error);
+                }
+            });
+        }
+
+        function renderPedidos(items) {
+            var container = $('#pedidosContainer');
+            container.empty();
+
+            if (items.length === 0) {
+                container.append('<div class="col-12"><div class="alert alert-info"><i class="fas fa-info-circle"></i> No tienes pedidos activos</div></div>');
+                return;
+            }
+
+            $.each(items, function (index, item) {
+                var estadoColor = item.estado === 'Listo' ? 'success' :
+                                 item.estado === 'En Preparación' ? 'warning' : 'info';
+                var estadoIcon = item.estado === 'Listo' ? 'check-circle' :
+                                item.estado === 'En Preparación' ? 'clock' : 'hourglass-half';
+
+                var card = `
+                    <div class="col-12 col-md-6 col-lg-4 mb-3">
+                        <div class="card card-${estadoColor} card-outline">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-utensils"></i> Mesa ${item.numeroMesa}
+                                </h3>
+                                <div class="card-tools">
+                                    <span class="badge badge-${estadoColor}">
+                                        <i class="fas fa-${estadoIcon}"></i> ${item.estado}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row mb-2">
+                                    <dt class="col-5">Pedido #:</dt>
+                                    <dd class="col-7">${item.id}</dd>
+                                </dl>
+
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Plato</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-right">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${item.detalles.map(d => `
+                                            <tr>
+                                                <td>
+                                                    ${d.nombre}
+                                                    ${d.comentario ? `<br><em class="text-muted small">${d.comentario}</em>` : ''}
+                                                </td>
+                                                <td class="text-center">${d.cantidad}</td>
+                                                <td class="text-right">$${parseInt(d.subtotal).toLocaleString('es-CO')}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+
+                                <div class="totales">
+                                    <div class="row">
+                                        <div class="col-6">Subtotal:</div>
+                                        <div class="col-6 text-right">$${parseInt(item.subtotal).toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">IVA (19%):</div>
+                                        <div class="col-6 text-right">$${parseInt(item.iva).toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-6"><strong>Total:</strong></div>
+                                        <div class="col-6 text-right"><strong class="text-lg">$${parseInt(item.total).toLocaleString('es-CO')}</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="@Url.Action("EditarPedido", "Mesero")?pedidoId=${item.id}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-edit"></i> Editar Pedido
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.append(card);
+
+                // Detectar cambios de estado
+                var estado = item.estado;
+                if (estado === 'Listo' && !item.aceptado && previousEstados[item.id] !== 'Listo' && !pedidosListos[item.id]) {
+                    pedidosListos[item.id] = item;
+                    renderPedidosListos();
+                }
+                previousEstados[item.id] = estado;
+            });
+        }
+
+                function renderPedidosListos() {
+            var listosContainer = $('#pedidosListos');
+            listosContainer.empty();
+
+            if (Object.keys(pedidosListos).length === 0) {
+                return;
+            }
+
+            $.each(pedidosListos, function (id, item) {
+                var alert = `
+                    <div class="col-12 mb-3">
+                        <div class="callout callout-success">
+                            <h5><i class="fas fa-check-circle"></i> Pedido Listo!</h5>
+                            <p class="mb-3">El pedido de la <strong>Mesa ${item.numeroMesa}</strong> está listo para entregar.</p>
+                            <button class="btn btn-success btn-lg btn-block" onclick="aceptarPedido(${id})">
+                                <i class="fas fa-check"></i> Marcar como Entregado
+                            </button>
+                        </div>
+                    </div>
+                `;
+                listosContainer.append(alert);
+
+                // Mostrar notificación del sistema
+                mostrarNotificacion('Pedido Listo!', `Mesa ${item.numeroMesa} - Tu pedido está listo`);
+
+
+                // Vibrar dispositivo (doble seguridad)
+                vibrar();
+            });
+        }
+
+        // Función para solicitar permisos de notificación
+        function solicitarPermisosNotificacion() {
+            if (!("Notification" in window)) {
+                console.log("Este navegador no soporta notificaciones");
+                return;
+            }
+
+            if (Notification.permission === "default") {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === "granted") {
+                        console.log("Permisos de notificación concedidos");
+                        // Mostrar notificación de prueba
+                        new Notification("QuickTable", {
+                            body: "Las notificaciones están activadas",
+                            icon: '/img/Logo.png',
+                            vibrate: [200, 100, 200]
+                        });
+                    }
+                });
+            }
+        }
+
+        // Función para mostrar notificación del sistema
+        function mostrarNotificacion(titulo, mensaje) {
+            if (!("Notification" in window)) {
+                console.log("Este navegador no soporta notificaciones");
+                return;
+            }
+
+            if (Notification.permission === "granted") {
+                var notification = new Notification(titulo, {
+                    body: mensaje,
+                    icon: '/img/Logo.png',
+                    vibrate: [300, 100, 300, 100, 300],
+                    requireInteraction: true,
+                    tag: 'pedido-' + Date.now(),
+                    silent: false
+                });
+
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+
+                // Vibrar también desde el navegador
+                vibrar();
+            } else if (Notification.permission === "default") {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === "granted") {
+                        mostrarNotificacion(titulo, mensaje);
+                    } else {
+                        console.log("Permiso de notificación denegado");
+                    }
+                });
+            } else {
+                console.log("Permiso de notificación denegado");
+            }
+        }
+
+
+        // Función para vibrar el dispositivo
+        function vibrar() {
+            if ("vibrate" in navigator) {
+                navigator.vibrate([200, 100, 200, 100, 200]);
+            }
+        }
+
+        function aceptarPedido(pedidoId) {
+            $.post('@Url.Action("MarcarPedidoAceptado", "Mesero")', { pedidoId: pedidoId })
+                .done(function () {
+                    delete pedidosListos[pedidoId];
+                    renderPedidosListos();
+                    toastr.success('Pedido marcado como entregado');
+                })
+                .fail(function () {
+                    toastr.error('Error al actualizar el pedido');
+                });
+        }
     </script>
-</body>
-</html>
+
+
+}

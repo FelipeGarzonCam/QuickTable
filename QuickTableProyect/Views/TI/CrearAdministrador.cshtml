@@ -1,57 +1,169 @@
 ﻿@{
     ViewBag.Title = "Crear Administrador";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    // Extraemos el mensaje y el UID en variables separadas
+
     var mensajeOk = TempData["Ok"]?.ToString() ?? "";
-    // Asumimos que el mensaje sigue el formato "Administrador X creado con tarjeta UID"
-    // y que el UID está al final.
-    var partes = mensajeOk.Split(' ');
-    var uid = partes.Length > 0 ? partes[^1] : "";
+    var uid = "";
+
+    if (!string.IsNullOrEmpty(mensajeOk) && mensajeOk.Contains("UID"))
+    {
+        var partes = mensajeOk.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        if (partes.Length > 0)
+        {
+            uid = partes[partes.Length - 1];
+        }
+    }
 }
 
-<h1 class="mb-4">Nuevo Administrador</h1>
+<link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css">
 
-@using (Html.BeginForm())
-{
-    @Html.AntiForgeryToken()
-    <div class="mb-3">
-        <label class="form-label">Nombre</label>
-        <input type="text" name="nombre" class="form-control" required />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Contraseña</label>
-        <input type="password" name="contrasena" class="form-control" required />
-    </div>
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-    <button class="btn btn-success">
-        <i class="fas fa-save"></i> Guardar
-    </button>
-    <a asp-action="Index" class="btn btn-secondary ms-2">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-}
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
 
-@if (!string.IsNullOrEmpty(mensajeOk))
-{
-    <div id="pendiente" class="alert alert-warning mt-4">
-        <strong>@mensajeOk</strong><br />
-        <span>Acerque la tarjeta al lector para grabarla…</span>
-    </div>
+    .collapse {
+        transition: height 0.35s ease;
+    }
 
-    <script>
-        // uid ya viene limpio, sin usar C# split() dentro de JS
-        const uid = "@uid";
-        const timer = setInterval(() => {
-            fetch(`/api/tarjeta/estado?uid=${uid}`)
-              .then(r => r.json())
-              .then(ok => {
-                  if (ok) {
-                      clearInterval(timer);
-                      const box = document.getElementById('pendiente');
-                      box.classList.replace('alert-warning','alert-success');
-                      box.innerHTML = 'Tarjeta grabada correctamente';
-                  }
-              });
-        }, 2000);
-    </script>
-}
+    .clickable-card {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .content-wrapper {
+        margin-left: 1% !important;
+        margin-right: 1% !important;
+    }
+</style>
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Nuevo Administrador</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a asp-action="Index">Gestión de Tarjetas</a></li>
+                        <li class="breadcrumb-item active">Nuevo Administrador</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-user-plus"></i> Datos del Administrador</h3>
+                        </div>
+                        @using (Html.BeginForm())
+                        {
+                            @Html.AntiForgeryToken()
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-user"></i> Usuario
+                                    </label>
+                                    <input type="text" name="nombre" class="form-control" placeholder="Ingrese el usuario del administrador" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-lock"></i> Contraseña
+                                    </label>
+                                    <input type="password" id="contrasena" name="contrasena" class="form-control" placeholder="Ingrese la contraseña" required minlength="4">
+                                    <small class="form-text text-muted">Mínimo 4 caracteres</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <i class="fas fa-lock"></i> Confirmar Contraseña
+                                    </label>
+                                    <input type="password" id="confirmarContrasena" class="form-control" placeholder="Confirme la contraseña" required minlength="4">
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success" id="btnGuardar">
+                                    <i class="fas fa-save"></i> Guardar
+                                </button>
+                                <a asp-action="Index" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Volver
+                                </a>
+                            </div>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(mensajeOk))
+                    {
+                        <div id="pendiente" class="alert alert-warning alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <h5><i class="icon fas fa-exclamation-triangle"></i> Atención</h5>
+                            <strong>Administrador creado correctamente.</strong><br>
+                            <span>Acerque la tarjeta al lector para grabarla</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
+<script src="~/AdminLTE/plugins/toastr/toastr.min.js"></script>
+<script>
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: "toast-top-right",
+        timeOut: 5000
+    };
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const contrasena = document.getElementById('contrasena').value;
+        const confirmar = document.getElementById('confirmarContrasena').value;
+
+        if (contrasena !== confirmar) {
+            e.preventDefault();
+            toastr.error('Las contraseñas no coinciden');
+            return false;
+        }
+
+        if (contrasena.length < 4) {
+            e.preventDefault();
+            toastr.error('La contraseña debe tener al menos 4 caracteres');
+            return false;
+        }
+    });
+
+    @if (!string.IsNullOrEmpty(uid))
+    {
+                <text>
+                const uid = '@uid';
+                const timer = setInterval(() => {
+                    fetch(`/api/tarjeta/estado?uid=${uid}`)
+                        .then(r => r.json())
+                        .then(ok => {
+                            if (ok) {
+                                clearInterval(timer);
+                                const box = document.getElementById('pendiente');
+                                box.classList.remove('alert-warning');
+                                box.classList.add('alert-success');
+                                box.innerHTML = '<button type="button" class="close" data-dismiss="alert">&times;</button><h5><i class="icon fas fa-check"></i> Éxito</h5><strong>Tarjeta grabada correctamente</strong>';
+                                toastr.success('Tarjeta grabada exitosamente');
+                            }
+                        })
+                        .catch(err => console.error('Error verificando estado:', err));
+                }, 2000);
+                </text>
+    }
+</script>

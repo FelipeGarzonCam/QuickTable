@@ -81,7 +81,7 @@ namespace QuickTableProyect.Interface
                     Activa = false  // IMPORTANTE: Inicia como no activa
                 });
                 _ctx.SaveChanges();
-                
+
                 TempData["Ok"] = $"Administrador {nombre} creado correctamente. Recuerde Asignar Una Tarjeta";
 
                 return RedirectToAction(nameof(Index));
@@ -144,7 +144,7 @@ namespace QuickTableProyect.Interface
                 _ctx.Empleados.Remove(admin);
 
                 _ctx.SaveChanges();
-              
+
                 return Json(new { success = true });
             }
             catch (Exception ex)
@@ -185,12 +185,12 @@ namespace QuickTableProyect.Interface
 
                 // Generar nuevo código de sesión para la regeneración
                 string sessionCode = Math.Abs(HttpContext.Session.Id.GetHashCode()).ToString("000000")[..6];
-                
+
 
                 return Json(new
                 {
                     success = true,
-                    uid = nuevoUid,                    
+                    uid = nuevoUid,
                     message = "Tarjeta regenerada correctamente"
                 });
             }
@@ -239,13 +239,10 @@ namespace QuickTableProyect.Interface
                 tarjeta.CodigoSesion = data.codigoSesion;
                 _ctx.SaveChanges();
 
-                Console.WriteLine($" Código {data.codigoSesion} asociado con UID {data.uid}");
-
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                Console.WriteLine($" Error: {ex.Message}");
                 return Json(new { success = false, message = ex.Message });
             }
         }

@@ -3,90 +3,149 @@
     ViewBag.Title = "Gestión de Tarjetas";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h1 class="mb-4">@ViewBag.Title</h1>
 
-@if (TempData["Ok"] != null)
-{
-    <div class="alert alert-success">@TempData["Ok"]</div>
-}
+<link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css">
+<link rel="stylesheet" href="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.css">
 
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>@ViewBag.Title</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
+                        <li class="breadcrumb-item active">Gestión de Tarjetas</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<div class="mb-3">
-    <a asp-action="CrearAdministrador" class="btn btn-success">
-        <i class="fas fa-user-plus"></i> Crear Administrador
-    </a>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row mb-3">
+                <div class="col-12">
+                    <a asp-action="CrearAdministrador" class="btn btn-success btn-lg">
+                        <i class="fas fa-user-plus"></i> Crear Administrador
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                @foreach (var t in Model)
+                {
+                    <div class="col-12 col-md-6 col-lg-4 mb-3">
+                        <div class="card @(t.Activa ? "card-success" : "card-warning") card-outline">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas @(t.Activa ? "fa-check-circle" : "fa-clock")"></i>
+                                    @t.Empleado?.Nombre
+                                </h3>
+                                <div class="card-tools">
+                                    @if (t.Activa)
+                                    {
+                                        <span class="badge badge-success">Activa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-warning">Pendiente</span>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4">ID:</dt>
+                                    <dd class="col-sm-8">@t.Id</dd>
+
+                                    <dt class="col-sm-4">UID:</dt>
+                                    <dd class="col-sm-8"><code>@t.Uid</code></dd>
+
+                                    <dt class="col-sm-4">Fecha:</dt>
+                                    <dd class="col-sm-8">@(t.FechaAsignacion?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+                                </dl>
+                            </div>
+                            <div class="card-footer">
+                                <div class="row">
+                                    <div class="col-12 col-sm-4 mb-2 mb-sm-0">
+                                        <button class="btn btn-warning btn-block btn-sm" onclick="mostrarModalCambiarClave(@t.EmpleadoId, '@t.Empleado.Nombre')" title="Cambiar Contraseña">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="col-12 col-sm-4 mb-2 mb-sm-0">
+                                        @if (!t.Activa)
+                                        {
+                                            <button type="button" class="btn btn-primary btn-block btn-sm" onclick="mostrarCodigoSesion('@t.Uid', '@t.Empleado.Nombre')" title="Crear Tarjeta">
+                                                <i class="fas fa-sd-card"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-info btn-block btn-sm" onclick="regenerarTarjeta(@t.EmpleadoId)" title="Regenerar Tarjeta">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <div class="col-12 col-sm-4">
+                                        <button class="btn btn-danger btn-block btn-sm" onclick="eliminarAdministrador(@t.EmpleadoId, '@t.Empleado.Nombre')" title="Eliminar Administrador">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
 </div>
 
-<table class="table table-striped table-bordered mt-3">
-    <thead class="table-dark">
-        <tr>
-            <th>#</th>
-            <th>UID</th>
-            <th>Administrador</th>
-            <th>Fecha Asignación</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var t in Model)
-        {
-            <tr>
-                <td>@t.Id</td>
-                <td><code>@t.Uid</code></td>
-                <td>@(t.Empleado?.Nombre ?? "—")</td>
-                <td>@(t.FechaAsignacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
-                <td>
-                    @if (t.Activa)
-                    {
-                        <span class="badge bg-success"><i class="fas fa-check"></i> Activa</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-warning"><i class="fas fa-clock"></i> Pendiente</span>
-                    }
-                </td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <!-- Cambiar Contraseña -->
-                        <button class="btn btn-warning btn-sm" onclick="mostrarModalCambiarClave(@t.EmpleadoId, '@t.Empleado.Nombre')" title="Cambiar Contraseña">
-                            <i class="fas fa-key"></i>
-                        </button>
-
-                        <!-- Botón Crear Tarjeta (SOLO si está pendiente) -->
-                        @if (!t.Activa)
-                        {
-                            <button type="button" class="btn btn-primary btn-sm" onclick="mostrarCodigoSesion('@t.Uid', '@t.Empleado.Nombre')" title="Crear Tarjeta">
-                                <i class="fas fa-sd-card"></i> Crear Tarjeta
-                            </button>
-                        }
-
-                        <!-- Regenerar Tarjeta (solo si está activa) -->
-                        @if (t.Activa)
-                        {
-                            <button class="btn btn-info btn-sm" onclick="regenerarTarjeta(@t.EmpleadoId)" title="Regenerar Tarjeta">
-                                <i class="fas fa-redo"></i>
-                            </button>
-                        }
-
-                        <!-- Eliminar -->
-                        <button class="btn btn-danger btn-sm" onclick="mostrarModalEliminar(@t.EmpleadoId, '@t.Empleado.Nombre')" title="Eliminar Administrador">
-                            <i class="fas fa-trash"></i>
-                        </button>
+<!-- Modal Cambiar Contraseña -->
+<div class="modal fade" id="modalCambiarClave" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Cambiar Contraseña</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formCambiarClave">
+                <div class="modal-body">
+                    <p>Administrador: <strong id="nombreAdmin"></strong></p>
+                    <input type="hidden" id="adminIdCambio">
+                    <div class="form-group">
+                        <label class="form-label">Nueva Contraseña</label>
+                        <input type="password" id="nuevaClave" class="form-control" required minlength="4">
                     </div>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                    <div class="form-group">
+                        <label class="form-label">Confirmar Contraseña</label>
+                        <input type="password" id="confirmarClave" class="form-control" required minlength="4">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Cambiar Contraseña</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Modal para mostrar código de sesión -->
-<div class="modal fade" id="codigoSesionModal" tabindex="-1" aria-labelledby="codigoSesionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal fade" id="codigoSesionModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="codigoSesionModalLabel">Código de Sesión para Raspberry Pi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Código de Sesión para Raspberry Pi</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body text-center">
                 <p>Administrador: <strong id="adminNombreModal"></strong></p>
@@ -95,260 +154,187 @@
                 <p class="text-muted">Ingrese este código en la Raspberry Pi para grabar la tarjeta</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Cambiar Contraseña -->
-<div class="modal fade" id="modalCambiarClave" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Cambiar Contraseña</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="formCambiarClave">
-                <div class="modal-body">
-                    <p>Administrador: <strong id="nombreAdmin"></strong></p>
-                    <input type="hidden" id="adminIdCambio">
-                    <div class="mb-3">
-                        <label class="form-label">Nueva Contraseña</label>
-                        <input type="password" id="nuevaClave" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Confirmar Contraseña</label>
-                        <input type="password" id="confirmarClave" class="form-control" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning">Cambiar Contraseña</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+@section Scripts {
+    <script src="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.js"></script>
 
-<!-- Modal Confirmar Eliminación -->
-<div class="modal fade" id="modalEliminar" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirmar Eliminación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Está seguro que desea eliminar al administrador <strong id="nombreEliminar"></strong>?</p>
-                <p class="text-danger"><small>Esta acción no se puede deshacer y eliminará también su tarjeta asociada.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <script>
+        $(document).ready(function() {
+            @if (TempData["Ok"] != null)
+            {
+                        <text>
+                        toastr.success('@TempData["Ok"]');
+                        </text>
+            }
 
-<script>
-    let adminIdEliminar = 0;
-    let modalCambiarClaveInstance = null;
-    let modalEliminarInstance = null;
-    let modalCodigoSesionInstance = null;
-
-    function mostrarMensaje(mensaje, tipo) {
-        const alertClass = tipo === 'success' ? 'alert-success' : 'alert-danger';
-        const html = `<div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                        ${mensaje}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                      </div>`;
-
-        const container = document.querySelector('main, .container, .container-fluid, body');
-        if (container) {
-            container.insertAdjacentHTML('afterbegin', html);
-            setTimeout(() => {
-                const alert = container.querySelector('.alert');
-                if (alert) alert.remove();
-            }, 5000);
-        }
-    }
+            @if (TempData["Error"] != null)
+            {
+                        <text>
+                        toastr.error('@TempData["Error"]');
+                        </text>
+            }
+        });
 
         function mostrarCodigoSesion(uid, adminNombre) {
-        const codigo = Math.floor(Math.random() * 900000) + 100000;
-
-        fetch('@Url.Action("AsociarCodigoSesion", "TI")', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ uid: uid, codigoSesion: codigo.toString() })
-        })
-        .then(r => r.json())
-        .then(d => {
-            if (!d.success) { alert(d.message); return; }
-
-            document.getElementById('adminNombreModal').textContent = adminNombre;
-            document.getElementById('uidModal').textContent   = uid;
-            document.getElementById('codigoSesionDisplay').textContent = codigo;
-
-            new bootstrap.Modal(document.getElementById('codigoSesionModal')).show();
-        });
-    }
-
-
-    function mostrarModalCambiarClave(id, nombre) {
-        document.getElementById('adminIdCambio').value = id;
-        document.getElementById('nombreAdmin').textContent = nombre;
-        document.getElementById('nuevaClave').value = '';
-        document.getElementById('confirmarClave').value = '';
-
-        modalCambiarClaveInstance = new bootstrap.Modal(document.getElementById('modalCambiarClave'));
-        modalCambiarClaveInstance.show();
-    }
-
-    function mostrarModalEliminar(id, nombre) {
-        adminIdEliminar = id;
-        document.getElementById('nombreEliminar').textContent = nombre;
-
-        modalEliminarInstance = new bootstrap.Modal(document.getElementById('modalEliminar'));
-        modalEliminarInstance.show();
-    }
-
-    document.getElementById('formCambiarClave').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const nueva = document.getElementById('nuevaClave').value;
-        const confirmar = document.getElementById('confirmarClave').value;
-        const adminId = document.getElementById('adminIdCambio').value;
-
-        if (nueva !== confirmar) {
-            mostrarMensaje('Las contraseñas no coinciden', 'error');
-            return;
-        }
-
-        if (nueva.length < 4) {
-            mostrarMensaje('La contraseña debe tener al menos 4 caracteres', 'error');
-            return;
-        }
-
-        fetch('@Url.Action("CambiarClaveAdmin", "TI")', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ adminId: parseInt(adminId), nuevaClave: nueva })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                mostrarMensaje('Contraseña actualizada correctamente', 'success');
-                if (modalCambiarClaveInstance) {
-                    modalCambiarClaveInstance.hide();
-                }
-            } else {
-                mostrarMensaje(data.message || 'Error al cambiar contraseña', 'error');
-            }
-        })
-        .catch(error => {
-            mostrarMensaje('Error de conexión', 'error');
-            console.error('Error:', error);
-        });
-    });
-
-    function confirmarEliminacion() {
-        fetch('@Url.Action("EliminarAdmin", "TI")', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ adminId: adminIdEliminar })
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                mostrarMensaje('Administrador eliminado correctamente', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                mostrarMensaje(data.message || 'Error al eliminar administrador', 'error');
-            }
-            if (modalEliminarInstance) {
-                modalEliminarInstance.hide();
-            }
-        })
-        .catch(error => {
-            mostrarMensaje('Error de conexión', 'error');
-            console.error('Error:', error);
-        });
-    }
-
-    function regenerarTarjeta(adminId) {
-        if (confirm('¿Regenerar la tarjeta? Se invalidará la anterior y deberá grabarla nuevamente.')) {
-            fetch('@Url.Action("RegenerarTarjeta", "TI")', {
+            const codigo = Math.floor(Math.random() * 900000 + 100000);
+            fetch('@Url.Action("AsociarCodigoSesion", "TI")', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ adminId: adminId })
+                body: JSON.stringify({ uid: uid, codigoSesion: codigo.toString() })
+            })
+            .then(r => r.json())
+            .then(d => {
+                if (!d.success) {
+                    toastr.error(d.message);
+                    return;
+                }
+                document.getElementById('adminNombreModal').textContent = adminNombre;
+                document.getElementById('uidModal').textContent = uid;
+                document.getElementById('codigoSesionDisplay').textContent = codigo;
+                $('#codigoSesionModal').modal('show');
+            })
+            .catch(error => {
+                toastr.error('Error de conexión');
+                console.error('Error:', error);
+            });
+        }
+
+        function mostrarModalCambiarClave(id, nombre) {
+            document.getElementById('adminIdCambio').value = id;
+            document.getElementById('nombreAdmin').textContent = nombre;
+            document.getElementById('nuevaClave').value = '';
+            document.getElementById('confirmarClave').value = '';
+            $('#modalCambiarClave').modal('show');
+        }
+
+        document.getElementById('formCambiarClave').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nueva = document.getElementById('nuevaClave').value;
+            const confirmar = document.getElementById('confirmarClave').value;
+            const adminId = document.getElementById('adminIdCambio').value;
+
+            if (nueva !== confirmar) {
+                toastr.error('Las contraseñas no coinciden');
+                return;
+            }
+
+            if (nueva.length < 4) {
+                toastr.error('La contraseña debe tener al menos 4 caracteres');
+                return;
+            }
+
+            fetch('@Url.Action("CambiarClaveAdmin", "TI")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ adminId: parseInt(adminId), nuevaClave: nueva })
             })
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    mostrarMensaje(`Tarjeta regenerada. Nuevo UID: ${data.uid}`, 'success');
-                    if (data.sessionCode) {
-                        mostrarMensaje(`Código de sesión: ${data.sessionCode}`, 'success');
-                    }
-                    setTimeout(() => location.reload(), 2000);
+                    toastr.success('Contraseña actualizada correctamente');
+                    $('#modalCambiarClave').modal('hide');
                 } else {
-                    mostrarMensaje(data.message || 'Error al regenerar tarjeta', 'error');
+                    toastr.error(data.message || 'Error al cambiar contraseña');
                 }
             })
             .catch(error => {
-                mostrarMensaje('Error de conexión', 'error');
+                toastr.error('Error de conexión');
                 console.error('Error:', error);
             });
+        });
+
+        function eliminarAdministrador(adminId, nombre) {
+            Swal.fire({
+                title: 'Eliminar Administrador',
+                text: "¿Está seguro que desea eliminar al administrador " + nombre + "? Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('@Url.Action("EliminarAdmin", "TI")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ adminId: adminId })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                'Eliminado',
+                                'Administrador eliminado correctamente',
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            toastr.error(data.message || 'Error al eliminar administrador');
+                        }
+                    })
+                    .catch(error => {
+                        toastr.error('Error de conexión');
+                        console.error('Error:', error);
+                    });
+                }
+            });
         }
+
+        function regenerarTarjeta(adminId) {
+            Swal.fire({
+                title: '¿Regenerar tarjeta?',
+                text: "Se invalidará la tarjeta anterior y deberá grabarla nuevamente",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, regenerar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('@Url.Action("RegenerarTarjeta", "TI")', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ adminId: adminId })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                'Regenerada',
+                                'Tarjeta regenerada. Nuevo UID: ' + data.uid,
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            toastr.error(data.message || 'Error al regenerar tarjeta');
+                        }
+                    })
+                    .catch(error => {
+                        toastr.error('Error de conexión');
+                        console.error('Error:', error);
+                    });
+                }
+            });
+        }
+    </script>
+}
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const modalCambiarClave = document.getElementById('modalCambiarClave');
-        if (modalCambiarClave) {
-            modalCambiarClave.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (modalCambiarClaveInstance) {
-                        modalCambiarClaveInstance.hide();
-                    } else {
-                        modalCambiarClave.style.display = 'none';
-                        document.body.classList.remove('modal-open');
-                        const backdrop = document.querySelector('.modal-backdrop');
-                        if (backdrop) backdrop.remove();
-                    }
-                });
-            });
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-
-        const modalEliminar = document.getElementById('modalEliminar');
-        if (modalEliminar) {
-            modalEliminar.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (modalEliminarInstance) {
-                        modalEliminarInstance.hide();
-                    } else {
-                        modalEliminar.style.display = 'none';
-                        document.body.classList.remove('modal-open');
-                        const backdrop = document.querySelector('.modal-backdrop');
-                        if (backdrop) backdrop.remove();
-                    }
-                });
-            });
-        }
-
-        const modalCodigoSesion = document.getElementById('codigoSesionModal');
-        if (modalCodigoSesion) {
-            modalCodigoSesion.querySelectorAll('[data-bs-dismiss="modal"]').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (modalCodigoSesionInstance) {
-                        modalCodigoSesionInstance.hide();
-                    } else {
-                        modalCodigoSesion.style.display = 'none';
-                        document.body.classList.remove('modal-open');
-                        const backdrop = document.querySelector('.modal-backdrop');
-                        if (backdrop) backdrop.remove();
-                    }
-                });
-            });
-        }
-    });
-</script>
+</style>

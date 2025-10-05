@@ -1,124 +1,113 @@
 ﻿@{
-    ViewData["Title"] = "Historial de Pedidos";
+    ViewBag.Title = "Historial de Pedidos";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>   
-    <link rel="stylesheet" href="~/css/adminlte.min.css">
-    <link href="~/AdminLTE/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/AdminLTE/dist/css/adminlte.min.css" rel="stylesheet" />
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-    <style>
-       
-        .container-fluid {
-            display: flex;
-            justify-content: center;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
-        #pedidosContainer {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-        }
+    .collapse {
+        transition: height 0.35s ease;
+    }
 
-        .pedido {
-            border: 1px solid #ccc;
-            padding: 5px;
-            margin: 5px;
-            min-width: 100px;
-            max-width: 400px;
-            box-sizing: border-box;
-            position: relative;
-            cursor: pointer;
-            display: inline-block;
-        }
+    .clickable-card {
+        cursor: pointer;
+        user-select: none;
+    }
 
-        .pedido-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-            .pedido-header h4 {
-                margin: 0;
-            }
-
-        .pedido table {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .pedido .totales {
-            text-align: right;
-            margin-top: 5px;
-        }        
-        .pedido-content {
-            max-height: auto;
-            overflow-y: auto;
-            padding: 5px !important;
-        }       
-
-        .pagination {
-            justify-content: center;
-        }
-
-       
-    </style>
-</head>
-<body>
-    <div class="mt-4">
-        <h2 class="text-center">@ViewData["Title"]</h2>
-        <div class="text-right mb-3">
-            <a href="@Url.Action("Index", "Caja")" class="btn btn-secondary">
-                <i class="fas fa-home"></i> Volver a Caja
-            </a>
-        </div>
-
-        <!-- Filtros de búsqueda -->
-        <div class="row mb-3">
-            <div class="col-md-3">
-                <label for="fechaFiltro">Fecha:</label>
-                <input type="date" class="form-control" id="fechaFiltro">
-            </div>
-            <div class="col-md-3">
-                <label for="pedidoIdFiltro">Número de Pedido:</label>
-                <input type="number" class="form-control" id="pedidoIdFiltro" min="1">
-            </div>
-            <div class="col-md-3">
-                <label for="meseroIdFiltro">ID Mesero:</label>
-                <input type="number" class="form-control" id="meseroIdFiltro" min="1">
-            </div>
-            <div class="col-md-3 align-self-end">
-                <button class="btn btn-primary" id="btnBuscar">Buscar</button>
+    .content-wrapper {
+        margin-left: 1% !important;
+        margin-right: 1% !important;
+    }
+</style>
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1><i class="fas fa-history"></i> @ViewBag.Title</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Caja")">Pedidos Activos</a></li>
+                        <li class="breadcrumb-item active">Historial</li>
+                    </ol>
+                </div>
             </div>
         </div>
+    </section>
 
-        <div id="pedidosContainer">
-            <!-- Los pedidos se cargarán aquí -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Botón Volver -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <a href="@Url.Action("Index", "Caja")" class="btn btn-info">
+                        <i class="fas fa-arrow-left"></i> Volver a Pedidos Activos
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="card card-primary card-outline">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros de Búsqueda</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="fechaFiltro">Fecha:</label>
+                                    <input type="date" class="form-control" id="fechaFiltro">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="pedidoIdFiltro">Número de Pedido:</label>
+                                    <input type="number" class="form-control" id="pedidoIdFiltro" min="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="meseroIdFiltro">ID Mesero:</label>
+                                    <input type="number" class="form-control" id="meseroIdFiltro" min="1">
+                                </div>
+                                <div class="col-md-3 align-self-end">
+                                    <button class="btn btn-primary btn-block" id="btnBuscar">
+                                        <i class="fas fa-search"></i> Buscar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenedor de Pedidos -->
+            <div class="row justify-content-center" id="pedidosContainer">
+                <!-- Los pedidos se cargarán aquí -->
+            </div>
+
+            <!-- Paginación -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <!-- Paginación se cargará aquí -->
+                </ul>
+            </nav>
         </div>
+    </section>
+</div>
 
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                <!-- Paginación se cargará aquí -->
-            </ul>
-        </nav>
-    </div>
-
-    
-    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
-    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
-    <script src="~/js/adminlte.min.js"></script>
-
+@section Scripts {
     <script>
         $(document).ready(function () {
-
             var pageNumber = 1;
             var pageSize = 8;
             var totalPedidos = 0;
+            var estadosExpandidos = {};
 
             function loadPedidos() {
                 var fecha = $('#fechaFiltro').val();
@@ -141,67 +130,154 @@
                         renderPagination();
                     },
                     error: function (xhr, status, error) {
-                        console.log('Ocurrió un error al cargar los datos: ' + error);
+                        console.log('Error al cargar datos: ' + error);
+                        toastr.error('Error al cargar el historial');
                     }
                 });
             }
 
             function renderPedidos(items) {
                 var container = $('#pedidosContainer');
+
+                // Guardar estados expandidos
+                $('.collapse').each(function() {
+                    var id = $(this).attr('id');
+                    estadosExpandidos[id] = $(this).hasClass('show');
+                });
+
                 container.empty();
 
                 if (items.length === 0) {
-                    container.append('<p>No hay pedidos en el historial.</p>');
+                    container.append('<div class="col-12"><div class="alert alert-info"><i class="fas fa-info-circle"></i> No hay pedidos en el historial</div></div>');
                     return;
                 }
 
                 $.each(items, function (index, item) {
-                    var pedidoDiv = $('<div class="pedido card"></div>');
+                    var metodoPagoColor = item.metodoPago === 'Efectivo' ? 'success' :
+                                         item.metodoPago === 'Tarjeta' ? 'info' : 'primary';
+                    var collapseId = 'historial-' + item.id;
+                    var isExpanded = estadosExpandidos[collapseId] || false;
 
-                    var headerDiv = $('<div class="pedido-header card-header"></div>');
-                    headerDiv.append('<h4>Mesa N°: ' + item.numeroMesa + '</h4>');
-                    pedidoDiv.append(headerDiv);
-
-                    var contentDiv = $('<div class="pedido-content card-body"></div>');
-
-                    contentDiv.append('<p>Pedido N°: ' + item.id + '</p>');
-                    contentDiv.append('<span>ID Mesero: ' + item.meseroId + ' - ' + item.meseroNombre + '</span>');
-                    contentDiv.append('<p>Fecha y Hora: ' + item.fechaHora + '</p>');
-
-                    var table = $('<table class="table "></table>');
-                    var thead = $('<thead><tr><th>Plato</th><th>#</th><th>Valor</th><th>Subtotal</th></tr></thead>');
-                    var tbody = $('<tbody></tbody>');
-
-                    $.each(item.detalles, function (i, detalle) {
-                        var row = $('<tr></tr>');
-                        row.append('<td>' + detalle.nombre + '</td>');
-                        row.append('<td>' + detalle.cantidad + '</td>');
-                        row.append('<td>$' + parseFloat(detalle.valor).toLocaleString('es-CO') + '</td>');
-                        row.append('<td>$' + parseFloat(detalle.subtotal).toLocaleString('es-CO') + '</td>');
-                        tbody.append(row);
+                    var fechaFormato = new Date(item.fechaHora).toLocaleDateString('es-CO', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    }) + ' ' + new Date(item.fechaHora).toLocaleTimeString('es-CO', {
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
 
-                    table.append(thead);
-                    table.append(tbody);
-                    contentDiv.append(table);
+                    var card = `
+                        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                            <div class="card card-info card-outline">
+                                <div class="card-header clickable-card" data-historial-id="${item.id}">
+                                    <h3 class="card-title">
+                                        <i class="fas fa-utensils"></i> Mesa ${item.numeroMesa}
+                                    </h3>
+                                    <div class="card-tools">
+                                        <span class="badge badge-${metodoPagoColor}">${item.metodoPago}</span>
+                                        <button type="button" class="btn btn-tool toggle-icon">
+                                            <i class="fas fa-angle-${isExpanded ? 'up' : 'down'}"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3 clickable-card" data-historial-id="${item.id}">
+                                    <dl class="row mb-0">
+                                        <dt class="col-5">Pedido #:</dt>
+                                        <dd class="col-7">${item.id}</dd>
 
-                    var totalDiv = $('<div class="totales"></div>');
-                    totalDiv.append('<p>SubTotal: $' + parseFloat(item.subtotal).toLocaleString('es-CO') + '</p>');
-                    totalDiv.append('<p>IVA 19%: $' + parseFloat(item.iva).toLocaleString('es-CO') + '</p>');
-                    totalDiv.append('<p>Propina: $' + parseFloat(item.propina).toLocaleString('es-CO') + '</p>');
-                    totalDiv.append('<h4>Total: $' + parseFloat(item.total + item.propina).toLocaleString('es-CO') + '</h4>');
-                    totalDiv.append('<p>Método de Pago: ' + item.metodoPago + '</p>');
+                                        <dt class="col-5">ID Mesero:</dt>
+                                        <dd class="col-7">${item.meseroId}</dd>
 
-                    if (item.metodoPago === "Efectivo") {
-                        totalDiv.append('<p>Efectivo Recibido: $' + parseFloat(item.efectivoRecibido).toLocaleString('es-CO') + '</p>');
-                        totalDiv.append('<p>Cambio: $' + parseFloat(item.cambio).toLocaleString('es-CO') + '</p>');
-                    }
+                                        <dt class="col-5">Mesero:</dt>
+                                        <dd class="col-7">${item.meseroNombre}</dd>
 
-                    contentDiv.append(totalDiv);
+                                        <dt class="col-5">Fecha:</dt>
+                                        <dd class="col-7">${fechaFormato}</dd>
 
-                    pedidoDiv.append(contentDiv);
+                                        <dt class="col-5">Total:</dt>
+                                        <dd class="col-7"><strong class="text-lg">$${parseFloat(item.total + item.propina).toLocaleString('es-CO')}</strong></dd>
+                                    </dl>
+                                </div>
+                                <div id="${collapseId}" class="collapse ${isExpanded ? 'show' : ''}">
+                                    <div class="card-body pt-0">
+                                        <hr>
+                                        <h6 class="text-bold">Detalles del Pedido:</h6>
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Plato</th>
+                                                    <th class="text-center">Cant.</th>
+                                                    <th class="text-right">Valor</th>
+                                                    <th class="text-right">Subtotal</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${item.detalles.map(d => `
+                                                    <tr>
+                                                        <td>${d.nombre}</td>
+                                                        <td class="text-center">${d.cantidad}</td>
+                                                        <td class="text-right">$${parseFloat(d.valor).toLocaleString('es-CO')}</td>
+                                                        <td class="text-right">$${parseFloat(d.subtotal).toLocaleString('es-CO')}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                        <div class="totales">
+                                            <div class="row">
+                                                <div class="col-6">Subtotal:</div>
+                                                <div class="col-6 text-right">$${parseFloat(item.subtotal).toLocaleString('es-CO')}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">IVA (19%):</div>
+                                                <div class="col-6 text-right">$${parseFloat(item.iva).toLocaleString('es-CO')}</div>
+                                            </div>
+                                            ${item.propina > 0 ? `
+                                            <div class="row">
+                                                <div class="col-6">Propina:</div>
+                                                <div class="col-6 text-right">$${parseFloat(item.propina).toLocaleString('es-CO')}</div>
+                                            </div>
+                                            ` : ''}
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-6"><strong>Total Pagado:</strong></div>
+                                                <div class="col-6 text-right"><strong class="text-lg">$${parseFloat(item.total + item.propina).toLocaleString('es-CO')}</strong></div>
+                                            </div>
+                                            ${item.metodoPago === 'Efectivo' ? `
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-6">Efectivo Recibido:</div>
+                                                <div class="col-6 text-right">$${parseFloat(item.efectivoRecibido).toLocaleString('es-CO')}</div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-6">Cambio:</div>
+                                                <div class="col-6 text-right">$${parseFloat(item.cambio).toLocaleString('es-CO')}</div>
+                                            </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.append(card);
+                });
 
-                    container.append(pedidoDiv);
+                // Event listeners para acordeón
+                $('.clickable-card').off('click').on('click', function(e) {
+                    var historialId = $(this).data('historial-id');
+                    var collapseElement = $('#historial-' + historialId);
+                    var toggleIcon = $(this).closest('.card').find('.toggle-icon i');
+
+                    collapseElement.collapse('toggle');
+
+                    setTimeout(function() {
+                        if (collapseElement.hasClass('show')) {
+                            toggleIcon.removeClass('fa-angle-down').addClass('fa-angle-up');
+                        } else {
+                            toggleIcon.removeClass('fa-angle-up').addClass('fa-angle-down');
+                        }
+                    }, 100);
                 });
             }
 
@@ -210,7 +286,6 @@
                 var pagination = $('.pagination');
                 pagination.empty();
 
-                // Botón "Primera"
                 var firstPageItem = $('<li class="page-item ' + (pageNumber === 1 ? 'disabled' : '') + '"><a class="page-link" href="#">Primera</a></li>');
                 firstPageItem.click(function () {
                     if (pageNumber !== 1) {
@@ -220,7 +295,6 @@
                 });
                 pagination.append(firstPageItem);
 
-                // Botón "Anterior"
                 var prevPageItem = $('<li class="page-item ' + (pageNumber === 1 ? 'disabled' : '') + '"><a class="page-link" href="#">Anterior</a></li>');
                 prevPageItem.click(function () {
                     if (pageNumber > 1) {
@@ -230,7 +304,6 @@
                 });
                 pagination.append(prevPageItem);
 
-                // Mostrar un rango de páginas
                 var maxPagesToShow = 5;
                 var startPage = Math.max(1, pageNumber - Math.floor(maxPagesToShow / 2));
                 var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
@@ -244,7 +317,6 @@
                     pagination.append(li);
                 }
 
-                // Botón "Siguiente"
                 var nextPageItem = $('<li class="page-item ' + (pageNumber === totalPages ? 'disabled' : '') + '"><a class="page-link" href="#">Siguiente</a></li>');
                 nextPageItem.click(function () {
                     if (pageNumber < totalPages) {
@@ -254,7 +326,6 @@
                 });
                 pagination.append(nextPageItem);
 
-                // Botón "Última"
                 var lastPageItem = $('<li class="page-item ' + (pageNumber === totalPages ? 'disabled' : '') + '"><a class="page-link" href="#">Última</a></li>');
                 lastPageItem.click(function () {
                     if (pageNumber !== totalPages) {
@@ -265,15 +336,13 @@
                 pagination.append(lastPageItem);
             }
 
-            // Manejar el evento del botón "Buscar"
             $('#btnBuscar').click(function () {
-                pageNumber = 1; // Reiniciar a la primera página al hacer una nueva búsqueda
+                pageNumber = 1;
                 loadPedidos();
             });
 
-            // Cargar pedidos al inicio
             loadPedidos();
         });
     </script>
-</body>
-</html>
+
+}

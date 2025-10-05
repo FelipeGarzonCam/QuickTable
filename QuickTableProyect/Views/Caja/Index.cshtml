@@ -1,328 +1,355 @@
 ﻿@{
-    ViewData["Title"] = "Pedidos Activos - Caja";
+    ViewBag.Title = "Pedidos Activos - Caja";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>@ViewData["Title"]</title>
-    
-    <link rel="stylesheet" href="~/css/adminlte.min.css">
-    <link href="~/AdminLTE/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/AdminLTE/dist/css/adminlte.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.css">
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-    <style>       
-        .container-fluid{
-            display: flex;
-            justify-content: center; 
-        }
-        #pedidosContainer {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content:space-around;            
-            
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
-        .pedido {
-            border: 1px solid #ccc;
-            padding: 5px;
-            margin: 5px;
-            min-width: 100px;
-            max-width: 400px;
-            box-sizing: border-box;
-            position: relative;
-            cursor: pointer;
-            display: inline-block;
+    .collapse {
+        transition: height 0.35s ease;
+    }
 
-        }
+    .clickable-card {
+        cursor: pointer;
+        user-select: none;
+    }
 
-        .pedido-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .card-footer button {
+        z-index: 10;
+        position: relative;
+    }
 
-            .pedido-header h4 {
-                margin: 0;
-            }
-
-        .pedido table {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .pedido .totales {
-            text-align: right;
-            margin-top: 5px;
-        }
-       
-        .pedido-content {
-            max-height: auto;
-            overflow-y: auto;
-            padding: 5px !important;
-        }
-        .pedido.selected {
-            border-color: #007bff;
-            background-color: #e9f7fe;
-        }
-    </style>
-</head>
-<body>
-    <div class=" mt-4">
-        <h2 class="text-center">@ViewData["Title"]</h2>
-        <div class="text-right mb-3">
-            <a href="@Url.Action("Historial", "Caja")" class="btn btn-secondary">
-                <i class="fas fa-history"></i> Historial de Pedidos
-            </a>
-        </div>
-        <div id="pedidosContainer">
-            <!-- Los pedidos se cargarán aquí -->
-        </div>
-    </div>
-
-    <!-- Modal para finalizar pedido -->
-    <div class="modal fade" id="finalizarPedidoModal" tabindex="-1" role="dialog" aria-labelledby="finalizarPedidoModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <!-- Formulario dentro del modal -->
-                <div class="modal-header">
-                    <h5 class="modal-title" id="finalizarPedidoModalLabel">Finalizar Pedido</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    .content-wrapper {
+        margin-left: 1% !important;
+        margin-right: 1% !important;
+    }
+</style>
+<div class="content-wrapper">
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1><i class="fas fa-cash-register"></i> @ViewBag.Title</h1>
                 </div>
-                <div class="modal-body">
-                    <!-- Contenido del formulario -->
-                    <input type="hidden" id="pedidoId" />
-                    <div class="form-group">
-                        <label for="pedidoInfo">Pedido Seleccionado:</label>
-                        <p id="pedidoInfo" class="form-control-static"></p>                       
-                    </div>
-                    <div class="form-group">
-                        <label>Total: </label>
-                        <p id="totalOriginal" class="form-control-static"></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="propinaPorcentaje">Propina (%):</label>
-                        <input type="number" class="form-control" id="propinaPorcentaje" min="0" max="100" value="0" />
-                    </div>
-                    <div class="form-group">
-                        <label>Total con Propina: </label>
-                        <p id="totalConPropina" class="form-control-static"></p>
-                    </div>
-                    <div class="form-group">
-                        <label for="metodoPago">Método de Pago:</label>
-                        <select class="form-control" id="metodoPago">
-                            <option value="QR">QR</option>
-                            <option value="Tarjeta">Tarjeta Débito/Crédito</option>
-                            <option value="Efectivo">Efectivo</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="efectivoGroup" style="display: none;">
-                        <label for="efectivoRecibido">Efectivo Recibido:</label>
-                        <input type="number" class="form-control" id="efectivoRecibido" min="0" step="0.01" />
-                        <small id="cambioCalculado" class="form-text text-muted"></small>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="btnFinalizarPedido">Finalizar Pedido</button>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Inicio</a></li>
+                        <li class="breadcrumb-item active">Pedidos Activos</li>
+                    </ol>
                 </div>
             </div>
         </div>
+    </section>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row mb-3">
+                <div class="col-12 text-center">
+                    <a href="@Url.Action("Historial", "Caja")" class="btn btn-info btn-lg">
+                        <i class="fas fa-history"></i> Ver Historial
+                    </a>
+                </div>
+            </div>
+
+            <div class="row justify-content-center" id="pedidosContainer">
+                <!-- Los pedidos se cargarán aquí -->
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal Finalizar Pedido -->
+<div class="modal fade" id="finalizarPedidoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Finalizar Pedido</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="pedidoId">
+                <p id="pedidoInfo"></p>
+
+                <div class="form-group">
+                    <label>Total Original</label>
+                    <h4 class="text-primary" id="totalOriginal"></h4>
+                </div>
+
+                <div class="form-group">
+                    <label>Propina (%)</label>
+                    <input type="number" class="form-control" id="propinaPorcentaje" value="5" min="0" max="100">
+                </div>
+
+                <div class="form-group">
+                    <label>Total con Propina</label>
+                    <h3 class="text-success" id="totalConPropina"></h3>
+                </div>
+
+                <div class="form-group">
+                    <label>Método de Pago</label>
+                    <select class="form-control" id="metodoPago">
+                        <option value="QR">QR</option>
+                        <option value="Tarjeta">Tarjeta</option>
+                        <option value="Efectivo">Efectivo</option>
+                    </select>
+                </div>
+
+                <div id="efectivoGroup" style="display:none;">
+                    <div class="form-group">
+                        <label>Efectivo Recibido</label>
+                        <input type="number" class="form-control" id="efectivoRecibido" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Cambio</label>
+                        <h4 class="text-info" id="cambioCalculado">0</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="confirmarFinalizacion()">Finalizar</button>
+            </div>
+        </div>
     </div>
-    <div class="toasts-top-right fixed" id="toastContainer"></div>
+</div>
 
-    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
-    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
-   <script src="~/js/adminlte.min.js"></script>
-
+@section Scripts {
+    <script src="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.js"></script>
     <script>
-        $(document).ready(function () {
+        let pedidoSeleccionado = null;
+        let estadosExpandidos = {}; // Guardar qué cards están expandidas
 
-            var pedidos = [];
-            var pedidoSeleccionado = null;
+        $(document).ready(function() {
+            loadPedidos();
+            setInterval(loadPedidos, 5000); // Cambiar a 5 segundos para dar más tiempo
 
-            function loadPedidos() {
-                $.ajax({
-                    url: '@Url.Action("ObtenerPedidosActivos", "Caja")',
-                    type: 'GET',
-                    success: function (data) {
-                        pedidos = data;
-                        renderPedidos();
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('Ocurrió un error al cargar los datos: ' + error);
-                    }
-                });
-            }
-
-            function renderPedidos() {
-                var container = $('#pedidosContainer');
-                container.empty();
-
-                if (pedidos.length === 0) {
-                    container.append('<p>No hay pedidos activos.</p>');
-                    return;
-                }
-
-                $.each(pedidos, function (index, item) {
-                    var pedidoDiv = $('<div class="pedido card"></div>');
-
-                    var headerDiv = $('<div class="pedido-header card-header"></div>');
-                    headerDiv.append('<h4>Mesa N°: ' + item.numeroMesa + '</h4>');
-                    
-
-                    pedidoDiv.append(headerDiv);
-
-                    var contentDiv = $('<div class="pedido-content card-body"></div>');
-
-                    contentDiv.append('<p>Pedido N°: ' + item.id + '</p>');
-                    contentDiv.append('<span>ID Mesero: ' + item.meseroId + ' - ' + item.meseroNombre + '</span>');
-                    contentDiv.append('<p>Estado: ' + item.estado + '</p>');
-
-                    var table = $('<table class="table"></table>');
-                    var thead = $('<thead><tr><th>Plato</th><th>#</th><th>Valor</th><th>Subtotal</th></tr></thead>');
-                    var tbody = $('<tbody></tbody>');
-
-                    $.each(item.detalles, function (i, detalle) {
-                        var row = $('<tr></tr>');
-                        row.append('<td>' + detalle.nombre + '</td>');
-                        row.append('<td>' + detalle.cantidad + '</td>');
-                        row.append('<td>$' + parseFloat(detalle.valor).toLocaleString('es-CO') + '</td>');
-                        row.append('<td>$' + parseFloat(detalle.subtotal).toLocaleString('es-CO') + '</td>');
-                        tbody.append(row);
-                    });
-
-                    table.append(thead);
-                    table.append(tbody);
-                    contentDiv.append(table);
-
-                    var totalDiv = $('<div class="totales"></div>');
-                    totalDiv.append('<p>SubTotal: $' + parseFloat(item.subtotal).toLocaleString('es-CO') + '</p>');
-                    totalDiv.append('<p>IVA 19%: $' + parseFloat(item.iva).toLocaleString('es-CO') + '</p>');
-                    totalDiv.append('<h4>Total: $' + parseFloat(item.total).toLocaleString('es-CO') + '</h4>');
-                    contentDiv.append(totalDiv);
-
-                    pedidoDiv.append(contentDiv);
-
-                    // Botón para abrir el modal y finalizar el pedido
-                    var btnFinalizar = $('<button class="btn btn-success btn-finalizar">Finalizar Pedido</button>');
-                    btnFinalizar.click(function (e) {
-                        e.stopPropagation();
-                        abrirModalFinalizarPedido(item);
-                    });
-                    contentDiv.append(btnFinalizar);
-
-                    container.append(pedidoDiv);
-                });
-            }
-
-            function abrirModalFinalizarPedido(pedido) {
-                pedidoSeleccionado = pedido;
-                // Configurar el modal con los datos del pedido
-                $('#pedidoId').val(pedido.id);
-                $('#pedidoInfo').text('Pedido N° ' + pedido.id + ' - Mesa ' + pedido.numeroMesa);
-                $('#propinaPorcentaje').val('0');
-                $('#metodoPago').val('QR');
-                $('#efectivoGroup').hide();
-                $('#efectivoRecibido').val('');
-                $('#cambioCalculado').text('');
-                // Mostrar los valores del total
-                $('#totalOriginal').text('$' + pedido.total.toLocaleString('es-CO'));
-                $('#totalConPropina').text('$' + pedido.total.toLocaleString('es-CO'));
-
-                // Mostrar el modal
-                $('#finalizarPedidoModal').modal('show');
-            }
-
-            $('#metodoPago').change(function () {
-                var metodoPago = $(this).val();
-                if (metodoPago === 'Efectivo') {
+            $('#metodoPago').change(function() {
+                if ($(this).val() === 'Efectivo') {
                     $('#efectivoGroup').show();
                 } else {
                     $('#efectivoGroup').hide();
                     $('#efectivoRecibido').val('');
-                    $('#cambioCalculado').text('');
+                    $('#cambioCalculado').text('0');
                 }
             });
 
-            $('#efectivoRecibido').on('input', function () {
-                var efectivoRecibido = parseFloat($(this).val());
-                var propinaPorcentaje = parseFloat($('#propinaPorcentaje').val());
-                var propina = (pedidoSeleccionado.total * propinaPorcentaje) / 100;
-                var totalConPropina = pedidoSeleccionado.total + propina;
-
-                if (!isNaN(efectivoRecibido)) {
-                    var cambio = efectivoRecibido - totalConPropina;
-                    $('#cambioCalculado').text('Cambio a entregar: $' + cambio.toFixed());
-                } else {
-                    $('#cambioCalculado').text('');
-                }
-            });
-            // Calcular el total con propina
-            $('#propinaPorcentaje').on('input', function () {
-                var propinaPorcentaje = parseFloat($(this).val());
-                var propina = (pedidoSeleccionado.total * propinaPorcentaje) / 100;
-                var totalConPropina = pedidoSeleccionado.total + propina;
-                $('#totalConPropina').text('$' + totalConPropina.toFixed().toLocaleString('es-CO'));
-            });
-
-            $('#btnFinalizarPedido').click(function () {
-                if (!pedidoSeleccionado) {
-                    alert('Seleccione un pedido.');
-                    return;
-                }
-
-                var propinaPorcentaje = parseFloat($('#propinaPorcentaje').val());
-                if (isNaN(propinaPorcentaje) || propinaPorcentaje < 0 || propinaPorcentaje > 100) {
-                    alert('Ingrese un porcentaje de propina válido entre 0 y 100.');
-                    return;
-                }
-                var propina = (pedidoSeleccionado.total * propinaPorcentaje) / 100;
-                var metodoPago = $('#metodoPago').val();
-                var efectivoRecibido = null;
-                var cambio = null;
-                var totalConPropina = pedidoSeleccionado.total + propina;
-
-                if (metodoPago === 'Efectivo') {
-                    efectivoRecibido = parseFloat($('#efectivoRecibido').val());
-                    if (isNaN(efectivoRecibido) || efectivoRecibido < totalConPropina) {
-                        alert('El efectivo recibido es insuficiente.');
-                        return;
-                    }
-                    cambio = efectivoRecibido - totalConPropina;
-                }
-
-                // Confirmar y enviar datos al servidor
-                $.ajax({
-                    url: '@Url.Action("FinalizarPedido", "Caja")',
-                    type: 'POST',
-                    data: {
-                        pedidoId: pedidoSeleccionado.id,
-                        propina: propina,
-                        metodoPago: metodoPago,
-                        efectivoRecibido: efectivoRecibido,
-                        cambio: cambio
-                    },
-                    // Redirigir a la factura en una nueva pestaña
-                    success: function (response) {
-                        if (response.success) {
-                            $('#finalizarPedidoModal').modal('hide');                            
-                            // Abrir la factura en una nueva pestaña
-                            window.open(response.facturaUrl, '_blank');
-                        } else {
-                            alert("Error al finalizar el pedido.");
-                        }
-                    },
-
-                });
-            });                       
-            loadPedidos();
-            setInterval(loadPedidos, 500); 
+            $('#propinaPorcentaje, #efectivoRecibido').on('input', calcularTotales);
         });
+
+        function loadPedidos() {
+            $.ajax({
+                url: '@Url.Action("ObtenerPedidosActivos", "Caja")',
+                type: 'GET',
+                success: function(data) {
+                    renderPedidos(data);
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error al cargar datos:', error);
+                }
+            });
+        }
+
+        function renderPedidos(items) {
+            const container = $('#pedidosContainer');
+
+            // Guardar estado de expansión actual antes de re-renderizar
+            $('.collapse').each(function() {
+                const id = $(this).attr('id');
+                estadosExpandidos[id] = $(this).hasClass('show');
+            });
+
+            container.empty();
+
+            if (items.length === 0) {
+                container.append('<div class="col-12"><p class="text-center">No hay pedidos activos</p></div>');
+                return;
+            }
+
+            $.each(items, function(index, item) {
+                const cardColor = item.estado === 'Listo' ? 'card-success' : 'card-warning';
+                const badgeColor = item.estado === 'Listo' ? 'success' : 'warning';
+                const collapseId = `pedido-${item.id}`;
+                const isExpanded = estadosExpandidos[collapseId] || false;
+
+                const card = `
+                    <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                        <div class="card ${cardColor} card-outline">
+                            <div class="card-header clickable-card" data-pedido-id="${item.id}">
+                                <h3 class="card-title">
+                                    <i class="fas fa-utensils"></i> Mesa ${item.numeroMesa}
+                                </h3>
+                                <div class="card-tools">
+                                    <span class="badge badge-${badgeColor}">${item.estado}</span>
+                                    <button type="button" class="btn btn-tool toggle-icon">
+                                        <i class="fas fa-angle-${isExpanded ? 'up' : 'down'}"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-3 clickable-card" data-pedido-id="${item.id}">
+                                <dl class="row mb-0">
+                                    <dt class="col-5">Pedido #:</dt>
+                                    <dd class="col-7">${item.id}</dd>
+
+                                    <dt class="col-5">Mesero:</dt>
+                                    <dd class="col-7">${item.meseroNombre}</dd>
+
+                                    <dt class="col-5">Total:</dt>
+                                    <dd class="col-7"><strong class="text-lg">$${item.total.toLocaleString()}</strong></dd>
+                                </dl>
+                            </div>
+                            <div id="${collapseId}" class="collapse ${isExpanded ? 'show' : ''}">
+                                <div class="card-body pt-0">
+                                    <hr>
+                                    <h6 class="text-bold">Detalles del Pedido:</h6>
+                                    <table class="table table-sm table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Plato</th>
+                                                <th class="text-center">Cant.</th>
+                                                <th class="text-right">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${item.detalles.map(d => `
+                                                <tr>
+                                                    <td>${d.nombre}</td>
+                                                    <td class="text-center">${d.cantidad}</td>
+                                                    <td class="text-right">$${d.subtotal.toLocaleString()}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                    <div class="totales">
+                                        <div class="row">
+                                            <div class="col-6">Subtotal:</div>
+                                            <div class="col-6 text-right">$${item.subtotal.toLocaleString()}</div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">IVA (19%):</div>
+                                            <div class="col-6 text-right">$${item.iva.toLocaleString()}</div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-6"><strong>Total:</strong></div>
+                                            <div class="col-6 text-right"><strong class="text-lg">$${item.total.toLocaleString()}</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn btn-success btn-block" onclick="abrirModalFinalizar(event, ${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                    <i class="fas fa-check"></i> Finalizar Pedido
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.append(card);
+            });
+
+            // Agregar event listeners para hacer click en toda la tarjeta
+            $('.clickable-card').off('click').on('click', function(e) {
+                const pedidoId = $(this).data('pedido-id');
+                const collapseElement = $(`#pedido-${pedidoId}`);
+                const toggleIcon = $(this).closest('.card').find('.toggle-icon i');
+
+                collapseElement.collapse('toggle');
+
+                // Cambiar ícono
+                setTimeout(() => {
+                    if (collapseElement.hasClass('show')) {
+                        toggleIcon.removeClass('fa-angle-down').addClass('fa-angle-up');
+                    } else {
+                        toggleIcon.removeClass('fa-angle-up').addClass('fa-angle-down');
+                    }
+                }, 100);
+            });
+        }
+
+        function abrirModalFinalizar(event, pedido) {
+            event.stopPropagation(); // Evitar que se propague al card
+            pedidoSeleccionado = pedido;
+            $('#pedidoId').val(pedido.id);
+            $('#pedidoInfo').text(`Pedido #${pedido.id} - Mesa ${pedido.numeroMesa}`);
+            $('#totalOriginal').text('$' + pedido.total.toLocaleString());
+            $('#totalConPropina').text('$' + pedido.total.toLocaleString());
+            $('#propinaPorcentaje').val(0);
+            $('#metodoPago').val('QR');
+            $('#efectivoGroup').hide();
+            $('#finalizarPedidoModal').modal('show');
+        }
+
+        function calcularTotales() {
+            if (!pedidoSeleccionado) return;
+
+            const propinaPorcentaje = parseFloat($('#propinaPorcentaje').val()) || 0;
+            const propina = pedidoSeleccionado.total * (propinaPorcentaje / 100);
+            const totalConPropina = pedidoSeleccionado.total + propina;
+
+            $('#totalConPropina').text('$' + totalConPropina.toLocaleString());
+
+            if ($('#metodoPago').val() === 'Efectivo') {
+                const efectivoRecibido = parseFloat($('#efectivoRecibido').val()) || 0;
+                const cambio = efectivoRecibido - totalConPropina;
+                $('#cambioCalculado').text('$' + (cambio >= 0 ? cambio.toLocaleString() : '0'));
+            }
+        }
+
+        function confirmarFinalizacion() {
+            const propinaPorcentaje = parseFloat($('#propinaPorcentaje').val()) || 0;
+            const propina = pedidoSeleccionado.total * (propinaPorcentaje / 100);
+            const totalConPropina = pedidoSeleccionado.total + propina;
+            const metodoPago = $('#metodoPago').val();
+            let efectivoRecibido = 0;
+            let cambio = 0;
+
+            if (metodoPago === 'Efectivo') {
+                efectivoRecibido = parseFloat($('#efectivoRecibido').val()) || 0;
+                if (efectivoRecibido < totalConPropina) {
+                    toastr.error('El efectivo recibido es insuficiente');
+                    return;
+                }
+                cambio = efectivoRecibido - totalConPropina;
+            }
+
+            $.ajax({
+                url: '@Url.Action("FinalizarPedido", "Caja")',
+                type: 'POST',
+                data: {
+                    pedidoId: pedidoSeleccionado.id,
+                    propina: propina,
+                    metodoPago: metodoPago,
+                    efectivoRecibido: efectivoRecibido,
+                    cambio: cambio
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#finalizarPedidoModal').modal('hide');
+                        toastr.success('Pedido finalizado correctamente');
+                        if (response.facturaUrl) {
+                            window.open(response.facturaUrl, '_blank');
+                        }
+                        loadPedidos();
+                    } else {
+                        toastr.error(response.message || 'Error al finalizar pedido');
+                    }
+                },
+                error: function() {
+                    toastr.error('Error de conexión');
+                }
+            });
+        }
     </script>
-</body>
-</html>
+
+
+}
