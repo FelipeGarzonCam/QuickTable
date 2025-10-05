@@ -1,0 +1,551 @@
+﻿@model IEnumerable<QuickTableProyect.Dominio.HistorialPedido>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Historial De Pedidos";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css" />
+    <!-- Estilos personalizados aquí -->
+    <style>
+        #pedidosTable {
+            background-color: #343a40;
+            color: white;
+        }
+
+            #pedidosTable thead th {
+                border-bottom: 1px solid #6c757d;
+                padding: 8px 16px;
+                position: relative;
+            }
+
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* Estilo minimalista para las flechas */
+        .sort-icon {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.5;
+        }
+
+            .sort-icon.active {
+                opacity: 1;
+                color: #45aaf2;
+            }
+
+        /* Filtros con estilo oscuro */
+        .filter-form {
+            background-color: #2d3339;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+            .filter-form .form-control {
+                background-color: #383f45;
+                border: none;
+                color: white;
+                padding: 10px 15px;
+            }
+
+                .filter-form .form-control::placeholder {
+                    color: #adb5bd;
+                }
+
+        .pagination {
+            margin-top: 20px;
+        }
+
+        .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .metodo-pago-badge {
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .metodo-efectivo {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .metodo-tarjeta {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .metodo-qr {
+            background-color: #6f42c1;
+            color: white;
+        }
+
+        .tiempo-badge {
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+
+        .tiempo-rapido {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .tiempo-normal {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .tiempo-lento {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+}
+
+<div class="container-fluid mt-4">
+    <h2>@ViewData["Title"]</h2>
+
+    <!-- Botón de exportar -->
+    <button id="exportarExcel" class="btn btn-success mb-3">
+        <i class="fas fa-file-export"></i> Exportar a Excel
+    </button>
+
+    <!-- Formulario de filtros -->
+    <div class="filter-form">
+        <form id="filterForm" class="row">
+            <div class="form-group col-md-3">
+                <label for="fecha" class="text-light">Fecha:</label>
+                <input type="date" id="fecha" class="form-control">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="metodoPago" class="text-light">Método de Pago:</label>
+                <select id="metodoPago" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="QR">QR</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <label for="mesero" class="text-light">Mesero:</label>
+                <input type="text" id="mesero" class="form-control">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="mesa" class="text-light">Mesa:</label>
+                <input type="text" id="mesa" class="form-control">
+            </div>
+            <div class="form-group col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
+            </div>
+        </form>
+    </div>
+
+    <table class="table" id="pedidosTable">
+        <thead>
+            <tr>
+                <th scope="col" data-column="Id" data-order="asc" class="sortable">
+                    ID Pedido
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="Mesa" data-order="asc" class="sortable">
+                    Mesa
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="MeseroId" data-order="asc" class="sortable">
+                    Mesero
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="FechaHora" data-order="asc" class="sortable">
+                    Fecha/Hora
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="TiempoCocina" data-order="asc" class="sortable">
+                    T. Cocina
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="TiempoEntrega" data-order="asc" class="sortable">
+                    T. Entrega
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="TiempoTotal" data-order="asc" class="sortable">
+                    T. Total
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+                <th scope="col" data-column="Total" data-order="asc" class="sortable">
+                    Total
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+
+                <th scope="col" data-column="MetodoPago" data-order="asc" class="sortable">
+                    Método Pago
+                    <span class="sort-icon">
+                        <i class="bi bi-caret-up-fill"></i>
+                    </span>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Los datos se insertan dinámicamente -->
+        </tbody>
+    </table>
+
+    <!-- Controles de paginación -->
+    <nav>
+        <ul class="pagination justify-content-center" id="pagination">
+            <!-- Páginas generadas dinámicamente -->
+        </ul>
+    </nav>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            if (typeof $.fn.pushMenu !== 'undefined') {
+                $('[data-widget="pushmenu"]').pushMenu();
+            }
+            var currentPage = 1;
+            var totalPages = 1;
+            var pageSize = 10;
+            var sortColumn = 'FechaHora';
+            var sortOrder = 'desc';
+            var filters = {
+                fecha: '',
+                metodoPago: '',
+                nombreMesero: '', 
+                mesa: ''
+            };
+
+            // Función para cargar los datos
+            function loadData() {
+                $.ajax({
+                    url: '@Url.Action("ObtenerHistorialPedidos", "Administrador")',
+                    type: 'GET',
+                    data: {
+                        pageNumber: currentPage,
+                        pageSize: pageSize,
+                        sortColumn: sortColumn,
+                        sortOrder: sortOrder,
+                        fecha: filters.fecha || '',
+                        metodoPago: filters.metodoPago || '',
+                        nombreMesero: filters.nombreMesero || '',
+                        mesa: filters.mesa || ''
+                    },
+                    success: function (response) {
+                        totalPages = response.totalPages;
+                        renderTable(response.pedidos);
+                        renderPagination();
+                        updateSortIcons();
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Ocurrió un error al cargar los datos: ' + error);
+                    }
+                });
+            }
+
+            // Función para renderizar la tabla
+            function renderTable(pedidos) {
+                var rows = '';
+                if (!pedidos || pedidos.length === 0) {
+                    $('#pedidosTable tbody').html('<tr><td colspan="9" class="text-center">No hay datos disponibles</td></tr>');
+                    return;
+                }
+
+                $.each(pedidos, function (index, pedido) {
+                    try {
+                        var fechaHora = formatDate(new Date(pedido.fechaCreacion));
+
+                        // Formatear los tiempos
+                        var tiempoCocina = formatTimeSpan(pedido.tiempoCocinaAListo);
+                        var tiempoEntrega = formatTimeSpan(pedido.tiempoListoAAceptado);
+                        var tiempoTotal = formatTimeSpan(pedido.tiempoTotal);  // Nueva línea
+
+                        // Clases para el tiempo
+                        var claseTiempoCocina = getTiempoClass(pedido.tiempoCocinaAListo);
+                        var claseTiempoEntrega = getTiempoClass(pedido.tiempoListoAAceptado);
+                        var claseTiempoTotal = getTiempoClass(pedido.tiempoTotal);  // Nueva línea
+
+                        // Clase para método de pago
+                        var claseMetodoPago = getMetodoPagoClass(pedido.medioPago);
+
+                        rows += '<tr>'
+                            + '<td>' + pedido.pedidoId + '</td>'
+                            + '<td>' + pedido.mesa + '</td>'
+                            + '<td>' + pedido.nombreMesero + ' (' + pedido.meseroId + ')</td>'
+                            + '<td>' + fechaHora + '</td>'
+                            + '<td><span class="tiempo-badge ' + claseTiempoCocina + '">' + tiempoCocina + '</span></td>'
+                            + '<td><span class="tiempo-badge ' + claseTiempoEntrega + '">' + tiempoEntrega + '</span></td>'
+                            + '<td><span class="tiempo-badge ' + claseTiempoTotal + '">' + tiempoTotal + '</span></td>'  // Nueva columna
+                            + '<td>$' + pedido.total.toLocaleString('es-CO') + '</td>'
+                            + '<td><span class="metodo-pago-badge ' + claseMetodoPago + '">' + pedido.medioPago + '</span></td>'
+                            + '</tr>';
+                    } catch (e) {
+                        console.error("Error al procesar pedido:", e, pedido);
+                    }
+                });
+                $('#pedidosTable tbody').html(rows);
+            }
+        
+            // Helper to extract seconds from TimeSpan string or object
+            function extractSeconds(timespan) {
+                if (!timespan) return 0;
+
+                if (typeof timespan === 'string') {
+                    // Parse from string like "-00:00:25.0660000"
+                    var isNegative = timespan.startsWith('-');
+                    var cleanTime = timespan.replace('-', '');
+                    var parts = cleanTime.split(':');
+
+                    if (parts.length >= 3) {
+                        var hours = parseInt(parts[0]) || 0;
+                        var minutes = parseInt(parts[1]) || 0;
+                        var seconds = parseFloat(parts[2]) || 0;
+
+                        var totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                        return isNegative ? -totalSeconds : totalSeconds;
+                    }
+                    return 0;
+                }
+
+                return timespan.totalSeconds || 0;
+            }
+
+            // Función para obtener la clase CSS para el método de pago
+            function getMetodoPagoClass(metodoPago) {
+                switch (metodoPago) {
+                    case 'Efectivo':
+                        return 'metodo-efectivo';
+                    case 'Tarjeta':
+                        return 'metodo-tarjeta';
+                    case 'QR':
+                        return 'metodo-qr';
+                    default:
+                        return '';
+                }
+            }
+
+            // Función para obtener la clase CSS para el tiempo (rápido, normal, lento)
+            function getTiempoClass(timespan) {
+                if (typeof timespan === 'string') {
+                    // Si es string, convertir a segundos
+                    var parts = timespan.split(':');
+                    var seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+                } else {
+                    // Si es un objeto timespan, tomar solo los segundos
+                    var seconds = timespan.totalSeconds || 0;
+                }
+
+                if (seconds < 300) { // menos de 5 minutos
+                    return 'tiempo-rapido';
+                } else if (seconds < 900) { // menos de 15 minutos
+                    return 'tiempo-normal';
+                } else {
+                    return 'tiempo-lento';
+                }
+            }
+
+            // Función para formatear TimeSpan
+            // Función para formatear TimeSpan
+            function formatTimeSpan(timespan) {
+                if (!timespan) return '00:00';
+
+                var totalSeconds;
+
+                if (typeof timespan === 'string') {
+                    // Parse the timespan string to extract total seconds
+                    var isNegative = timespan.startsWith('-');
+                    var cleanTime = timespan.replace('-', '');
+                    var parts = cleanTime.split(':');
+
+                    if (parts.length >= 3) {
+                        var hours = parseInt(parts[0]) || 0;
+                        var minutes = parseInt(parts[1]) || 0;
+                        // Handle decimal seconds
+                        var secondsParts = parts[2].split('.');
+                        var seconds = parseInt(secondsParts[0]) || 0;
+
+                        totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                        totalSeconds = Math.abs(totalSeconds); // Always use positive value for display
+                    } else {
+                        return '00:00';
+                    }
+                } else if (timespan.totalSeconds !== undefined) {
+                    totalSeconds = Math.abs(timespan.totalSeconds);
+                } else {
+                    return '00:00';
+                }
+
+                // Format the seconds into mm:ss
+                var minutes = Math.floor(totalSeconds / 60);
+                var seconds = Math.floor(totalSeconds % 60);
+
+                return pad(minutes) + ':' + pad(seconds);
+            }
+
+
+
+            function pad(num) {
+                return (num < 10 ? '0' : '') + num;
+            }
+
+            // Función para formatear fecha
+            function formatDate(date) {
+                if (!(date instanceof Date) || isNaN(date)) {
+                    return '';
+                }
+
+                return date.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            // Función para renderizar la paginación
+            function renderPagination() {
+                var pagination = '';
+
+                // Rango de páginas a mostrar
+                var maxPagesToShow = 5;
+                var startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+                // Ajustar el inicio si cerca del final
+                if (endPage - startPage < maxPagesToShow - 1) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+
+                // "Anterior"
+                if (currentPage > 1) {
+                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Anterior</a></li>';
+                } else {
+                    pagination += '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
+                }
+
+                // Páginas
+                for (var i = startPage; i <= endPage; i++) {
+                    if (i === currentPage) {
+                        pagination += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
+                    } else {
+                        pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
+                    }
+                }
+
+                //"Siguiente"
+                if (currentPage < totalPages) {
+                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Siguiente</a></li>';
+                } else {
+                    pagination += '<li class="page-item disabled"><span class="page-link">Siguiente</span></li>';
+                }
+
+                // Mostrar la página actual y la cantidad total de páginas
+                if (totalPages > 0) {
+                    pagination += '<li class="page-item disabled"><span class="page-link">Página ' + currentPage + ' de ' + totalPages + '</span></li>';
+                }
+
+                $('#pagination').html(pagination);
+            }
+
+            // Evento de clic en los enlaces de paginación
+            $('#pagination').on('click', 'a.page-link', function (e) {
+                e.preventDefault();
+                var selectedPage = parseInt($(this).data('page'));
+                if (selectedPage !== currentPage) {
+                    currentPage = selectedPage;
+                    loadData();
+                }
+            });
+
+            // Evento para ordenar las columnas
+            $('#pedidosTable thead').on('click', 'th.sortable', function () {
+                var column = $(this).data('column');
+
+                // Si se hace clic en la misma columna, alternar el orden
+                if (sortColumn === column) {
+                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortColumn = column;
+                    sortOrder = 'asc';
+                }
+
+                currentPage = 1; // Reiniciar a la primera página
+                loadData();
+            });
+
+            // Actualizar los iconos de ordenamiento
+            function updateSortIcons() {
+                // Primero eliminar todas las clases y restablecer todos los iconos
+                $('.sort-icon i').removeClass('bi-caret-up-fill bi-caret-down-fill').addClass('bi-caret-up-fill');
+                $('.sort-icon').removeClass('active');
+
+                // Luego actualizar solo la columna activa
+                var activeHeader = $('th[data-column="' + sortColumn + '"]');
+                var sortIcon = activeHeader.find('.sort-icon');
+                sortIcon.addClass('active');
+
+                // Cambiar el ícono según el orden
+                if (sortOrder === 'asc') {
+                    sortIcon.find('i').removeClass('bi-caret-down-fill').addClass('bi-caret-up-fill');
+                } else {
+                    sortIcon.find('i').removeClass('bi-caret-up-fill').addClass('bi-caret-down-fill');
+                }
+            }
+
+            // Evento para el formulario de filtros
+            $('#filterForm').submit(function (e) {
+                e.preventDefault();
+                filters = {
+                    fecha: $('#fecha').val(),
+                    metodoPago: $('#metodoPago').val(),
+                    nombreMesero: $('#mesero').val().trim(), // Obtenemos el valor del campo y lo asignamos a nombreMesero
+                    mesa: $('#mesa').val()
+                };
+                currentPage = 1; // Reiniciar a la primera página
+                loadData();
+            });
+
+            // Evento para el botón de exportar a Excel
+            $('#exportarExcel').click(function () {
+                // Construir la URL con todos los filtros y ordenamiento
+                var url = '@Url.Action("DescargarHistorialPedidosExcel", "Administrador")' +
+                    '?fecha=' + encodeURIComponent(filters.fecha || '') +
+                    '&metodoPago=' + encodeURIComponent(filters.metodoPago || '') +
+                    '&nombreMesero=' + encodeURIComponent(filters.nombreMesero || '') +
+                    '&mesa=' + encodeURIComponent(filters.mesa || '') +
+                    '&sortColumn=' + encodeURIComponent(sortColumn) +
+                    '&sortOrder=' + encodeURIComponent(sortOrder);
+
+                // Redirigir al método de descarga con todos los parámetros
+                window.location.href = url;
+            });
+
+            // Carga inicial de datos
+            loadData();
+        });
+    </script>
+}
