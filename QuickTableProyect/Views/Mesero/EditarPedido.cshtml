@@ -3,100 +3,118 @@
     ViewData["Title"] = "Editar Pedido";
 }
 
-<div class="container">
-    <h2>Editar Pedido</h2>
-    <p>ID Empleado: @ViewData["MeseroId"], Nombre: @ViewData["MeseroNombre"]</p>
-    <p>Total del Pedido: $<span id="totalPedido">0</span></p>
-   
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <input type="text" class="form-control" id="searchBar" placeholder="Buscar por nombre de comida" oninput="filterItems()" />
+<div class="container-fluid">
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0">@ViewData["Title"]</h5>
+            <small>Mesero: @ViewData["MeseroNombre"] (ID: @ViewData["MeseroId"])</small>
+            <h4 class="mb-0 mt-2">Total: $<span id="totalPedido">0</span></h4>
         </div>
-        <div class="col-md-6">
-            <select id="categoryDropdown" class="form-control" onchange="filterItems()">
-                <option value="">Selecciona una categoría</option>
-                @foreach (var categoria in ViewBag.Categorias)
-                {
-                    <option value="@categoria">@categoria</option>
-                }
-            </select>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12 col-md-6 mb-2">
+                    <label for="searchBar" class="form-label">Buscar Plato</label>
+                    <input type="text" class="form-control" id="searchBar" placeholder="Buscar por nombre" oninput="filterItems()" />
+                </div>
+                <div class="col-12 col-md-6 mb-2">
+                    <label for="categoryDropdown" class="form-label">Categoría</label>
+                    <select id="categoryDropdown" class="form-control" onchange="filterItems()">
+                        <option value="">Todas las categorías</option>
+                        @foreach (var categoria in ViewBag.Categorias)
+                        {
+                            <option value="@categoria">@categoria</option>
+                        }
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-between">
-        <a href="@Url.Action("Index", "Mesero")" class="btn btn-secondary">Cancelar</a>
-        <button class="btn btn-primary" onclick="confirmarPedido()">Confirmar Cambios</button>
+    <div id="menuItemsContainer" class="row">
+        @foreach (var item in Model)
+        {
+            int cantidadExistente = ViewBag.DetallesPedido.ContainsKey(item.Id) ? ViewBag.DetallesPedido[item.Id] : 0;
+
+            <div class="col-12 col-sm-6 col-lg-4 mb-2 menu-item-card" data-name="@item.Nombre" data-category="@item.Categoria" data-id="@item.Id" data-precio="@item.Precio">
+                <div class="card shadow-sm @(cantidadExistente > 0 ? "border-primary" : "")">
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-0 text-primary">@item.Nombre</h6>
+                                <small class="text-white-50">@item.Descripcion</small>
+
+                            </div>
+                            <h5 class="mb-0 text-success">$@item.Precio.ToString("N0")</h5>
+                        </div>
+
+                        <div class="d-flex align-items-center mb-2">
+                            <button class="btn btn-outline-danger btn-sm" style="width: 35px; height: 35px;" onclick="decreaseQuantity('@item.Id')">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="text" id="quantity-@item.Id" value="@cantidadExistente" class="form-control text-center mx-2" style="width: 50px; font-weight: bold;" readonly />
+                            <button class="btn btn-outline-success btn-sm" style="width: 35px; height: 35px;" onclick="increaseQuantity('@item.Id')">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+
+                        <textarea id="comment-@item.Id" class="form-control form-control-sm" rows="1" placeholder="Observaciones" style="font-size: 0.85rem;"></textarea>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Cantidad</th>
-                <th>Observacion</th>
-            </tr>
-        </thead>
-        <tbody id="menuItemsTable">
-            @foreach (var item in Model)
-            {
-                int cantidadExistente = ViewBag.DetallesPedido.ContainsKey(item.Id)
-                    ? ViewBag.DetallesPedido[item.Id]
-                    : 0;
+    <div class="fixed-bottom bg-white border-top p-2 shadow">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-6">
+                    <a href="@Url.Action("Index", "Mesero")" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+                <div class="col-6">
+                    <button class="btn btn-warning w-100" onclick="confirmarPedido()">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <tr data-name="@item.Nombre" data-category="@item.Categoria" data-id="@item.Id" data-precio="@item.Precio">
-                    <td>@item.Nombre</td>
-                    <td>@item.Descripcion</td>
-                    <td><strong>$@item.Precio.ToString("N0")</strong></td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary" style="width: 40px; height: 40px" onclick="decreaseQuantity('@item.Id')">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <input type="text" id="quantity-@item.Id" value="@cantidadExistente" class="text-center" style="width: 40px; margin: 5px 0 5px 0;" readonly />
-                        <button class="btn btn-sm btn-success" style="width: 40px; height: 40px;" onclick="increaseQuantity('@item.Id')">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <input type="text" id="comment-@item.Id" class="form-control" placeholder="Comentario (opcional)" />
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div style="height: 60px;"></div>
+
 </div>
 
 <script>
     function filterItems() {
         const searchQuery = document.getElementById("searchBar").value.toLowerCase();
         const selectedCategory = document.getElementById("categoryDropdown").value;
-        const rows = document.querySelectorAll("#menuItemsTable tr");
+        const cards = document.querySelectorAll(".menu-item-card");
 
-        rows.forEach(row => {
-            const itemName = row.getAttribute("data-name").toLowerCase();
-            const itemCategory = row.getAttribute("data-category");
+        cards.forEach(card => {
+            const itemName = card.getAttribute("data-name").toLowerCase();
+            const itemCategory = card.getAttribute("data-category");
 
             const matchesSearch = !searchQuery || itemName.includes(searchQuery);
             const matchesCategory = !selectedCategory || itemCategory === selectedCategory;
 
-            row.style.display = (matchesSearch && matchesCategory) ? "" : "none";
+            card.style.display = (matchesSearch && matchesCategory) ? "" : "none";
         });
     }
 
     function calculateTotal() {
         let total = 0;
-        const rows = document.querySelectorAll("#menuItemsTable tr");
+        const cards = document.querySelectorAll(".menu-item-card");
 
-        rows.forEach(row => {
-            const itemId = row.getAttribute("data-id");
-            const precio = parseFloat(row.getAttribute("data-precio"));
+        cards.forEach(card => {
+            const itemId = card.getAttribute("data-id");
+            const precio = parseFloat(card.getAttribute("data-precio"));
             const cantidad = parseInt(document.getElementById("quantity-" + itemId).value || 0);
 
             total += precio * cantidad;
         });
 
-        document.getElementById("totalPedido").innerText = total.toFixed(2);
+        document.getElementById("totalPedido").innerText = total.toLocaleString();
     }
 
     function increaseQuantity(itemId) {
@@ -117,10 +135,10 @@
     function confirmarPedido() {
         const pedidoId = @ViewData["PedidoId"];
         const items = [];
-        const rows = document.querySelectorAll("#menuItemsTable tr");
+        const cards = document.querySelectorAll(".menu-item-card");
 
-        rows.forEach(row => {
-            const itemId = row.getAttribute("data-id");
+        cards.forEach(card => {
+            const itemId = card.getAttribute("data-id");
             const quantity = parseInt(document.getElementById("quantity-" + itemId).value);
             if (quantity > 0) {
                 items.push({
@@ -129,11 +147,10 @@
                     comentario: document.getElementById("comment-" + itemId).value
                 });
             }
-
         });
 
         if (items.length === 0) {
-            alert("Selecciona al menos un ítem para el pedido.");
+            alert("Selecciona al menos un plato para el pedido.");
             return;
         }
 
@@ -160,3 +177,24 @@
     });
 </script>
 
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+    .border-primary {
+        border-width: 2px;
+    }
+
+    .fixed-bottom {
+        z-index: 1000;
+    }
+
+    textarea {
+        resize: none;
+    }
+</style>

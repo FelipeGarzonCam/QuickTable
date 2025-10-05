@@ -158,14 +158,36 @@
                     var collapseId = 'historial-' + item.id;
                     var isExpanded = estadosExpandidos[collapseId] || false;
 
-                    var fechaFormato = new Date(item.fechaHora).toLocaleDateString('es-CO', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                    }) + ' ' + new Date(item.fechaHora).toLocaleTimeString('es-CO', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
+                    var fecha = new Date(item.fechaHora);
+                    var fechaFormato = 'Fecha no válida';
+
+                    var fechaFormato = '';
+                        if (item.fechaHora) {
+                            var partes = item.fechaHora.split(' ');
+                            var fechaPartes = partes[0].split('/');
+                            var horaPartes = partes[1].split(':');
+
+                            var fecha = new Date(
+                                parseInt(fechaPartes[2]),
+                                parseInt(fechaPartes[1]) - 1,
+                                parseInt(fechaPartes[0]),
+                                parseInt(horaPartes[0]),
+                                parseInt(horaPartes[1])
+                            );
+
+                            fechaFormato = fecha.toLocaleDateString('es-CO', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            }) + ' ' + fecha.toLocaleTimeString('es-CO', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        } else {
+                            fechaFormato = 'Sin fecha';
+                        }
+
+
 
                     var card = `
                         <div class="col-12 col-sm-6 col-lg-4 mb-3">
