@@ -14,6 +14,7 @@ namespace QuickTableProyect.Interface
         private readonly EmpleadoService _empleadoService;
         private readonly RegistroSesionService _sesionService;
         private readonly SistemaQuickTableContext _ctx = new();      // EF6 DbContext
+        private readonly RegistroSesionService sesionService;
 
         public LoginController(
             EmpleadoService empleadoService,
@@ -21,6 +22,7 @@ namespace QuickTableProyect.Interface
         {
             _empleadoService = empleadoService;
             _sesionService = sesionService;
+            this.sesionService = sesionService;
         }
 
         // ----------- GET /Login --------------
@@ -194,6 +196,47 @@ namespace QuickTableProyect.Interface
             _ctx.SaveChanges();
             
         }
+        // Agregar este método al LoginController existente
+        // QuickTableProyect/Controllers/LoginController.cs
+
+        // QuickTableProyect/Controllers/LoginController.cs
+        // Agregar este método al LoginController existente
+
+        // QuickTableProyect/Controllers/LoginController.cs
+        // Reemplazar el método FinalizarDia existente con este:
+
+        [HttpPost]
+        public JsonResult FinalizarDia()
+        {
+            try
+            {
+                var empleadoIdString = HttpContext.Session.GetString("Id");
+
+                if (string.IsNullOrEmpty(empleadoIdString))
+                {
+                    return Json(new { success = false, message = "No hay sesión activa" });
+                }
+
+                if (!int.TryParse(empleadoIdString, out int empleadoId))
+                {
+                    return Json(new { success = false, message = "ID de empleado inválido" });
+                }
+
+                // Finalizar día laboral usando sesionService (NO registroSesionService)
+                sesionService.FinalizarDiaLaboral(empleadoId);
+
+                // Limpiar la sesión
+                HttpContext.Session.Clear();
+
+                return Json(new { success = true, message = "Día laboral finalizado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error: " + ex.Message });
+            }
+        }
+
+
 
     }
 }

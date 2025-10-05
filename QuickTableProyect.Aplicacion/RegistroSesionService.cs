@@ -1,4 +1,5 @@
-﻿using QuickTableProyect.Dominio;
+﻿// QuickTableProyect.Aplicacion/RegistroSesionService.cs
+using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
 using System;
 using System.Collections.Generic;
@@ -11,25 +12,25 @@ namespace QuickTableProyect.Aplicacion
 {
     public class RegistroSesionService
     {
-        private readonly SistemaQuickTableContext _context;
+        private readonly SistemaQuickTableContext context;
 
         public RegistroSesionService(SistemaQuickTableContext context)
         {
-            _context = context;
+            this.context = context;
         }
-        // Marca como ERROR todas las sesiones previas "En línea"
+
+        // Marca como ERROR todas las sesiones previas En línea
         public void MarcarErroresPendientes(int empleadoId)
         {
-            var abiertas = _context.RegistroSesiones
-                 .Where(r => r.EmpleadoId == empleadoId
-                          && r.FechaHoraDesconexion == null)
-                 .ToList();
+            var abiertas = context.RegistroSesiones
+                .Where(r => r.EmpleadoId == empleadoId && r.FechaHoraDesconexion == null)
+                .ToList();
 
             foreach (var reg in abiertas)
             {
                 reg.FechaHoraDesconexion = "Error al cerrar sesión";
             }
-            _context.SaveChanges();
+            context.SaveChanges();
         }
 
         public int RegistrarConexion(int empleadoId)
@@ -40,25 +41,42 @@ namespace QuickTableProyect.Aplicacion
                 FechaHoraConexion = DateTime.Now,
                 FechaHoraDesconexion = null
             };
-            _context.RegistroSesiones.Add(registro);
-            _context.SaveChanges();
+            context.RegistroSesiones.Add(registro);
+            context.SaveChanges();
             return registro.Id;
         }
 
         public void RegistrarDesconexion(int registroId)
         {
-            var registro = _context.RegistroSesiones.Find(registroId);
-            if (registro != null && registro.FechaHoraDesconexion == null)
+            var registro = context.RegistroSesiones.Find(registroId);
+            if (registro != null)
             {
-                registro.FechaHoraDesconexion = DateTime.Now
-                    .ToString("yyyy-MM-dd HH:mm:ss");
-                _context.SaveChanges();
+                registro.FechaHoraDesconexion = (registro.FechaHoraDesconexion == null)
+                    ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                    : registro.FechaHoraDesconexion;
+            }
+            context.SaveChanges();
+        }
+
+        // NUEVO MÉTODO para finalizar día laboral manualmente
+        public void FinalizarDiaLaboral(int empleadoId)
+        {
+            // Obtener el registro de sesión activo (sin FechaHoraDesconexion)
+            var registroActivo = context.RegistroSesiones
+                .Where(r => r.EmpleadoId == empleadoId && r.FechaHoraDesconexion == null)
+                .OrderByDescending(r => r.FechaHoraConexion)
+                .FirstOrDefault();
+
+            if (registroActivo != null)
+            {
+                registroActivo.FechaHoraDesconexion = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                context.SaveChanges();
             }
         }
 
         public List<RegistroSesion> ObtenerRegistrosPorFecha(DateTime fecha)
         {
-            return _context.RegistroSesiones
+            return context.RegistroSesiones
                 .Include(r => r.Empleado)
                 .Where(r => DbFunctions.TruncateTime(r.FechaHoraConexion) == DbFunctions.TruncateTime(fecha))
                 .ToList();
@@ -66,7 +84,7 @@ namespace QuickTableProyect.Aplicacion
 
         public List<RegistroSesion> ObtenerRegistrosPorFechaRolIdNombre(DateTime? fecha, string rol, int? empleadoId, string nombre)
         {
-            var query = _context.RegistroSesiones.Include(r => r.Empleado).AsQueryable();
+            var query = context.RegistroSesiones.Include(r => r.Empleado).AsQueryable();
 
             if (fecha.HasValue)
             {
@@ -85,7 +103,7 @@ namespace QuickTableProyect.Aplicacion
 
             if (!string.IsNullOrEmpty(nombre))
             {
-                query = query.Where(r => r.Empleado.Nombre.ToLower().Contains(nombre.ToLower()));
+                query = query.Where(r => r.Empleado.Nombre.Contains(nombre));
             }
 
             return query.ToList();
