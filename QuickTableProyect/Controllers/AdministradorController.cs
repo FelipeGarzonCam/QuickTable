@@ -9,7 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using static QuickTableProyect.Aplicacion.PedidoService;
 using QuickTableProyect.Persistencia.Datos;
-
+//puto git
 namespace QuickTableProyect.Controllers
 {
     public class AdministradorController : Controller

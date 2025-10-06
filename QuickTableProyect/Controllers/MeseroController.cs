@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using QuickTableProyect.Dominio;
 using System.Linq;
-
+//puto git
 namespace QuickTableProyect.Interface
 {
     public class MeseroController : Controller

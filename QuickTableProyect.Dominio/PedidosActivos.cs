@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-
+//puto git
 namespace QuickTableProyect.Dominio
 {
     public class PedidosActivos

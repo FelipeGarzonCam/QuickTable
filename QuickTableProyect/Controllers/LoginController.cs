@@ -6,7 +6,7 @@ using System.Data.Entity;                                // EF 6 → Include()
 using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
-
+//puto git
 namespace QuickTableProyect.Interface
 {
     public class LoginController : Controller

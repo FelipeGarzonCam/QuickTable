@@ -152,3 +152,4 @@ namespace QuickTableProyect.Aplicacion
         public string NombreEmpleado { get; set; }
     }
 }
+//puto git

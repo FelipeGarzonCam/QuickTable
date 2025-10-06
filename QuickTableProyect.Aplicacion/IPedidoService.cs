@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using QuickTableProyect.Dominio;
 using static QuickTableProyect.Aplicacion.PedidoService;
-
+//puto git
 namespace QuickTableProyect.Aplicacion
 {
     public interface IPedidoService

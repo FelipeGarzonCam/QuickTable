@@ -79,3 +79,4 @@ namespace QuickTableProyect.Aplicacion
         }
     }
 }
+//puto git

@@ -138,3 +138,4 @@ namespace QuickTableProyect.Aplicacion
         public string TiempoTrabajado { get; set; }
     }
 }
+//puto git

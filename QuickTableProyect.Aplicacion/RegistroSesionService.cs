@@ -7,7 +7,7 @@ using System.Data.Entity;
 using System.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Text.RegularExpressions;
-
+//puto git
 namespace QuickTableProyect.Aplicacion
 {
     public class RegistroSesionService

@@ -54,7 +54,7 @@ namespace QuickTableProyect.Persistencia.Datos
             base.OnModelCreating(modelBuilder);
         }
     }
-} //masterrrr
+} 
 
-
+//puto git
 

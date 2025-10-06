@@ -3,9 +3,9 @@ using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using System.Linq;
 using System;
-using System.Data.Entity; 
+using System.Data.Entity;
 
-
+//puto git
 
 namespace QuickTableProyect.Interface
 {

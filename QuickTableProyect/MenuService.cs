@@ -2,7 +2,7 @@
 using QuickTableProyect.Persistencia.Datos;
 using System.Collections.Generic;
 using System.Linq;
-
+//
 namespace QuickTableProyect.Aplicacion
 {
     public class MenuService
