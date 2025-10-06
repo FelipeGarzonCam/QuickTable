@@ -23,6 +23,11 @@ builder.Services.AddScoped<HistorialPedidoService>();
 builder.Services.AddScoped<RegistroSesionService>(); // Nuevo servicio
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();  // Para usar sesiones
+// Servicios para gestión de tarjetas NFC y asistencia
+builder.Services.AddScoped<AsistenciaService>();
+builder.Services.AddScoped<TarjetaNFCService>();
+builder.Services.AddScoped<CryptoService>();
+
 
 // Configurar Kestrel para obtener la IP local de la máquina
 builder.WebHost.ConfigureKestrel(options =>

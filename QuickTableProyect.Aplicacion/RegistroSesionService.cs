@@ -39,11 +39,13 @@ namespace QuickTableProyect.Aplicacion
             {
                 EmpleadoId = empleadoId,
                 FechaHoraConexion = DateTime.Now,
-                FechaHoraDesconexion = null
+                FechaHoraDesconexion = null,
+                MarcoTarjetaSalida = false
             };
             context.RegistroSesiones.Add(registro);
             context.SaveChanges();
             return registro.Id;
+
         }
 
         public void RegistrarDesconexion(int registroId)
@@ -58,10 +60,9 @@ namespace QuickTableProyect.Aplicacion
             context.SaveChanges();
         }
 
-        // NUEVO MÉTODO para finalizar día laboral manualmente
+        // El método FinalizarDiaLaboral cambiar para que marque que NO fue con tarjeta:
         public void FinalizarDiaLaboral(int empleadoId)
         {
-            // Obtener el registro de sesión activo (sin FechaHoraDesconexion)
             var registroActivo = context.RegistroSesiones
                 .Where(r => r.EmpleadoId == empleadoId && r.FechaHoraDesconexion == null)
                 .OrderByDescending(r => r.FechaHoraConexion)
@@ -70,6 +71,7 @@ namespace QuickTableProyect.Aplicacion
             if (registroActivo != null)
             {
                 registroActivo.FechaHoraDesconexion = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                registroActivo.MarcoTarjetaSalida = false;  // AGREGAR ESTA LÍNEA (manual, no con tarjeta)
                 context.SaveChanges();
             }
         }

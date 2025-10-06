@@ -8,6 +8,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using static QuickTableProyect.Aplicacion.PedidoService;
+using QuickTableProyect.Persistencia.Datos;
 
 namespace QuickTableProyect.Controllers
 {
@@ -19,6 +20,9 @@ namespace QuickTableProyect.Controllers
         private readonly IPedidoService _pedidoService;
         private readonly HistorialPedidoService _historialPedidoService;
 
+        // AGREGAR contexto para gestión de tarjetas
+        private readonly SistemaQuickTableContext ctx;
+
         // Asegúrate de que este sea el único constructor en la clase
         public AdministradorController(MenuService menuService, EmpleadoService empleadoService,
             RegistroSesionService registroSesionService, IPedidoService pedidoService,
@@ -29,6 +33,9 @@ namespace QuickTableProyect.Controllers
             _registroSesionService = registroSesionService;
             _pedidoService = pedidoService;
             _historialPedidoService = historialPedidoService;
+
+            // AGREGAR inicialización del contexto
+            ctx = new SistemaQuickTableContext();
 
             // Establecer el contexto de licencia de EPPlus
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -327,7 +334,8 @@ namespace QuickTableProyect.Controllers
                     nombre = r.Empleado.Nombre,
                     rol = r.Empleado.Rol,
                     fechaHoraConexion = r.FechaHoraConexion.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    fechaHoraDesconexion = r.FechaHoraDesconexion
+                    fechaHoraDesconexion = r.FechaHoraDesconexion,
+                    marcoTarjetaSalida = r.MarcoTarjetaSalida // NUEVO CAMPO
                 })
                 .ToList();
 
@@ -403,6 +411,7 @@ namespace QuickTableProyect.Controllers
                 worksheet.Cells[1, 3].Value = "Rol";
                 worksheet.Cells[1, 4].Value = "Fecha y Hora Conexión";
                 worksheet.Cells[1, 5].Value = "Fecha y Hora Desconexión";
+                worksheet.Cells[1, 6].Value = "Método Salida"; // NUEVA COLUMNA
 
                 int row = 2;
                 foreach (var registro in sortedRegistros)
@@ -414,11 +423,12 @@ namespace QuickTableProyect.Controllers
                     worksheet.Cells[row, 5].Value = registro.FechaHoraDesconexion is null ? "En línea" : registro.FechaHoraDesconexion == "Error al cerrar sesión"
                           ? registro.FechaHoraDesconexion
                         : registro.FechaHoraDesconexion;
+                    worksheet.Cells[row, 6].Value = registro.MarcoTarjetaSalida ? "Tarjeta NFC" : "Manual/Timeout"; // NUEVA COLUMNA
                     row++;
                 }
 
                 // Estilizar tabla
-                using (var range = worksheet.Cells[1, 1, 1, 5])
+                using (var range = worksheet.Cells[1, 1, 1, 6]) // ACTUALIZADO A 6 COLUMNAS
                 {
                     range.Style.Font.Bold = true;
                     range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
@@ -623,10 +633,10 @@ namespace QuickTableProyect.Controllers
             }
 
             if (!string.IsNullOrEmpty(nombreMesero))
-    {
-        query = query.Where(h => h.MeseroNombre != null && 
-                               h.MeseroNombre.Contains(nombreMesero, StringComparison.OrdinalIgnoreCase));
-    }
+            {
+                query = query.Where(h => h.MeseroNombre != null &&
+                                       h.MeseroNombre.Contains(nombreMesero, StringComparison.OrdinalIgnoreCase));
+            }
 
             if (!string.IsNullOrEmpty(mesa))
             {
@@ -736,5 +746,141 @@ namespace QuickTableProyect.Controllers
                     $"HistorialPedidos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
             }
         }
+
+        // ============= MÉTODOS NUEVOS PARA GESTIÓN DE TARJETAS NFC =============
+
+        [HttpGet]
+        public IActionResult GestionarTarjetas()
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            try
+            {
+                var empleados = ctx.Empleados
+                    .Where(e => e.Rol != "Admin") // Solo empleados normales (Mesero, Cocina, Cajero)
+                    .OrderBy(e => e.Nombre)
+                    .ToList();
+
+                return View(empleados);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al cargar empleados: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AsignarTarjetaEmpleado([FromBody] AsignarTarjetaRequest request)
+        {
+            try
+            {
+                if (request == null || request.empleadoId <= 0)
+                {
+                    return Json(new { success = false, message = "Datos inválidos" });
+                }
+
+                var empleado = ctx.Empleados.Find(request.empleadoId);
+                if (empleado == null)
+                {
+                    return Json(new { success = false, message = "Empleado no encontrado" });
+                }
+
+                // Generar código de sesión (6 dígitos)
+                string codigoSesion = Math.Abs(HttpContext.Session.Id.GetHashCode()).ToString("000000").Substring(0, 6);
+
+                // Crear registro temporal en tabla Codigos2FA (reutilizamos la tabla existente)
+                var codigoTemporal = new Codigo2FA
+                {
+                    EmpleadoId = request.empleadoId,
+                    Codigo = codigoSesion,
+                    Expiracion = DateTime.Now.AddMinutes(10), // 10 minutos para usar el código
+                    EsParaTarjetaEmpleado = true // Indica que es para asignar tarjeta de empleado
+                };
+
+                // Limpiar códigos vencidos primero
+                var vencidos = ctx.Codigos2FA.Where(c => c.Expiracion < DateTime.Now).ToList();
+                ctx.Codigos2FA.RemoveRange(vencidos);
+
+                ctx.Codigos2FA.Add(codigoTemporal);
+                ctx.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    codigoSesion = codigoSesion,
+                    nombreEmpleado = empleado.Nombre,
+                    rolEmpleado = empleado.Rol
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DesasignarTarjetaEmpleado([FromBody] DesasignarTarjetaRequest request)
+        {
+            try
+            {
+                if (request == null || request.empleadoId <= 0)
+                {
+                    return Json(new { success = false, message = "ID de empleado inválido" });
+                }
+
+                var empleado = ctx.Empleados.Find(request.empleadoId);
+                if (empleado == null)
+                {
+                    return Json(new { success = false, message = "Empleado no encontrado" });
+                }
+
+                if (string.IsNullOrEmpty(empleado.TarjetaUID))
+                {
+                    return Json(new { success = false, message = $"{empleado.Nombre} no tiene tarjeta asignada" });
+                }
+
+                // Desasignar tarjeta
+                empleado.TarjetaUID = null;
+                ctx.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Tarjeta desasignada de {empleado.Nombre}",
+                    nombreEmpleado = empleado.Nombre
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // Liberar recursos del contexto
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ctx?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+
+    // ============= CLASES AUXILIARES =============
+
+    public class AsignarTarjetaRequest
+    {
+        public int empleadoId { get; set; }
+    }
+
+    public class DesasignarTarjetaRequest
+    {
+        public int empleadoId { get; set; }
     }
 }

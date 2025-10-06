@@ -1,10 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Data.Entity; // IMPORTANTE: EF6, no EF Core
+using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
+using System;
+using System.Data.Entity; // IMPORTANTE: EF6, no EF Core
+using System.Linq;
 
 namespace QuickTableProyect.Interface.Api
 {
@@ -236,6 +237,145 @@ namespace QuickTableProyect.Interface.Api
                 message = "TarjetaApiController funcionando correctamente"
             });
         }
+        // AGREGAR estos métodos al final del TarjetaApiController existente:
+
+        // 9. NUEVO: Asignar tarjeta a empleado (no admin)
+        [HttpPost("asignar-empleado")]
+        public IActionResult AsignarTarjetaEmpleado([FromBody] AsignarEmpleadoRequest request)
+        {
+            try
+            {
+                if (request == null || request.empleadoId <= 0 || string.IsNullOrEmpty(request.uid))
+                {
+                    return BadRequest(new { success = false, message = "Datos inválidos" });
+                }
+
+                // Buscar el código de sesión temporal para empleado
+                var codigoSesion = ctx.Codigos2FA
+                    .FirstOrDefault(c => c.EmpleadoId == request.empleadoId &&
+                                        c.Expiracion > DateTime.Now &&
+                                        c.EsParaTarjetaEmpleado == true);
+
+                if (codigoSesion == null)
+                {
+                    return BadRequest(new { success = false, message = "Código de sesión expirado o inválido" });
+                }
+
+                var empleado = ctx.Empleados.Find(request.empleadoId);
+                if (empleado == null)
+                {
+                    return BadRequest(new { success = false, message = "Empleado no encontrado" });
+                }
+
+                // Encriptar el UID usando el CryptoService
+                string uidEncriptado = CryptoService.Encrypt(request.uid);
+
+                // Verificar que la tarjeta no esté ya asignada a otro empleado
+                var empleadoExistente = ctx.Empleados
+                    .FirstOrDefault(e => e.TarjetaUID == uidEncriptado && e.Id != request.empleadoId);
+
+                if (empleadoExistente != null)
+                {
+                    return BadRequest(new { success = false, message = $"Tarjeta ya asignada a {empleadoExistente.Nombre}" });
+                }
+
+                // Asignar tarjeta al empleado
+                empleado.TarjetaUID = uidEncriptado;
+
+                // Eliminar el código temporal usado
+                ctx.Codigos2FA.Remove(codigoSesion);
+
+                ctx.SaveChanges();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Tarjeta asignada a {empleado.Nombre}",
+                    nombre = empleado.Nombre,
+                    rol = empleado.Rol
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // 10. NUEVO: Validar código de sesión para empleados
+        [HttpPost("validar-sesion-empleado")]
+        public IActionResult ValidarSesionEmpleado([FromForm] string sessionCode)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(sessionCode) || sessionCode.Length != 6 || !sessionCode.All(char.IsDigit))
+                {
+                    return Ok(new { valid = false, message = "Código inválido" });
+                }
+
+                // Para empleados, buscar código de sesión para tarjeta
+                var codigoSesion = ctx.Codigos2FA
+                    .Include(c => c.Empleado) // EF6 syntax
+                    .Where(c => c.Codigo == sessionCode &&
+                               c.Expiracion > DateTime.Now &&
+                               c.EsParaTarjetaEmpleado == true)
+                    .FirstOrDefault();
+
+                if (codigoSesion != null)
+                {
+                    return Ok(new
+                    {
+                        valid = true,
+                        role = "Empleado",
+                        empleadoId = codigoSesion.EmpleadoId,
+                        nombre = codigoSesion.Empleado?.Nombre ?? "Sin nombre",
+                        rolEmpleado = codigoSesion.Empleado?.Rol ?? "Sin rol",
+                        tipo = "tarjeta-empleado"
+                    });
+                }
+
+                return Ok(new { valid = false, message = "Código de empleado inválido o expirado" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { valid = false, error = ex.Message });
+            }
+        }
+
+        // Clase para recibir la petición de asignar tarjeta a empleado
+        public class AsignarEmpleadoRequest
+        {
+            public int empleadoId { get; set; }
+            public string uid { get; set; }
+        }
+        // Health check endpoint
+        [HttpGet("health")]
+        public IActionResult Health()
+        {
+            try
+            {
+                // Comprobar conexión a base de datos
+                var count = ctx.Empleados.Count();
+
+                return Ok(new
+                {
+                    status = "OK",
+                    timestamp = DateTime.Now,
+                    database = "Connected",
+                    message = "Sistema funcionando correctamente"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    status = "ERROR",
+                    timestamp = DateTime.Now,
+                    database = "Disconnected",
+                    error = ex.Message
+                });
+            }
+        }
+
 
     }
 }
