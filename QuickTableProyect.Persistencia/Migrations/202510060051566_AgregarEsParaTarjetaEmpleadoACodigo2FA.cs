@@ -3,16 +3,16 @@
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class AddNavIdToTarjetaRC : DbMigration
+    public partial class AgregarEsParaTarjetaEmpleadoACodigo2FA : DbMigration
     {
         public override void Up()
         {
-            AddColumn("dbo.TarjetaRC", "NavId", c => c.String());
+            AddColumn("dbo.Empleado", "Activo", c => c.Boolean(nullable: false));
         }
         
         public override void Down()
         {
-            DropColumn("dbo.TarjetaRC", "NavId");
+            DropColumn("dbo.Empleado", "Activo");
         }
     }
 }

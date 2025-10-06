@@ -14,6 +14,13 @@ namespace QuickTableProyect.Interface.Api
     public class TarjetaApiController : ControllerBase
     {
         private readonly SistemaQuickTableContext ctx = new();
+        private readonly CryptoService cryptoService; // AGREGAR ESTA LÍNEA
+
+        // AGREGAR CONSTRUCTOR
+        public TarjetaApiController()
+        {
+            cryptoService = new CryptoService();
+        }
 
         // 1. devuelve UIDs pendientes de grabar
         [HttpGet("pendientes")]
@@ -59,9 +66,6 @@ namespace QuickTableProyect.Interface.Api
                 return BadRequest(new { error = ex.Message });
             }
         }
-
-
-
 
         // 3. Endpoint para polling desde el navegador
         [HttpGet("estado")]
@@ -117,8 +121,6 @@ namespace QuickTableProyect.Interface.Api
                 return BadRequest(new { valid = false, error = ex.Message });
             }
         }
-
-
 
         // 5. Obtener información específica de una sesión
         [HttpGet("sesion-info")]
@@ -237,42 +239,30 @@ namespace QuickTableProyect.Interface.Api
                 message = "TarjetaApiController funcionando correctamente"
             });
         }
-        // AGREGAR estos métodos al final del TarjetaApiController existente:
 
-        // 9. NUEVO: Asignar tarjeta a empleado (no admin)
+        // 9. CORREGIDO: Asignar tarjeta a empleado
         [HttpPost("asignar-empleado")]
         public IActionResult AsignarTarjetaEmpleado([FromBody] AsignarEmpleadoRequest request)
         {
             try
             {
-                if (request == null || request.empleadoId <= 0 || string.IsNullOrEmpty(request.uid))
+                if (request == null || request.EmpleadoId <= 0 || string.IsNullOrEmpty(request.Uid))
                 {
                     return BadRequest(new { success = false, message = "Datos inválidos" });
                 }
 
-                // Buscar el código de sesión temporal para empleado
-                var codigoSesion = ctx.Codigos2FA
-                    .FirstOrDefault(c => c.EmpleadoId == request.empleadoId &&
-                                        c.Expiracion > DateTime.Now &&
-                                        c.EsParaTarjetaEmpleado == true);
-
-                if (codigoSesion == null)
-                {
-                    return BadRequest(new { success = false, message = "Código de sesión expirado o inválido" });
-                }
-
-                var empleado = ctx.Empleados.Find(request.empleadoId);
+                var empleado = ctx.Empleados.Find(request.EmpleadoId);
                 if (empleado == null)
                 {
                     return BadRequest(new { success = false, message = "Empleado no encontrado" });
                 }
 
-                // Encriptar el UID usando el CryptoService
-                string uidEncriptado = CryptoService.Encrypt(request.uid);
+                // CORREGIDO: Usar el UID tal como viene (ya está procesado por el Python)
+                var uidParaGuardar = request.Uid;
 
                 // Verificar que la tarjeta no esté ya asignada a otro empleado
                 var empleadoExistente = ctx.Empleados
-                    .FirstOrDefault(e => e.TarjetaUID == uidEncriptado && e.Id != request.empleadoId);
+                    .FirstOrDefault(e => e.TarjetaUID == uidParaGuardar && e.Id != request.EmpleadoId);
 
                 if (empleadoExistente != null)
                 {
@@ -280,11 +270,7 @@ namespace QuickTableProyect.Interface.Api
                 }
 
                 // Asignar tarjeta al empleado
-                empleado.TarjetaUID = uidEncriptado;
-
-                // Eliminar el código temporal usado
-                ctx.Codigos2FA.Remove(codigoSesion);
-
+                empleado.TarjetaUID = uidParaGuardar;
                 ctx.SaveChanges();
 
                 return Ok(new
@@ -301,7 +287,7 @@ namespace QuickTableProyect.Interface.Api
             }
         }
 
-        // 10. NUEVO: Validar código de sesión para empleados
+        // 10. CORREGIDO: Validar código de sesión para empleados
         [HttpPost("validar-sesion-empleado")]
         public IActionResult ValidarSesionEmpleado([FromForm] string sessionCode)
         {
@@ -312,24 +298,22 @@ namespace QuickTableProyect.Interface.Api
                     return Ok(new { valid = false, message = "Código inválido" });
                 }
 
-                // Para empleados, buscar código de sesión para tarjeta
+                // BUSCAR código de sesión en Codigos2FA (como funciona para TI y Admin)
                 var codigoSesion = ctx.Codigos2FA
-                    .Include(c => c.Empleado) // EF6 syntax
-                    .Where(c => c.Codigo == sessionCode &&
-                               c.Expiracion > DateTime.Now &&
-                               c.EsParaTarjetaEmpleado == true)
-                    .FirstOrDefault();
+                    .Include(c => c.Empleado)
+                    .FirstOrDefault(c => c.Codigo == sessionCode &&
+                                       c.Expiracion > DateTime.Now &&
+                                       c.EsParaTarjetaEmpleado == true);
 
                 if (codigoSesion != null)
                 {
                     return Ok(new
                     {
                         valid = true,
-                        role = "Empleado",
+                        tipo = "tarjeta-empleado",
                         empleadoId = codigoSesion.EmpleadoId,
                         nombre = codigoSesion.Empleado?.Nombre ?? "Sin nombre",
-                        rolEmpleado = codigoSesion.Empleado?.Rol ?? "Sin rol",
-                        tipo = "tarjeta-empleado"
+                        rolEmpleado = codigoSesion.Empleado?.Rol ?? "Sin rol"
                     });
                 }
 
@@ -341,12 +325,8 @@ namespace QuickTableProyect.Interface.Api
             }
         }
 
-        // Clase para recibir la petición de asignar tarjeta a empleado
-        public class AsignarEmpleadoRequest
-        {
-            public int empleadoId { get; set; }
-            public string uid { get; set; }
-        }
+
+
         // Health check endpoint
         [HttpGet("health")]
         public IActionResult Health()
@@ -376,6 +356,11 @@ namespace QuickTableProyect.Interface.Api
             }
         }
 
-
+        // CORREGIDA: Clase para recibir la petición
+        public class AsignarEmpleadoRequest
+        {
+            public int EmpleadoId { get; set; }  // CORREGIDO: Mayúscula inicial
+            public string Uid { get; set; }     // CORREGIDO: Mayúscula inicial
+        }
     }
 }

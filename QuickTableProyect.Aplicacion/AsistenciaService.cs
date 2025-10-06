@@ -15,21 +15,53 @@ namespace QuickTableProyect.Aplicacion
             this.context = context;
         }
 
-        /// <summary>
-        /// Marca la salida de un empleado usando su tarjeta NFC encriptada
-        /// </summary>
-        /// <param name="tarjetaUIDEncriptada">UID de la tarjeta encriptado</param>
-        /// <returns>Resultado de la operación</returns>
+
+        // CAMBIAR el método MarcarSalidaConTarjeta en AsistenciaService.cs:
+
         public ResultadoMarcarSalida MarcarSalidaConTarjeta(string tarjetaUIDEncriptada)
         {
             try
             {
-                // Buscar empleado por UID de tarjeta encriptada
+                                // DECODIFICAR BASE64
+                string uidDecimal = "";
+                try
+                {
+                    byte[] data = Convert.FromBase64String(tarjetaUIDEncriptada);
+                    uidDecimal = System.Text.Encoding.UTF8.GetString(data);
+                    
+                }
+                catch (Exception ex)
+                {
+                    
+                    return new ResultadoMarcarSalida
+                    {
+                        Exito = false,
+                        Mensaje = "Error decodificando UID de tarjeta"
+                    };
+                }
+
+                // CONVERTIR DECIMAL A HEXADECIMAL FORMATO CORRECTO
+                string uidHex = "";
+                try
+                {
+                    long decimalValue = long.Parse(uidDecimal);
+                    uidHex = decimalValue.ToString("X16"); // Convertir a hexadecimal 16 dígitos
+                    
+                }
+                catch (Exception ex)
+                {                    
+                    uidHex = uidDecimal;
+                }
+
+                // BUSCAR empleado con AMBOS FORMATOS
                 var empleado = context.Empleados
-                    .FirstOrDefault(e => e.TarjetaUID == tarjetaUIDEncriptada);
+                    .FirstOrDefault(e => (e.TarjetaUID == uidHex || e.TarjetaUID == uidDecimal) && e.Activo == true);
+
+               
 
                 if (empleado == null)
                 {
+                    
                     return new ResultadoMarcarSalida
                     {
                         Exito = false,
@@ -37,7 +69,7 @@ namespace QuickTableProyect.Aplicacion
                     };
                 }
 
-                // Buscar el último registro de sesión sin finalizar del día actual
+                // EL RESTO IGUAL...
                 var hoy = DateTime.Today;
                 var registroActivo = context.RegistroSesiones
                     .Where(r => r.EmpleadoId == empleado.Id)
@@ -46,8 +78,11 @@ namespace QuickTableProyect.Aplicacion
                     .OrderByDescending(r => r.FechaHoraConexion)
                     .FirstOrDefault();
 
+                
+
                 if (registroActivo == null)
                 {
+                   
                     return new ResultadoMarcarSalida
                     {
                         Exito = false,
@@ -55,14 +90,13 @@ namespace QuickTableProyect.Aplicacion
                     };
                 }
 
-                // Marcar salida
                 var horaSalida = DateTime.Now;
                 registroActivo.FechaHoraDesconexion = horaSalida.ToString("yyyy-MM-dd HH:mm:ss");
                 registroActivo.MarcoTarjetaSalida = true;
 
                 context.SaveChanges();
+                
 
-                // Calcular tiempo trabajado
                 var tiempoTrabajado = horaSalida - registroActivo.FechaHoraConexion;
 
                 return new ResultadoMarcarSalida
@@ -78,6 +112,7 @@ namespace QuickTableProyect.Aplicacion
             }
             catch (Exception ex)
             {
+               
                 return new ResultadoMarcarSalida
                 {
                     Exito = false,
@@ -85,6 +120,10 @@ namespace QuickTableProyect.Aplicacion
                 };
             }
         }
+
+
+
+
     }
 
     // Clase para el resultado de marcar salida

@@ -6,7 +6,9 @@
         public string Nombre { get; set; }
         public string Rol { get; set; } 
         public string Contrasena { get; set; }
-        public string TarjetaUID { get; set; }
+        public string? TarjetaUID { get; set; }
+
+        public bool Activo { get; set; } = true; // Nueva propiedad
     }
 }
 

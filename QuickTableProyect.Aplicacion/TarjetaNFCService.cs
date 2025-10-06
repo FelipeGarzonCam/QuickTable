@@ -8,10 +8,12 @@ namespace QuickTableProyect.Aplicacion
     public class TarjetaNFCService
     {
         private readonly SistemaQuickTableContext context;
+        private readonly CryptoService cryptoService; // AGREGAR
 
         public TarjetaNFCService(SistemaQuickTableContext context)
         {
             this.context = context;
+            this.cryptoService = new CryptoService(); // AGREGAR
         }
 
         /// <summary>
@@ -35,8 +37,8 @@ namespace QuickTableProyect.Aplicacion
                     };
                 }
 
-                // Encriptar el UID de la tarjeta
-                string tarjetaUIDEncriptada = CryptoService.Encrypt(tarjetaUIDSinEncriptar);
+                // CORREGIDO: Encriptar el UID de la tarjeta usando instancia
+                string tarjetaUIDEncriptada = cryptoService.EncriptarUID(tarjetaUIDSinEncriptar);
 
                 // Verificar que la tarjeta no esté ya asignada a otro empleado
                 var empleadoConTarjeta = context.Empleados

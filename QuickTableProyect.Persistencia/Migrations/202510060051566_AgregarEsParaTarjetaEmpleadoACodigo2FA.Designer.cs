@@ -7,13 +7,13 @@ namespace QuickTableProyect.Persistencia.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class AgregarTimestampsPedidos2 : IMigrationMetadata
+    public sealed partial class AgregarEsParaTarjetaEmpleadoACodigo2FA : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(AgregarTimestampsPedidos2));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(AgregarEsParaTarjetaEmpleadoACodigo2FA));
         
         string IMigrationMetadata.Id
         {
-            get { return "202504190311290_AgregarTimestampsPedidos2"; }
+            get { return "202510060051566_AgregarEsParaTarjetaEmpleadoACodigo2FA"; }
         }
         
         string IMigrationMetadata.Source

@@ -200,7 +200,6 @@ namespace QuickTableProyect.Controllers
             ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero" };
             return View();
         }
-
         [HttpPost]
         public IActionResult CrearEmpleado(Empleado empleado)
         {
@@ -209,14 +208,41 @@ namespace QuickTableProyect.Controllers
             {
                 return RedirectToAction("Index", "Login");
             }
+
+            // DEPURACIÓN - AGREGAR ESTAS LÍNEAS:
+            System.Diagnostics.Debug.WriteLine($"=== CREAR EMPLEADO ===");
+            System.Diagnostics.Debug.WriteLine($"Nombre: {empleado.Nombre}");
+            System.Diagnostics.Debug.WriteLine($"Rol: {empleado.Rol}");
+            System.Diagnostics.Debug.WriteLine($"Contrasena: {empleado.Contrasena}");
+            System.Diagnostics.Debug.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
+
+            foreach (var error in ModelState)
+            {
+                System.Diagnostics.Debug.WriteLine($"Campo: {error.Key}, Errores: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+            }
+
             if (ModelState.IsValid)
             {
-                _empleadoService.CrearEmpleado(empleado);
-                return RedirectToAction(nameof(ModificarEmpleados));
+                empleado.Activo = true;
+                System.Diagnostics.Debug.WriteLine("Llamando _empleadoService.CrearEmpleado");
+
+                try
+                {
+                    _empleadoService.CrearEmpleado(empleado);
+                    System.Diagnostics.Debug.WriteLine("Empleado creado exitosamente");
+                    return RedirectToAction(nameof(ModificarEmpleados));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR CREANDO EMPLEADO: {ex.Message}");
+                    ModelState.AddModelError("", $"Error: {ex.Message}");
+                }
             }
-            ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero" };
+
+            ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero", "Admin" };
             return View(empleado);
         }
+
 
         public IActionResult EditarEmpleado(int id)
         {
