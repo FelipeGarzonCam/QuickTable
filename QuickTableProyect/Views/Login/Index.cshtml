@@ -37,6 +37,7 @@
                         </div>
                     </div>
                 </form>
+
                 <!-- Seccion del QR -->
                 <div class="mt-4 text-center">
                     <hr />
@@ -48,28 +49,34 @@
                     </div>
                     <p id="urlDisplay" class="text-muted small mt-2"></p>
                 </div>
-                
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de 2FA (mantener el codigo existente del modal) -->
-<div class="modal fade" id="modal2FA" tabindex="-1" aria-hidden="true">
+<!-- Modal de 2FA mejorado -->
+<div class="modal fade" id="modal2FA" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Segundo Paso de Autenticación</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" id="btnCerrar2FA" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
                 <p>Introduce en la Raspberry el siguiente código y luego acerca tu tarjeta NFC</p>
                 <h1 id="lblCode" class="display-5 text-center fw-bold text-primary"></h1>
-                <div class="mt-3">
+                <div class="mt-3" id="statusContainer">
                     <div class="spinner-border spinner-border-sm text-info" role="status"></div>
                     <span class="text-muted ms-2">Esperando autenticación con tarjeta...</span>
                 </div>
-                <p class="text-center text-muted mb-0 mt-3">El código expirará en 10 minutos.</p>
+                <p class="text-center text-muted mb-3 mt-3">
+                    Tiempo restante: <span id="tiempoRestante" class="fw-bold text-warning">10:00</span>
+                </p>
+                <div class="mt-3">
+                    <button type="button" id="btnCancelar2FA" class="btn btn-outline-danger btn-sm">
+                        Cancelar Autenticación
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -80,11 +87,24 @@
 <link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css" />
 
 <script>
+    // Variables globales para controlar el estado 2FA
+    let timer2FA = null;
+    let timeoutTimer = null;
+    let currentNavId = null;
+    let modal2FA = null;
+    let countdownTimer = null;
+
     $(document).ready(function() {
-        // Generar QR al cargar la pagina
+        // Generar QR al cargar la página
         generarQR();
 
-        // Manejador del formulario de login (mantener codigo existente)
+        // Inicializar el modal
+        modal2FA = new bootstrap.Modal(document.getElementById('modal2FA'));
+
+        // Manejadores de eventos del modal 2FA
+        setupModal2FAEvents();
+
+        // Manejador del formulario de login
         $('#loginForm').on('submit', function(e) {
             e.preventDefault();
 
@@ -96,6 +116,9 @@
                 return;
             }
 
+            // Limpiar cualquier proceso 2FA anterior
+            limpiar2FAState();
+
             $.ajax({
                 url: '@Url.Action("Autenticar", "Login")',
                 type: 'POST',
@@ -103,39 +126,7 @@
                 success: function(response) {
                     if (response.success) {
                         if (response.requiere2FA) {
-                            $('#lblCode').text(response.code);
-                            var modal2FA = new bootstrap.Modal(document.getElementById('modal2FA'));
-                            modal2FA.show();
-
-                            var pollCount = 0;
-                            var maxPolls = 40;
-                            var timer = setInterval(function() {
-                                pollCount++;
-
-                                $.get('@Url.Action("Check2FA", "Login")', { navId: response.nav })
-                                    .done(function(ok) {
-                                        if (ok) {
-                                            clearInterval(timer);
-                                            modal2FA.hide();
-                                            toastr.success('Autenticación 2FA exitosa.', 'Éxito');
-                                            setTimeout(function() {
-                                                window.location.href = '@Url.Action("Index", "Administrador")';
-                                            }, 1000);
-                                        } else if (pollCount >= maxPolls) {
-                                            clearInterval(timer);
-                                            toastr.error('Tiempo agotado para 2FA. Inténtelo de nuevo.', 'Error');
-                                            modal2FA.hide();
-                                        }
-                                    })
-                                    .fail(function(xhr, status, error) {
-                                        console.log('Error verificando 2FA:', error);
-                                        if (pollCount >= maxPolls) {
-                                            clearInterval(timer);
-                                            toastr.error('Error de conexión. Inténtelo de nuevo.', 'Error');
-                                            modal2FA.hide();
-                                        }
-                                    });
-                            }, 3000);
+                            iniciar2FA(response);
                         } else {
                             toastr.success('Inicio de sesión exitoso', 'Éxito');
                             setTimeout(function() {
@@ -153,7 +144,146 @@
         });
     });
 
-    // Funcion para generar y mostrar el QR
+    // Configurar eventos del modal 2FA
+    function setupModal2FAEvents() {
+        // Botón cancelar
+        $('#btnCancelar2FA').on('click', function() {
+            cancelar2FA();
+        });
+
+        // Botón cerrar (X)
+        $('#btnCerrar2FA').on('click', function() {
+            cancelar2FA();
+        });
+
+        // Evento cuando se cierra el modal (por cualquier método)
+        document.getElementById('modal2FA').addEventListener('hidden.bs.modal', function() {
+            if (currentNavId) {
+                // Si se cierra el modal y aún hay proceso activo, cancelar
+                cancelar2FA();
+            }
+        });
+    }
+
+    // Iniciar el proceso 2FA
+    function iniciar2FA(response) {
+        currentNavId = response.nav;
+        $('#lblCode').text(response.code);
+
+        // Mostrar modal
+        modal2FA.show();
+
+        // Iniciar contador regresivo visual
+        iniciarCountdown(600); // 10 minutos
+
+        // Polling para verificar confirmación
+        iniciarPolling2FA();
+
+        // Timeout de seguridad que limpia en base de datos
+        timeoutTimer = setTimeout(function() {
+            cancelar2FA("Tiempo agotado para autenticación 2FA");
+        }, 600000); // 10 minutos
+    }
+
+    // Iniciar polling para verificar 2FA
+    function iniciarPolling2FA() {
+        let pollCount = 0;
+        const maxPolls = 200; // 10 minutos / 3 segundos = ~200 intentos
+
+        timer2FA = setInterval(function() {
+            pollCount++;
+
+            $.get('@Url.Action("Check2FA", "Login")', { navId: currentNavId })
+                .done(function(ok) {
+                    if (ok) {
+                        // 2FA confirmado exitosamente
+                        limpiar2FAState();
+                        modal2FA.hide();
+                        toastr.success('Autenticación 2FA exitosa.', 'Éxito');
+                        setTimeout(function() {
+                            window.location.href = '@Url.Action("Index", "Administrador")';
+                        }, 1000);
+                    } else if (pollCount >= maxPolls) {
+                        // Tiempo agotado
+                        cancelar2FA("Tiempo de espera agotado");
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.log('Error verificando 2FA:', error);
+                    if (pollCount >= maxPolls) {
+                        cancelar2FA("Error de conexión durante la verificación");
+                    }
+                });
+        }, 3000); // Verificar cada 3 segundos
+    }
+
+    // Iniciar contador regresivo visual
+    function iniciarCountdown(segundos) {
+        let tiempoRestante = segundos;
+
+        countdownTimer = setInterval(function() {
+            const minutos = Math.floor(tiempoRestante / 60);
+            const segs = tiempoRestante % 60;
+
+            $('#tiempoRestante').text(`${minutos}:${segs.toString().padStart(2, '0')}`);
+
+            // Cambiar color según tiempo restante
+            if (tiempoRestante <= 60) {
+                $('#tiempoRestante').removeClass('text-warning').addClass('text-danger');
+            }
+
+            tiempoRestante--;
+
+            if (tiempoRestante < 0) {
+                clearInterval(countdownTimer);
+            }
+        }, 1000);
+    }
+
+    // Cancelar proceso 2FA
+    function cancelar2FA(mensaje = "Autenticación 2FA cancelada") {
+        // Llamar al backend para limpiar códigos 2FA
+        $.post('@Url.Action("CancelarTodo2FA", "Login")')
+            .always(function() {
+                // Limpiar estado local
+                limpiar2FAState();
+
+                // Cerrar modal y mostrar mensaje
+                modal2FA.hide();
+                toastr.warning(mensaje, 'Cancelado');
+            });
+    }
+
+    // Limpiar todo el estado 2FA
+    function limpiar2FAState() {
+        // Limpiar timers
+        if (timer2FA) {
+            clearInterval(timer2FA);
+            timer2FA = null;
+        }
+
+        if (timeoutTimer) {
+            clearTimeout(timeoutTimer);
+            timeoutTimer = null;
+        }
+
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+        }
+
+        // Limpiar variables
+        currentNavId = null;
+
+        // Resetear UI del modal
+        $('#tiempoRestante').removeClass('text-danger').addClass('text-warning');
+        $('#statusContainer').html(`
+            <div class="spinner-border spinner-border-sm text-info" role="status"></div>
+            <span class="text-muted ms-2">Esperando autenticación con tarjeta...</span>
+        `);
+    }
+
+    // Función para generar y mostrar el QR
     function generarQR() {
         $.ajax({
             url: '@Url.Action("GenerarQR", "Login")',
@@ -171,4 +301,12 @@
             }
         });
     }
+
+    // Limpiar estado al recargar o cerrar página
+    $(window).on('beforeunload', function() {
+        if (currentNavId) {
+            // Intento de limpieza síncrona (puede no completarse)
+            navigator.sendBeacon('@Url.Action("CancelarTodo2FA", "Login")', new FormData());
+        }
+    });
 </script>

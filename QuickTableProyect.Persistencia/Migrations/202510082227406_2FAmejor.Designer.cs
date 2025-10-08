@@ -7,13 +7,13 @@ namespace QuickTableProyect.Persistencia.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class emparejamiento : IMigrationMetadata
+    public sealed partial class _2FAmejor : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(emparejamiento));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(_2FAmejor));
         
         string IMigrationMetadata.Id
         {
-            get { return "202510061355441_emparejamiento"; }
+            get { return "202510082227406_2FAmejor"; }
         }
         
         string IMigrationMetadata.Source

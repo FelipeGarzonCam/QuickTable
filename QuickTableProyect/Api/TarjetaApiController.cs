@@ -355,13 +355,66 @@ namespace QuickTableProyect.Interface.Api
                 });
             }
         }
-
-        // CORREGIDA: Clase para recibir la petición
+        
         public class AsignarEmpleadoRequest
         {
-            public int EmpleadoId { get; set; }  // CORREGIDO: Mayúscula inicial
-            public string Uid { get; set; }     // CORREGIDO: Mayúscula inicial
+            public int EmpleadoId { get; set; }  
+            public string Uid { get; set; }     
         }
+
+        // AGREGAR este método al TarjetaApiController existente
+        [HttpPost("marcar-salida-empleado")]
+        public IActionResult MarcarSalidaEmpleado([FromForm] string tarjetaUID)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(tarjetaUID))
+                    return BadRequest(new { message = "UID de tarjeta requerido" });
+
+                // BÚSQUEDA UNIFICADA: Empleados normales O admins con TarjetasRC
+                var empleado = ctx.Empleados
+                    .Where(e =>
+                        e.TarjetaUID == tarjetaUID || // Empleados normales
+                        ctx.TarjetasRC.Any(t =>
+                            t.EmpleadoId == e.Id &&
+                            t.Activa &&
+                            t.UidFisico == tarjetaUID)) // Admins
+                    .FirstOrDefault();
+
+                if (empleado == null)
+                    return BadRequest(new { message = "Tarjeta no autorizada" });
+
+                // Resto igual que el sistema existente de salida...
+                var sesionActiva = ctx.RegistroSesiones
+                    .Where(r => r.EmpleadoId == empleado.Id && r.FechaHoraDesconexion == null)
+                    .OrderByDescending(r => r.FechaHoraConexion)
+                    .FirstOrDefault();
+
+                if (sesionActiva != null)
+                {
+                    sesionActiva.FechaHoraDesconexion = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    sesionActiva.MarcoTarjetaSalida = true;
+                    ctx.SaveChanges();
+
+                    return Ok(new
+                    {
+                        empleado = empleado.Nombre,
+                        accion = "Salida registrada",
+                        tipo = "salida"
+                    });
+                }
+                else
+                {
+                    return BadRequest(new { message = "No hay sesión activa para marcar salida" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error: {ex.Message}" });
+            }
+        }
+
     }
+
+
 }
-//puto git

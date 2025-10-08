@@ -1,48 +1,283 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-QuickTable Control de Acceso
-Sistema de control de asistencia con tarjetas NFC
-Version: COMPLETO TACTIL - IP y Puerto separados
+QuickTable Control de Acceso UNIFICADO
+Sistema completo de control de asistencia con tarjetas NFC
+Incluye: Control de Acceso, Modo Admin, Modo TI y Modo Empleado
+Version: UNIFICADO - Sin dependencias externas
 """
 
 import tkinter as tk
 from tkinter import messagebox, font
-import subprocess
-import sys
-import os
+import requests
 import threading
 import time
 import json
-import requests
-from datetime import datetime
+import os
+import sys
 
-# Importar la clase QuickTableRFID existente
+# ============================================================================
+# SECCION 1: DETECCION DE HARDWARE RC522
+# ============================================================================
 try:
-    from quicktablerfid import QuickTableRFID
+    from mfrc522 import SimpleMFRC522
+    import RPi.GPIO as GPIO
+    GPIO.setwarnings(False)
     HARDWARE_AVAILABLE = True
-except ImportError:
-    print("Hardware RC522 no disponible")
+    print("Hardware RC522 detectado y disponible")
+except ImportError as e:
     HARDWARE_AVAILABLE = False
-    QuickTableRFID = None
+    SimpleMFRC522 = None
+    GPIO = None
+    print(f"Hardware RC522 no disponible: {e}")
 
+
+# ============================================================================
+# SECCION 2: CLASE QUICKTABLERFID (Manejo de hardware NFC)
+# ============================================================================
+class QuickTableRFID:
+    """Clase para manejo de tarjetas NFC RC522"""
+    
+    def __init__(self):
+        if not HARDWARE_AVAILABLE:
+            raise ImportError("Hardware RC522 no disponible")
+        
+        self.reader = SimpleMFRC522()
+        GPIO.setwarnings(False)
+        print("SimpleMFRC522 inicializado correctamente")
+    
+    def read_card_uid(self, timeout=15):
+        """
+        Leer solo el UID fisico de la tarjeta (para control de asistencia)
+        
+        Args:
+            timeout (int): Tiempo maximo de espera en segundos
+            
+        Returns:
+            str: UID de la tarjeta en formato hexadecimal o None si no se detecta
+        """
+        if not HARDWARE_AVAILABLE:
+            return None
+        
+        print(f"Buscando tarjeta (timeout: {timeout}s)...")
+        start_time = time.time()
+        
+        try:
+            while (time.time() - start_time) < timeout:
+                try:
+                    id, text = self.reader.read_no_block()
+                    
+                    if id:
+                        uid_string = f"{id:016X}"
+                        print(f"Tarjeta detectada: {uid_string}")
+                        return uid_string
+                    
+                    time.sleep(0.1)
+                    
+                except Exception as e:
+                    if "No card" not in str(e):
+                        print(f"Error lectura: {e}")
+                    time.sleep(0.5)
+            
+            print("Timeout - No se detecto tarjeta")
+            return None
+            
+        except Exception as e:
+            print(f"Error en read_card_uid: {e}")
+            return None
+    
+    def read_text_from_card(self, timeout=15):
+        """
+        Leer tanto el UID fisico como el texto escrito en la tarjeta (para admin 2FA)
+        
+        Args:
+            timeout (int): Tiempo maximo de espera en segundos
+            
+        Returns:
+            tuple: (uid_fisico, texto_escrito) o (None, None) si falla
+        """
+        if not HARDWARE_AVAILABLE:
+            return None, None
+        
+        print(f"Leyendo tarjeta completa por {timeout} segundos...")
+        start_time = time.time()
+        
+        try:
+            while (time.time() - start_time) < timeout:
+                try:
+                    id, text = self.reader.read_no_block()
+                    
+                    if id:
+                        uid_string = f"{id:016X}"
+                        text_clean = (text or "").strip()
+                        
+                        print(f"UID fisico: {uid_string}")
+                        print(f"Texto escrito: '{text_clean}'")
+                        
+                        return uid_string, text_clean
+                    
+                    time.sleep(0.1)
+                    
+                except Exception as e:
+                    if "No card" not in str(e):
+                        print(f"Error leyendo tarjeta completa: {e}")
+                    time.sleep(0.5)
+            
+            print("Timeout - No se pudo leer tarjeta completa")
+            return None, None
+            
+        except Exception as e:
+            print(f"Error en read_text_from_card: {e}")
+            return None, None
+    
+    def clear_and_write_text(self, text, timeout=30):
+        """
+        Borrar y escribir texto en la tarjeta (para crear tarjetas admin)
+        
+        Args:
+            text (str): Texto a escribir
+            timeout (int): Tiempo maximo de espera
+            
+        Returns:
+            bool: True si la escritura fue exitosa
+        """
+        if not HARDWARE_AVAILABLE:
+            return False
+        
+        print(f"Borrando tarjeta y escribiendo: '{text}'")
+        
+        try:
+            write_complete = threading.Event()
+            write_success = [False]
+            error_msg = [None]
+            
+            def write_thread():
+                try:
+                    print("Borrando contenido anterior...")
+                    clear_text = " " * 48
+                    self.reader.write(clear_text)
+                    time.sleep(0.5)
+                    
+                    print("Escribiendo nuevo contenido...")
+                    self.reader.write(text)
+                    
+                    write_success[0] = True
+                    write_complete.set()
+                except Exception as e:
+                    error_msg[0] = str(e)
+                    write_complete.set()
+            
+            thread = threading.Thread(target=write_thread, daemon=True)
+            thread.start()
+            
+            if write_complete.wait(timeout=timeout):
+                if write_success[0]:
+                    print("Borrado y escritura completados")
+                    return True
+                else:
+                    print(f"Error: {error_msg[0]}")
+                    return False
+            else:
+                print("Timeout en operacion")
+                return False
+                
+        except Exception as e:
+            print(f"Error critico escribiendo: {e}")
+            return False
+    
+    def cleanup(self):
+        """Limpiar recursos GPIO"""
+        if HARDWARE_AVAILABLE and GPIO:
+            try:
+                GPIO.cleanup()
+                print("GPIO limpiado correctamente")
+            except Exception as e:
+                print(f"Error limpiando GPIO: {e}")
+
+
+# ============================================================================
+# SECCION 3: CLASE ADMINLTEKEYBOARD (Teclado tactil numerico)
+# ============================================================================
+class AdminLTEKeyboard:
+    """Teclado numerico tactil para entrada de codigos"""
+    
+    def __init__(self, parent, entry_widget, app_instance):
+        self.parent = parent
+        self.entry = entry_widget
+        self.app = app_instance
+        self.create_keyboard()
+    
+    def create_keyboard(self):
+        keyboard_frame = tk.Frame(self.parent, bg='#343a40')
+        keyboard_frame.pack(pady=20)
+        
+        buttons = [
+            ['1', '2', '3'],
+            ['4', '5', '6'],
+            ['7', '8', '9'],
+            ['Borrar', '0', 'Entrar']
+        ]
+        
+        for row in buttons:
+            row_frame = tk.Frame(keyboard_frame, bg='#343a40')
+            row_frame.pack(pady=3)
+            
+            for btn_text in row:
+                if btn_text == 'Entrar':
+                    bg_color = '#007bff'
+                elif btn_text == 'Borrar':
+                    bg_color = '#dc3545'
+                else:
+                    bg_color = '#6c757d'
+                
+                btn = tk.Button(
+                    row_frame,
+                    text=btn_text,
+                    font=('Arial', 12, 'bold'),
+                    width=6,
+                    height=2,
+                    bg=bg_color,
+                    fg='white',
+                    border=0,
+                    command=lambda x=btn_text: self.on_key_press(x)
+                )
+                btn.pack(side='left', padx=3)
+    
+    def on_key_press(self, key):
+        current = self.entry.get()
+        
+        if key == 'Borrar':
+            if current:
+                self.entry.delete(len(current)-1, tk.END)
+        elif key == 'Entrar':
+            if hasattr(self.app, 'validar_codigo_sesion'):
+                self.app.validar_codigo_sesion()
+        elif key.isdigit():
+            if len(current) < 15:
+                self.entry.insert(tk.END, key)
+
+
+# ============================================================================
+# SECCION 4: CLASE PRINCIPAL QUICKTABLECONTROLACCESO
+# ============================================================================
 class QuickTableControlAcceso:
+    """Aplicacion principal unificada de control de acceso"""
+    
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("QuickTable - Control de Acceso")
         self.root.geometry("800x600")
         self.root.configure(bg='#212529')
         
-        # Configurar para pantalla completa
+        # Configurar pantalla completa
         self.root.attributes('-fullscreen', True)
         self.root.bind('<Escape>', self.exit_fullscreen)
         self.root.bind('<F11>', self.toggle_fullscreen)
         
-        # Variable de instancia para hardware
+        # Variables de instancia
         self.hardware_available = HARDWARE_AVAILABLE
-        
-        # Variable para campo activo del teclado
         self.active_entry_type = 'ip'
+        self.session_data = {}
         
         # Inicializar hardware NFC
         self.reader = None
@@ -106,23 +341,22 @@ class QuickTableControlAcceso:
             return response.status_code == 200
         except:
             try:
-                # Intentar ping basico al servidor
                 response = requests.get(self.server_url, timeout=3)
                 return response.status_code in [200, 404, 403]
             except:
                 return False
     
+    # ========================================================================
+    # PANTALLA DE CONFIGURACION DEL SERVIDOR
+    # ========================================================================
     def mostrar_configuracion_servidor(self):
         """Pantalla TACTIL para configurar servidor - IP y Puerto separados"""
-        # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # Frame principal horizontal
         main_frame = tk.Frame(self.root, bg='#212529')
         main_frame.pack(fill='both', expand=True, padx=20, pady=20)
         
-        # Titulo centrado
         title_frame = tk.Frame(main_frame, bg='#212529')
         title_frame.pack(fill='x', pady=(0, 20))
         
@@ -134,7 +368,6 @@ class QuickTableControlAcceso:
             bg='#212529'
         ).pack()
         
-        # Frame contenedor horizontal  
         content_frame = tk.Frame(main_frame, bg='#212529')
         content_frame.pack(fill='both', expand=True)
         
@@ -212,7 +445,7 @@ class QuickTableControlAcceso:
         button_frame.pack(pady=15)
         
         tk.Button(button_frame, text="Probar Conexion", 
-                font=('Arial', 11, 'bold'), 
+                font=('Arial', 11, 'bold'),
                 bg='#ffc107', fg='#212529', 
                 activebackground='#e0a800', 
                 width=14, height=2, border=0, 
@@ -248,7 +481,7 @@ class QuickTableControlAcceso:
         self.active_entry_type = entry_type
     
     def create_shared_keyboard(self, parent):
-        """Teclado tactil copiado EXACTO de raspberrynfcapp"""
+        """Teclado tactil para configuracion de servidor"""
         keyboard_frame = tk.Frame(parent, bg='#212529')
         keyboard_frame.pack(pady=20)
         
@@ -370,7 +603,6 @@ class QuickTableControlAcceso:
                 self.server_url = test_url
                 print(f"Servidor OK: {test_url}")
             else:
-                # Intentar ping basico
                 response = requests.get(test_url, timeout=5)
                 if response.status_code in [200, 404, 403]:
                     self.root.after(0, lambda: self.connection_status.config(
@@ -400,13 +632,14 @@ class QuickTableControlAcceso:
         print(f"Conectado a servidor: {self.server_url}")
         self.mostrar_pantalla_principal()
     
+    # ========================================================================
+    # PANTALLA PRINCIPAL (MENU)
+    # ========================================================================
     def mostrar_pantalla_principal(self):
         """Pantalla principal con dos opciones grandes"""
-        # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # Frame principal centrado
         main_frame = tk.Frame(self.root, bg='#212529')
         main_frame.place(relx=0.5, rely=0.5, anchor='center')
         
@@ -461,7 +694,7 @@ class QuickTableControlAcceso:
                              height=8,
                              relief='raised',
                              bd=3,
-                             command=self.mostrar_modo_admin)
+                             command=self.mostrar_pantalla_codigo)
         btn_admin.pack(side='right', padx=20)
         
         # Frame para opciones adicionales
@@ -498,17 +731,18 @@ class QuickTableControlAcceso:
                 fg='#6c757d',
                 bg='#212529').pack(pady=10)
     
+    # ========================================================================
+    # PANTALLA MARCAR SALIDA
+    # ========================================================================
     def mostrar_marcar_salida(self):
         """Pantalla para marcar salida con tarjeta NFC"""
         if not self.hardware_available or not self.reader:
             messagebox.showerror("Error", "Hardware RC522 no disponible")
             return
         
-        # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # Frame principal
         main_frame = tk.Frame(self.root, bg='#212529')
         main_frame.place(relx=0.5, rely=0.5, anchor='center')
         
@@ -520,7 +754,7 @@ class QuickTableControlAcceso:
                 fg='#ffffff',
                 bg='#212529').pack(pady=30)
         
-        # Icono (representado con texto)
+        # Icono
         icon_font = font.Font(family="Arial", size=48)
         tk.Label(main_frame,
                 text="[ NFC ]",
@@ -544,7 +778,7 @@ class QuickTableControlAcceso:
                                    bg='#212529')
         self.status_label.pack(pady=20)
         
-        # Boton volver - MAS GRANDE Y TACTIL
+        # Boton volver
         tk.Button(main_frame,
                  text="Volver al Inicio",
                  font=("Arial", 18, "bold"),
@@ -570,7 +804,7 @@ class QuickTableControlAcceso:
             uid_fisico = self.reader.read_card_uid(timeout=30)
             
             if not uid_fisico:
-                self.root.after(0, lambda: self.status_label.config(text="No se detectó tarjeta", fg='#dc3545'))
+                self.root.after(0, lambda: self.status_label.config(text="No se detecto tarjeta", fg='#dc3545'))
                 return
             
             self.root.after(0, lambda: self.status_label.config(text="Procesando...", fg='#ffc107'))
@@ -617,11 +851,9 @@ class QuickTableControlAcceso:
     
     def mostrar_resultado_exitoso(self, mensaje):
         """Mostrar resultado exitoso"""
-        # Limpiar ventana
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # Frame principal
         main_frame = tk.Frame(self.root, bg='#212529')
         main_frame.place(relx=0.5, rely=0.5, anchor='center')
         
@@ -642,7 +874,7 @@ class QuickTableControlAcceso:
                 bg='#212529',
                 justify='center').pack(pady=20)
         
-        # Boton para regresar inmediatamente - MAS GRANDE
+        # Boton para regresar
         tk.Button(main_frame,
                  text="Regresar al Inicio",
                  font=("Arial", 20, "bold"),
@@ -671,56 +903,465 @@ class QuickTableControlAcceso:
         else:
             self.mostrar_pantalla_principal()
     
+    # ========================================================================
+    # PANTALLA DE CODIGO DE SESION (Modo Admin/TI/Empleado)
+    # ========================================================================
+    def mostrar_pantalla_codigo(self):
+        """Pantalla principal de codigo de sesion"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        main_frame = tk.Frame(self.root, bg='#343a40')
+        main_frame.place(relx=0.5, rely=0.5, anchor='center')
+        
+        tk.Label(main_frame, text="Codigo de Sesion", 
+                font=('Arial', 24, 'bold'), 
+                fg='white', bg='#343a40').pack(pady=(0, 20))
+        
+        tk.Label(main_frame, text="Ingrese el codigo de 6 digitos", 
+                font=('Arial', 12), 
+                fg='#adb5bd', bg='#343a40').pack(pady=10)
+        
+        # Campo codigo
+        code_frame = tk.Frame(main_frame, bg='#343a40')
+        code_frame.pack(pady=20)
+        
+        self.code_entry = tk.Entry(code_frame, font=('Arial', 22, 'bold'), 
+                                  width=8, justify='center', 
+                                  bg='white', fg='#495057')
+        
+        vcmd = (self.root.register(self.validate_code), '%P')
+        self.code_entry.config(validate='key', validatecommand=vcmd)
+        self.code_entry.pack(pady=10)
+        self.code_entry.focus()
+        self.code_entry.bind('<Return>', lambda e: self.validar_codigo_sesion())
+        
+        # Teclado
+        self.keyboard = AdminLTEKeyboard(main_frame, self.code_entry, self)
+        
+        # Info servidor y botones
+        info_frame = tk.Frame(main_frame, bg='#343a40')
+        info_frame.pack(pady=(20, 0))
+        
+        tk.Label(info_frame, text=f"Servidor: {self.server_url}", 
+                font=('Arial', 9), fg='#6c757d', bg='#343a40').pack(pady=(0, 10))
+        
+        # Boton regreso
+        tk.Button(info_frame, text="Regresar al Menu Principal", 
+                 font=('Arial', 14, 'bold'), bg='#17a2b8', fg='white', 
+                 activebackground='#138496', width=25, height=2, 
+                 border=0, command=self.mostrar_pantalla_principal).pack(pady=10)
+    
+    def validate_code(self, value):
+        return len(value) <= 6 and (value.isdigit() or value == "")
+    
+    def validar_codigo_sesion(self):
+        codigo = self.code_entry.get().strip()
+        
+        if len(codigo) != 6:
+            messagebox.showerror("Error", "Debe ingresar un codigo de 6 digitos")
+            return
+        
+        print(f"Validando codigo: {codigo}")
+        threading.Thread(target=self._validar_sesion_thread, 
+                        args=(codigo,), daemon=True).start()
+    
+    def _validar_sesion_thread(self, codigo):
+        try:
+            print("Intentando validacion TI...")
+            response = requests.post(
+                f"{self.server_url}/api/tarjeta/validar-sesion", 
+                data={'sessionCode': codigo}, 
+                timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"Respuesta TI: {data}")
+                if data.get('valid') and data.get('role') == 'TI':
+                    print("Sesion TI valida")
+                    self.session_data = data
+                    self.root.after(0, self.mostrar_modo_ti)
+                    return
+            elif response.status_code == 404:
+                print("No hay tarjetas pendientes para TI")
+            
+            print("Intentando validacion Admin...")
+            response = requests.post(
+                f"{self.server_url}/api/tarjeta/validar-sesion-admin", 
+                data={'sessionCode': codigo}, 
+                timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"Respuesta Admin: {data}")
+                if data.get('valid') and data.get('role') == 'Admin':
+                    print("Sesion Admin valida")
+                    self.session_data = data
+                    self.root.after(0, self.mostrar_modo_admin)
+                    return
+            
+            print("Intentando validacion empleado...")
+            response = requests.post(
+                f"{self.server_url}/api/tarjeta/validar-sesion-empleado", 
+                data={'sessionCode': codigo}, 
+                timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f"Respuesta Empleado: {data}")
+                if data.get('valid') and data.get('tipo') == 'tarjeta-empleado':
+                    print("Sesion Empleado valida")
+                    self.session_data = data
+                    self.root.after(0, self.mostrar_modo_empleado)
+                    return
+            
+            print("Codigo de sesion invalido")
+            self.root.after(0, lambda: messagebox.showerror(
+                "Error", "Codigo invalido o no hay sesiones activas"))
+            
+        except Exception as e:
+            print(f"Error validando sesion: {e}")
+            self.root.after(0, lambda: messagebox.showerror(
+                "Error", f"Error de conexion: {str(e)}"))
+    
+    # ========================================================================
+    # MODO EMPLEADO (Asignar tarjeta a empleado)
+    # ========================================================================
+    def mostrar_modo_empleado(self):
+        """Modo para asignar tarjetas a empleados"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        main_frame = tk.Frame(self.root, bg='#343a40')
+        main_frame.place(relx=0.5, rely=0.5, anchor='center')
+        
+        # Header
+        header_frame = tk.Frame(main_frame, bg='#28a745', width=500)
+        header_frame.pack(fill='x', pady=(0, 20))
+        
+        tk.Label(header_frame, text="Asignar Tarjeta de Empleado", 
+                font=('Arial', 18, 'bold'), 
+                fg='white', bg='#28a745').pack(pady=15)
+        
+        # Info empleado
+        info_frame = tk.Frame(main_frame, bg='#495057', relief='raised', bd=1)
+        info_frame.pack(fill='x', pady=10, padx=20)
+        
+        empleado_nombre = self.session_data.get('nombre', 'N/A')
+        empleado_rol = self.session_data.get('rolEmpleado', 'N/A')
+        empleado_id = self.session_data.get('empleadoId', 'N/A')
+        
+        tk.Label(info_frame, text=f"Empleado: {empleado_nombre}", 
+                font=('Arial', 12, 'bold'), 
+                fg='#f8f9fa', bg='#495057').pack(pady=5)
+        
+        tk.Label(info_frame, text=f"Rol: {empleado_rol} | ID: {empleado_id}", 
+                font=('Arial', 10), 
+                fg='#adb5bd', bg='#495057').pack(pady=5)
+        
+        # Estado
+        self.empleado_status_label = tk.Label(main_frame, 
+                                            text="Acerca la nueva tarjeta NFC al lector...", 
+                                            font=('Arial', 14), fg='#28a745', bg='#343a40')
+        self.empleado_status_label.pack(pady=30)
+        
+        # Botones
+        button_frame = tk.Frame(main_frame, bg='#343a40')
+        button_frame.pack(pady=20)
+        
+        tk.Button(button_frame, text="Asignar Tarjeta", 
+                 font=('Arial', 12, 'bold'), bg='#007bff', fg='white', 
+                 activebackground='#0056b3', width=18, height=2, 
+                 border=0, command=self.asignar_tarjeta_empleado).pack(side='left', padx=10)
+        
+        tk.Button(button_frame, text="Regresar", 
+                 font=('Arial', 11), bg='#17a2b8', fg='white', 
+                 activebackground='#138496', width=15, height=2, 
+                 border=0, command=self.mostrar_pantalla_principal).pack(side='right', padx=10)
+    
+    def asignar_tarjeta_empleado(self):
+        if not HARDWARE_AVAILABLE or not self.reader:
+            messagebox.showerror("Error", "Hardware RC522 no disponible")
+            return
+        
+        threading.Thread(target=self._asignar_tarjeta_empleado_thread, daemon=True).start()
+    
+    def _asignar_tarjeta_empleado_thread(self):
+        try:
+            self.root.after(0, lambda: self.empleado_status_label.config(
+                text="Leyendo tarjeta...", fg='#ffc107'))
+            
+            uid_fisico = self.reader.read_card_uid(timeout=20)
+            
+            if not uid_fisico:
+                self.root.after(0, lambda: messagebox.showerror("Error", 
+                    "No se pudo leer la tarjeta"))
+                return
+            
+            self.root.after(0, lambda: self.empleado_status_label.config(
+                text="Enviando al servidor...", fg='#17a2b8'))
+            
+            empleado_id = self.session_data.get('empleadoId')
+            response = requests.post(
+                f"{self.server_url}/api/tarjeta/asignar-empleado",
+                json={
+                    'empleadoId': empleado_id,
+                    'uid': uid_fisico
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get('success'):
+                    mensaje = f"Tarjeta asignada exitosamente\n\n"
+                    mensaje += f"Empleado: {data.get('nombre', 'N/A')}\n"
+                    mensaje += f"Rol: {data.get('rol', 'N/A')}"
+                    
+                    self.root.after(0, lambda: self.empleado_status_label.config(
+                        text="Tarjeta asignada correctamente", fg='#28a745'))
+                    
+                    self.root.after(0, lambda: messagebox.showinfo("Exito", mensaje))
+                    
+                    self.root.after(3000, self.mostrar_pantalla_principal)
+                else:
+                    self.root.after(0, lambda: messagebox.showerror("Error", 
+                        data.get('message', 'Error desconocido')))
+            else:
+                self.root.after(0, lambda: messagebox.showerror("Error", 
+                    f"Error del servidor: {response.status_code}"))
+        except Exception as e:
+            print(f"Error asignando tarjeta empleado: {e}")
+            self.root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
+    
+    # ========================================================================
+    # MODO TI (Escribir tarjetas admin)
+    # ========================================================================
+    def mostrar_modo_ti(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        main_frame = tk.Frame(self.root, bg='#343a40')
+        main_frame.place(relx=0.5, rely=0.5, anchor='center')
+        
+        # Header
+        header_frame = tk.Frame(main_frame, bg='#17a2b8', width=500)
+        header_frame.pack(fill='x', pady=(0, 20))
+        
+        tk.Label(header_frame, text="Modo TI - Escribir Tarjetas", 
+                font=('Arial', 18, 'bold'), 
+                fg='white', bg='#17a2b8').pack(pady=15)
+        
+        # Info
+        info_frame = tk.Frame(main_frame, bg='#495057', relief='raised', bd=1)
+        info_frame.pack(fill='x', pady=10, padx=20)
+        
+        uid_real = self.session_data.get('uid', 'ERROR-NO-UID')
+        tk.Label(info_frame, text=f"UID: {uid_real}", 
+                font=('Arial', 11, 'bold'), 
+                fg='#ffc107', bg='#495057').pack(pady=10)
+        
+        admin_nombre = self.session_data.get('adminNombre', 'N/A')
+        tk.Label(info_frame, text=f"Admin: {admin_nombre}", 
+                font=('Arial', 11), 
+                fg='#f8f9fa', bg='#495057').pack(pady=5)
+        
+        # Estado
+        self.ti_status_label = tk.Label(main_frame, 
+                                      text="Acerca la tarjeta MIFARE al lector...", 
+                                      font=('Arial', 14), fg='#17a2b8', bg='#343a40')
+        self.ti_status_label.pack(pady=30)
+        
+        # Botones
+        button_frame = tk.Frame(main_frame, bg='#343a40')
+        button_frame.pack(pady=20)
+        
+        self.write_button = tk.Button(button_frame, text="Limpiar y Escribir", 
+                 font=('Arial', 12, 'bold'), bg='#007bff', fg='white', 
+                 activebackground='#0056b3', width=18, height=2, 
+                 border=0, command=self.escribir_tarjeta_limpia)
+        self.write_button.pack(side='left', padx=10)
+        
+        self.verify_button = tk.Button(button_frame, text="Verificar y Confirmar", 
+                 font=('Arial', 12, 'bold'), bg='#28a745', fg='white', 
+                 activebackground='#218838', width=18, height=2, 
+                 border=0, state='disabled', command=self.verificar_y_confirmar)
+        self.verify_button.pack(side='left', padx=10)
+        
+        tk.Button(main_frame, text="Regresar", 
+                 font=('Arial', 11), bg='#17a2b8', fg='white', 
+                 activebackground='#138496', width=15, height=2, 
+                 border=0, command=self.mostrar_pantalla_principal).pack(pady=10)
+    
+    def escribir_tarjeta_limpia(self):
+        self.write_button.config(state='disabled', text='Escribiendo...')
+        threading.Thread(target=self._escribir_tarjeta_real, daemon=True).start()
+    
+    def _escribir_tarjeta_real(self):
+        if not HARDWARE_AVAILABLE or not self.reader:
+            self.root.after(0, lambda: messagebox.showerror(
+                "Error", "Hardware RC522 no disponible"))
+            self.root.after(0, lambda: self.write_button.config(
+                state='normal', text='Limpiar y Escribir'))
+            return
+        
+        try:
+            uid_real = self.session_data.get('uid', 'ERROR')
+            print(f"Escribiendo UID REAL: {uid_real}")
+            
+            self.root.after(0, lambda: self.ti_status_label.config(
+                text="Escribiendo UID...", fg='#ffc107'))
+            
+            if self.reader.clear_and_write_text(uid_real, timeout=30):
+                print("Escritura completada")
+                self.root.after(0, lambda: self.ti_status_label.config(
+                    text="Tarjeta escrita exitosamente", fg='#28a745'))
+                self.root.after(0, lambda: self.verify_button.config(state='normal'))
+                self.root.after(0, lambda: self.write_button.config(
+                    state='normal', text='Escribir Nueva Tarjeta'))
+            else:
+                print("Error escribiendo")
+                self.root.after(0, lambda: messagebox.showerror("Error", 
+                    "Error escribiendo tarjeta"))
+                self.root.after(0, lambda: self.ti_status_label.config(
+                    text="Error en escritura", fg='#dc3545'))
+                self.root.after(0, lambda: self.write_button.config(
+                    state='normal', text='Limpiar y Escribir'))
+                
+        except Exception as e:
+            print(f"Error escribiendo: {e}")
+            self.root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
+            self.root.after(0, lambda: self.write_button.config(
+                state='normal', text='Limpiar y Escribir'))
+    
+    def verificar_y_confirmar(self):
+        self.verify_button.config(state='disabled', text='Verificando...')
+        threading.Thread(target=self._verificar_real, daemon=True).start()
+    
+    def _verificar_real(self):
+        if not HARDWARE_AVAILABLE or not self.reader:
+            self.root.after(0, lambda: messagebox.showerror(
+                "Error", "Hardware RC522 no disponible"))
+            return
+        
+        try:
+            uid_esperado = self.session_data.get('uid', 'ERROR')
+            
+            self.root.after(0, lambda: self.ti_status_label.config(
+                text="Verificando...", fg='#007bff'))
+            
+            uid_leido, texto_leido = self.reader.read_text_from_card(timeout=15)
+            
+            if uid_leido and texto_leido:
+                print(f"Comparando: '{uid_esperado}' vs '{texto_leido}'")
+                
+                if texto_leido.strip() == uid_esperado.strip():
+                    print("Verificacion exitosa")
+                    
+                    self.root.after(0, lambda: self.ti_status_label.config(
+                        text="Confirmando con servidor...", fg='#17a2b8'))
+                    
+                    response = requests.post(f"{self.server_url}/api/tarjeta/confirmar", 
+                                           data={'uidLeido': uid_leido}, timeout=10)
+                    
+                    if response.status_code == 200:
+                        print("PROCESO COMPLETADO")
+                        self.root.after(0, lambda: self.ti_status_label.config(
+                            text="COMPLETADO - Tarjeta activada", fg='#28a745'))
+                        self.root.after(3000, self.mostrar_pantalla_principal)
+                    else:
+                        self.root.after(0, lambda: messagebox.showerror("Error", 
+                            f"Error servidor: {response.status_code}"))
+                else:
+                    self.root.after(0, lambda: messagebox.showerror("Error", 
+                        "UIDs no coinciden"))
+            else:
+                self.root.after(0, lambda: messagebox.showerror("Error", 
+                    "No se pudo leer la tarjeta"))
+                
+        except Exception as e:
+            print(f"Error verificando: {e}")
+            self.root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
+        finally:
+            self.root.after(0, lambda: self.verify_button.config(
+                state='normal', text='Verificar y Confirmar'))
+    
+    # ========================================================================
+    # MODO ADMIN (Autenticacion 2FA)
+    # ========================================================================
     def mostrar_modo_admin(self):
-        """Ejecutar el sistema admin completo existente"""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        
+        main_frame = tk.Frame(self.root, bg='#343a40')
+        main_frame.place(relx=0.5, rely=0.5, anchor='center')
+        
+        tk.Label(main_frame, text="Modo Admin - Autenticacion 2FA", 
+                font=('Arial', 18, 'bold'), 
+                fg='white', bg='#28a745').pack(pady=20)
+        
+        nav_id = self.session_data.get('navId', 'N/A')
+        admin_nombre = self.session_data.get('adminNombre', 'N/A')
+        
+        tk.Label(main_frame, text=f"Admin: {admin_nombre}", 
+                font=('Arial', 12), fg='#f8f9fa', bg='#343a40').pack(pady=5)
+        
+        tk.Label(main_frame, text=f"NavID: {str(nav_id)[:8]}...", 
+                font=('Arial', 10), fg='#adb5bd', bg='#343a40').pack(pady=5)
+        
+        self.admin_status_label = tk.Label(main_frame, 
+                                         text="Acerca su tarjeta de administrador...", 
+                                         font=('Arial', 14), fg='#28a745', bg='#343a40')
+        self.admin_status_label.pack(pady=30)
+        
+        tk.Button(main_frame, text="Regresar", 
+                 font=('Arial', 11), bg='#17a2b8', fg='white', 
+                 width=15, height=2, 
+                 command=self.mostrar_pantalla_principal).pack(pady=20)
+        
+        threading.Thread(target=self.proceso_admin, daemon=True).start()
+    
+    def proceso_admin(self):
+        if not HARDWARE_AVAILABLE or not self.reader:
+            self.root.after(0, lambda: messagebox.showerror(
+                "Error", "Hardware RC522 no disponible"))
+            return
+        
         try:
-            # Ocultar ventana actual (NO destruir)
-            self.root.withdraw()
+            uid_fisico, texto_leido = self.reader.read_text_from_card(timeout=25)
             
-            # Crear variable de entorno para indicar que debe regresar aqui
-            env = os.environ.copy()
-            env['QUICKTABLE_FULLSCREEN'] = '1'
-            env['QUICKTABLE_RETURN_TO_MENU'] = '1'  # NUEVA VARIABLE
+            if not uid_fisico or not texto_leido:
+                self.root.after(0, lambda: messagebox.showerror("Error", 
+                    "No se pudo leer la tarjeta"))
+                return
             
-            # Ejecutar raspberrynfcapp en proceso separado
-            process = subprocess.Popen([sys.executable, 'raspberrynfcapp.py'], 
-                                     env=env,
-                                     stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE)
+            self.root.after(0, lambda: self.admin_status_label.config(
+                text=f"Verificando tarjeta...", fg='#ffc107'))
             
-            # Monitorear el proceso en hilo separado
-            threading.Thread(target=self.monitorear_proceso_admin, args=(process,), daemon=True).start()
+            response = requests.post(f"{self.server_url}/Login/Confirmar2FA", 
+                                data={
+                                    'navId': self.session_data.get('navId', ''),
+                                    'uidFisico': uid_fisico,
+                                    'textoEscrito': texto_leido
+                                }, timeout=10)
             
-        except FileNotFoundError:
-            messagebox.showerror("Error", "Sistema admin no encontrado (raspberrynfcapp.py)")
-            self.root.deiconify()
+            if response.status_code == 200:
+                self.root.after(0, lambda: self.admin_status_label.config(
+                    text="Autenticacion 2FA exitosa", fg='#28a745'))
+                self.root.after(3000, self.mostrar_pantalla_principal)
+            else:
+                self.root.after(0, lambda: messagebox.showerror("Error", 
+                    f"Tarjeta no autorizada: {response.text}"))
+                
         except Exception as e:
-            messagebox.showerror("Error", f"Error ejecutando modo admin: {e}")
-            self.root.deiconify()
+            self.root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
     
-    def monitorear_proceso_admin(self, process):
-        """Monitorear el proceso del modo admin"""
-        try:
-            return_code = process.wait()  # Esperar a que termine
-            print(f"raspberrynfcapp termino con codigo: {return_code}")
-            
-            # Siempre volver a mostrar la ventana principal
-            self.root.after(0, self.volver_del_admin)
-        except Exception as e:
-            print(f"Error monitoreando proceso admin: {e}")
-            self.root.after(0, self.volver_del_admin)
-    
-    def volver_del_admin(self):
-        """Volver del modo admin a la pantalla principal"""
-        self.root.deiconify()  # Mostrar la ventana
-        self.root.lift()       # Traer al frente
-        self.root.focus_force() # Forzar foco
-        self.mostrar_pantalla_principal()
-    
+    # ========================================================================
+    # FUNCIONES DE CONTROL
+    # ========================================================================
     def salir_aplicacion(self):
         """Salir de la aplicacion"""
-        if messagebox.askyesno("Salir", "¿Estas seguro de que quieres salir?"):
+        if messagebox.askyesno("Salir", "Estas seguro de que quieres salir?"):
             if self.reader:
                 self.reader.cleanup()
             self.root.destroy()
@@ -729,11 +1370,12 @@ class QuickTableControlAcceso:
     def run(self):
         """Ejecutar la aplicacion"""
         try:
-            print("=== QuickTable Control de Acceso ===")
+            print("=" * 60)
+            print("QuickTable Control de Acceso UNIFICADO")
             print(f"Servidor: {self.server_url}")
             print(f"Hardware RC522: {'Disponible' if self.hardware_available and self.reader else 'No disponible'}")
             print("ESC = Salir pantalla completa, F11 = Alternar pantalla completa")
-            print("=" * 50)
+            print("=" * 60)
             
             self.root.mainloop()
         except Exception as e:
@@ -743,6 +1385,10 @@ class QuickTableControlAcceso:
                 self.reader.cleanup()
             print("Aplicacion cerrada")
 
+
+# ============================================================================
+# SECCION 5: PUNTO DE ENTRADA
+# ============================================================================
 if __name__ == "__main__":
     try:
         app = QuickTableControlAcceso()

@@ -18,6 +18,8 @@ namespace QuickTableProyect.Dominio
         public Empleado Empleado { get; set; }
 
         public bool EsParaTarjetaEmpleado { get; set; }
+
+        public bool Usado { get; set; }
     }
 }
 //puto git

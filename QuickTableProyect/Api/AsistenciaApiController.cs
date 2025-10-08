@@ -57,4 +57,3 @@ namespace QuickTableProyect.Interface.Api
         public string Uid { get; set; }
     }
 }
-//puto git

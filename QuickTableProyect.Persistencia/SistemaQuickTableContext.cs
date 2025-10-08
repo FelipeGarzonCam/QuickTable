@@ -56,5 +56,4 @@ namespace QuickTableProyect.Persistencia.Datos
     }
 } 
 
-//puto git
 

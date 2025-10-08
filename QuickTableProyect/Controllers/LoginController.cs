@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;                                // EF 6 → Include()
+using System.Data.Entity;                                // EF 6 → Include()
 using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
@@ -63,13 +63,12 @@ namespace QuickTableProyect.Interface
                     "Mesero" => RedirectToAction("Index", "Mesero"),
                     "Cocina" => RedirectToAction("Index", "Cocina"),
                     "Cajero" => RedirectToAction("Index", "Caja"),
-                    "TI" => RedirectToAction("Index", "TI"),  
+                    "TI" => RedirectToAction("Index", "TI"),
                     _ => RedirectToAction("Index", "Login")
                 };
             }
             return View();
         }
-
 
         // ----------- POST /Login/Autenticar --------------
         [HttpPost]
@@ -86,7 +85,7 @@ namespace QuickTableProyect.Interface
             // 2) registra nueva conexión
             int regId = _sesionService.RegistrarConexion(emp.Id);
 
-            // 3) guarda datos en la sesión de ASP.NET Core
+            // 3) guarda datos en la sesión de ASP.NET Core
             HttpContext.Session.SetString("Rol", emp.Rol);
             HttpContext.Session.SetString("Id", emp.Id.ToString());
             HttpContext.Session.SetString("Nombre", emp.Nombre);
@@ -95,6 +94,12 @@ namespace QuickTableProyect.Interface
             // ----- segundo factor SOLO para administradores -----
             if (emp.Rol == "Admin")
             {
+                // Limpiar códigos 2FA previos del empleado antes de crear uno nuevo
+                var codigosAnteriores = _ctx.Codigos2FA
+                    .Where(c => c.EmpleadoId == emp.Id && !c.Confirmado)
+                    .ToList();
+                _ctx.Codigos2FA.RemoveRange(codigosAnteriores);
+
                 string code = new Random().Next(100_000, 999_999).ToString();
                 Guid navId = Guid.NewGuid();
 
@@ -104,7 +109,8 @@ namespace QuickTableProyect.Interface
                     NavegadorId = navId,
                     EmpleadoId = emp.Id,
                     Expiracion = DateTime.Now.AddMinutes(10),
-                    Confirmado = false
+                    Confirmado = false,
+                    Usado = false  // Agregar campo para mejor control
                 });
                 _ctx.SaveChanges();
 
@@ -130,42 +136,79 @@ namespace QuickTableProyect.Interface
             return Json(new { success = true, redirectUrl = url });
         }
 
-        // ----------- POST /Login/Confirmar2FA --------------
+        // ----------- POST /Login/Confirmar2FA (CORREGIDO) --------------
+        // ----------- POST /Login/Confirmar2FA (CON DEBUG) --------------
         [HttpPost]
         public IActionResult Confirmar2FA(string navId, string uidFisico, string textoEscrito)
         {
             try
             {
                 if (!Guid.TryParse(navId, out Guid navegadorId))
-                    return BadRequest("ID de navegador inválido");
-
-                // BUSCAR tarjeta que coincida con AMBOS valores
-                var tarjeta = _ctx.TarjetasRC
-                    .Include(t => t.Empleado)
-                    .FirstOrDefault(t => t.Activa &&
-                                       t.Empleado.Rol == "Admin" &&
-                                       t.UidFisico == uidFisico &&         // UID del chip
-                                       t.Uid == textoEscrito.Trim());      // UID que escribimos
-
-                if (tarjeta == null)
                 {                    
-                    return BadRequest("Tarjeta no autorizada");
+                    return BadRequest("ID de navegador inválido");
                 }
 
-                // Confirmar 2FA
-                var codigo = _ctx.Codigos2FA.FirstOrDefault(c => c.NavegadorId == navegadorId && !c.Confirmado);
-                if (codigo != null)
+                System.Console.WriteLine($"[DEBUG] Iniciando 2FA - NavId: {navegadorId}, UidFisico: {uidFisico}, TextoEscrito: {textoEscrito}");
+
+                // PRIMERO: Buscar el código 2FA pendiente
+                var codigo2FA = _ctx.Codigos2FA
+                    .Include(c => c.Empleado)
+                    .FirstOrDefault(c => c.NavegadorId == navegadorId &&
+                                        !c.Confirmado &&
+                                        !c.Usado &&
+                                        c.Expiracion > DateTime.Now);
+
+                if (codigo2FA == null)
                 {
-                    codigo.Confirmado = true;
-                    _ctx.SaveChanges();                   
-                    return Ok("2FA confirmado");
+                   
+                    return BadRequest("No hay petición 2FA válida pendiente para este navegador");
                 }
 
-                return BadRequest("Código 2FA no encontrado");
+                
+
+                // SEGUNDO: Buscar TODAS las tarjetas que coincidan con los datos físicos
+                var tarjetasCandidatas = _ctx.TarjetasRC
+                    .Include(t => t.Empleado)
+                    .Where(t => t.Activa &&
+                               t.Empleado.Rol == "Admin" &&
+                               t.UidFisico == uidFisico &&         // UID del chip
+                               t.Uid == textoEscrito.Trim())        // UID que escribimos
+                    .ToList();
+
+                
+
+                // TERCERO: Buscar la tarjeta que pertenezca al empleado correcto
+                var tarjetaCorrecta = tarjetasCandidatas
+                    .FirstOrDefault(t => t.EmpleadoId == codigo2FA.EmpleadoId);
+
+                if (tarjetaCorrecta == null)
+                {                   
+
+                    foreach (var t in tarjetasCandidatas)
+                    {
+                        System.Console.WriteLine($"[DEBUG] - EmpleadoId: {t.EmpleadoId} ({t.Empleado?.Nombre})");
+                    }
+
+                    // Marcar el código como usado para evitar reintentos
+                    codigo2FA.Usado = true;
+                    _ctx.SaveChanges();
+                    return BadRequest("Tarjeta no autorizada para este usuario");
+                }
+
+               
+
+                // CUARTO: Confirmar 2FA exitoso
+                codigo2FA.Confirmado = true;
+                codigo2FA.Usado = true;
+                _ctx.SaveChanges();
+
+                System.Console.WriteLine($"[DEBUG] 2FA confirmado exitosamente para {tarjetaCorrecta.Empleado?.Nombre}");
+                return Ok("2FA confirmado exitosamente");
             }
             catch (Exception ex)
             {
-                return BadRequest($"Error: {ex.Message}");
+                
+                return BadRequest($"Error en 2FA: {ex.Message}");
             }
         }
 
@@ -175,13 +218,46 @@ namespace QuickTableProyect.Interface
         public JsonResult Check2FA(Guid navId)
         {
             bool ok = _ctx.Codigos2FA.Any(c => c.NavegadorId == navId && c.Confirmado);
-            return Json(ok);                                      // JsonRequestBehavior ya no se usa en Core :contentReference[oaicite:5]{index=5}
+            return Json(ok);
+        }
+
+        // ----------- POST /Login/CancelarTodo2FA (NUEVO) --------------
+        [HttpPost]
+        public JsonResult CancelarTodo2FA()
+        {
+            try
+            {
+                string empIdString = HttpContext.Session.GetString("Id");
+                if (int.TryParse(empIdString, out int empId))
+                {
+                    // Cancelar todos los códigos 2FA pendientes del empleado
+                    var codigosPendientes = _ctx.Codigos2FA
+                        .Where(c => c.EmpleadoId == empId && !c.Confirmado)
+                        .ToList();
+
+                    foreach (var codigo in codigosPendientes)
+                    {
+                        codigo.Usado = true;  // Marcarlos como usados para cancelarlos
+                    }
+                    _ctx.SaveChanges();
+                }
+
+                // Limpiar códigos vencidos globalmente
+                LimpiarCodigosVencidos();
+
+                return Json(new { success = true, message = "Códigos 2FA cancelados" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
         }
 
         // ----------- utilitario: ¿tiene 2FA pendiente? --------------
         private bool Requiere2FA(int empId) =>
             _ctx.Codigos2FA.Any(c => c.EmpleadoId == empId &&
                                      !c.Confirmado &&
+                                     !c.Usado &&
                                      c.Expiracion > DateTime.Now);
 
         // ----------- GET /Login/Logout --------------
@@ -190,25 +266,44 @@ namespace QuickTableProyect.Interface
             int? regId = HttpContext.Session.GetInt32("RegistroSesionId");
             if (regId.HasValue) _sesionService.RegistrarDesconexion(regId.Value);
 
+            // Limpiar códigos 2FA pendientes del usuario al hacer logout
+            string empIdString = HttpContext.Session.GetString("Id");
+            if (int.TryParse(empIdString, out int empId))
+            {
+                var codigosPendientes = _ctx.Codigos2FA
+                    .Where(c => c.EmpleadoId == empId && !c.Confirmado)
+                    .ToList();
+
+                foreach (var codigo in codigosPendientes)
+                {
+                    codigo.Usado = true;
+                }
+                _ctx.SaveChanges();
+            }
+
             HttpContext.Session.Clear();
             return RedirectToAction("Index");
         }
+
+        // ----------- Limpieza mejorada de códigos vencidos --------------
         private void LimpiarCodigosVencidos()
         {
-            var vencidos = _ctx.Codigos2FA.Where(c => c.Expiracion < DateTime.Now).ToList();
-            _ctx.Codigos2FA.RemoveRange(vencidos);
+            // Eliminar códigos vencidos por tiempo
+            var vencidosPorTiempo = _ctx.Codigos2FA
+                .Where(c => c.Expiracion < DateTime.Now)
+                .ToList();
+
+            // Eliminar códigos marcados como usados (cancelados o completados)
+            var usados = _ctx.Codigos2FA
+                .Where(c => c.Usado)
+                .ToList();
+
+            _ctx.Codigos2FA.RemoveRange(vencidosPorTiempo);
+            _ctx.Codigos2FA.RemoveRange(usados);
             _ctx.SaveChanges();
-            
         }
-        // Agregar este método al LoginController existente
-        // QuickTableProyect/Controllers/LoginController.cs
 
-        // QuickTableProyect/Controllers/LoginController.cs
-        // Agregar este método al LoginController existente
-
-        // QuickTableProyect/Controllers/LoginController.cs
-        // Reemplazar el método FinalizarDia existente con este:
-
+        // ----------- JSON FinalizarDia --------------
         [HttpPost]
         public JsonResult FinalizarDia()
         {
@@ -239,7 +334,8 @@ namespace QuickTableProyect.Interface
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
-        //generar QR
+
+        // ----------- QR Generator --------------
         [HttpGet]
         public IActionResult GenerarQR()
         {
@@ -276,7 +372,5 @@ namespace QuickTableProyect.Interface
                 return Json(new { success = false, message = ex.Message });
             }
         }
-
-
     }
 }
