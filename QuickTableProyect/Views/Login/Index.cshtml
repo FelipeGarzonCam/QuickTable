@@ -1,43 +1,60 @@
 ﻿@{
     Layout = "_Layout";
 }
+
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="login-box">
         <div class="login-logo">
             <a href="#"><b>QuickTable</b></a>
         </div>
+
         <div class="card">
             <div class="card-body login-card-body">
                 <p class="login-box-msg">LOGIN</p>
-                <form id="loginForm" method="post" action='@Url.Action("Autenticar", "Login")'>
+
+                <form id="loginForm" method="post" action="@Url.Action("Autenticar", "Login")">
                     <div class="input-group mb-3">
-                        <input type="text" name="nombre" class="form-control" placeholder="Usuario" required>
+                        <input type="text" name="nombre" class="form-control" placeholder="Usuario" required />
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-user"></span>
                             </div>
                         </div>
                     </div>
+
                     <div class="input-group mb-3">
-                        <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required>
+                        <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required />
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
                             </div>
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
                         </div>
                     </div>
                 </form>
+                <!-- Seccion del QR -->
+                <div class="mt-4 text-center">
+                    <hr />
+                    <p class="text-muted mb-2">Escanea para acceder desde otro dispositivo</p>
+                    <div id="qrContainer" class="d-flex justify-content-center align-items-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Generando QR...</span>
+                        </div>
+                    </div>
+                    <p id="urlDisplay" class="text-muted small mt-2"></p>
+                </div>
+                
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de 2FA -->
+<!-- Modal de 2FA (mantener el codigo existente del modal) -->
 <div class="modal fade" id="modal2FA" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -46,7 +63,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <p>Introduce en la Raspberry el siguiente código y luego acerca tu tarjeta NFC:</p>
+                <p>Introduce en la Raspberry el siguiente código y luego acerca tu tarjeta NFC</p>
                 <h1 id="lblCode" class="display-5 text-center fw-bold text-primary"></h1>
                 <div class="mt-3">
                     <div class="spinner-border spinner-border-sm text-info" role="status"></div>
@@ -63,98 +80,95 @@
 <link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css" />
 
 <script>
-    $(function () {
-        // Manejador del formulario de login
-        $("#loginForm").on("submit", function (e) {
-            e.preventDefault();
-            var nombre = $("input[name='nombre']").val().trim();
-            var contrasena = $("input[name='contrasena']").val().trim();
+    $(document).ready(function() {
+        // Generar QR al cargar la pagina
+        generarQR();
 
-            // Validación de campos
-            if (nombre === "" || contrasena === "") {
+        // Manejador del formulario de login (mantener codigo existente)
+        $('#loginForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var nombre = $('input[name="nombre"]').val().trim();
+            var contrasena = $('input[name="contrasena"]').val().trim();
+
+            if (!nombre || !contrasena) {
                 toastr.warning('Por favor, completa todos los campos.', 'Advertencia');
                 return;
             }
 
-            // Envío de datos al servidor
             $.ajax({
                 url: '@Url.Action("Autenticar", "Login")',
                 type: 'POST',
-                dataType: 'json',
                 data: { nombre: nombre, contrasena: contrasena },
-                success: function (response) {
+                success: function(response) {
                     if (response.success) {
-                        // SI NO requiere 2FA, redirigir directamente
-                        if (!response.requiere2FA) {
-                            toastr.success("Inicio de sesión exitoso.", "Éxito");
-                            setTimeout(function() {
-                                window.location.href = response.redirectUrl;
-                            }, 500);
-                        } else {
-                            // SI requiere 2FA, mostrar modal y empezar polling
-                            $("#lblCode").text(response.code);
-                            $("#modal2FA").modal('show');
+                        if (response.requiere2FA) {
+                            $('#lblCode').text(response.code);
+                            var modal2FA = new bootstrap.Modal(document.getElementById('modal2FA'));
+                            modal2FA.show();
 
-                            // Inicia polling CORREGIDO para verificar 2FA
-                            const navId = response.nav;
-                            let pollCount = 0;
-                            const maxPolls = 40; // 2 minutos máximo (40 * 3000ms)
-
-                            const timer = setInterval(function() {
+                            var pollCount = 0;
+                            var maxPolls = 40;
+                            var timer = setInterval(function() {
                                 pollCount++;
 
-                                $.get('@Url.Action("Check2FA", "Login")', { navId: navId })
-                                .done(function(ok) {
-                                    if (ok) {
-                                        clearInterval(timer);
-                                        $("#modal2FA").modal('hide');
-                                        toastr.success("Autenticación 2FA exitosa.", "Éxito");
-                                        setTimeout(function() {
-                                            // ✅ RUTA CORREGIDA
-                                            window.location.href = '@Url.Action("Index", "Administrador")';
-                                        }, 1000);
-                                    } else if (pollCount >= maxPolls) {
-                                        // Timeout después de 2 minutos
-                                        clearInterval(timer);
-                                        toastr.error("Tiempo agotado para 2FA. Inténtelo de nuevo.", "Error");
-                                        $("#modal2FA").modal('hide');
-                                    }
-                                })
-                                .fail(function(xhr, status, error) {
-                                    console.log('Error verificando 2FA:', error);
-                                    if (pollCount >= maxPolls) {
-                                        clearInterval(timer);
-                                        toastr.error("Error de conexión. Inténtelo de nuevo.", "Error");
-                                        $("#modal2FA").modal('hide');
-                                    }
-                                });
-                            }, 3000); // Verificar cada 3 segundos
-
-                            // Timeout de seguridad adicional
+                                $.get('@Url.Action("Check2FA", "Login")', { navId: response.nav })
+                                    .done(function(ok) {
+                                        if (ok) {
+                                            clearInterval(timer);
+                                            modal2FA.hide();
+                                            toastr.success('Autenticación 2FA exitosa.', 'Éxito');
+                                            setTimeout(function() {
+                                                window.location.href = '@Url.Action("Index", "Administrador")';
+                                            }, 1000);
+                                        } else if (pollCount >= maxPolls) {
+                                            clearInterval(timer);
+                                            toastr.error('Tiempo agotado para 2FA. Inténtelo de nuevo.', 'Error');
+                                            modal2FA.hide();
+                                        }
+                                    })
+                                    .fail(function(xhr, status, error) {
+                                        console.log('Error verificando 2FA:', error);
+                                        if (pollCount >= maxPolls) {
+                                            clearInterval(timer);
+                                            toastr.error('Error de conexión. Inténtelo de nuevo.', 'Error');
+                                            modal2FA.hide();
+                                        }
+                                    });
+                            }, 3000);
+                        } else {
+                            toastr.success('Inicio de sesión exitoso', 'Éxito');
                             setTimeout(function() {
-                                if (timer) {
-                                    clearInterval(timer);
-                                    toastr.warning("Sesión 2FA expirada.", "Advertencia");
-                                    $("#modal2FA").modal('hide');
-                                }
-                            }, 600000); // 10 minutos
+                                window.location.href = response.redirectUrl;
+                            }, 1000);
                         }
                     } else {
-                        toastr.error(response.message, "Error");
+                        toastr.error(response.message, 'Error');
                     }
                 },
-                error: function () {
-                    toastr.error('Ocurrió un error al procesar la solicitud.', 'Error');
+                error: function() {
+                    toastr.error('Error de conexión', 'Error');
                 }
             });
         });
+    });
 
-        // Cerrar modal si se hace clic en la X
-        $('#modal2FA').on('hidden.bs.modal', function () {
-            // Limpiar cualquier timer activo
-            if (typeof timer !== 'undefined') {
-                clearInterval(timer);
+    // Funcion para generar y mostrar el QR
+    function generarQR() {
+        $.ajax({
+            url: '@Url.Action("GenerarQR", "Login")',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    $('#qrContainer').html('<img src="' + response.qrImage + '" alt="QR Code" class="img-fluid" style="max-width: 150px;" />');
+                    $('#urlDisplay').text(response.url);
+                } else {
+                    $('#qrContainer').html('<p class="text-danger">Error al generar QR</p>');
+                }
+            },
+            error: function() {
+                $('#qrContainer').html('<p class="text-danger">Error de conexión</p>');
             }
         });
-    });
+    }
 </script>

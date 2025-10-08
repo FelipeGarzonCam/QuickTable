@@ -64,3 +64,5 @@ artifacts/
 
 # Publish profiles
 **/Properties/PublishProfiles/
+
+.vscode/

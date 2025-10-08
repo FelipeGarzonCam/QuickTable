@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using QuickTableProyect.Dominio;
 using System.Linq;
-//puto git
+
 namespace QuickTableProyect.Interface
 {
     public class MeseroController : Controller
@@ -107,10 +107,11 @@ namespace QuickTableProyect.Interface
 
             ViewBag.DetallesComentario = detallesComentario;
 
-            if (pedido == null || pedido.MeseroId != empleadoId)
+            if (pedido == null)
             {
                 return RedirectToAction("Index", "Mesero");
             }
+
 
             var menuItems = _menuService.ObtenerMenuItems();
 
@@ -139,17 +140,17 @@ namespace QuickTableProyect.Interface
             }
 
             var pedidoExistente = _pedidoService.ObtenerPedidoPorId(pedidoId);
-            if (pedidoExistente == null || pedidoExistente.MeseroId != empleadoId)
+            if (pedidoExistente == null)
             {
-                return Json(new { success = false, message = "Pedido no encontrado o sin permisos para editar." });
+                return Json(new { success = false, message = "Pedido no encontrado." });
             }
 
-            // Actualizar el pedido existente
+            // ✅ MANTENER EL MESERO ORIGINAL - NO CAMBIAR OWNERSHIP
             var pedidoActualizado = new PedidosActivos
             {
                 Id = pedidoId,
-                MeseroId = empleadoId,
-                EmpleadoNombre = HttpContext.Session.GetString("Nombre"),
+                MeseroId = pedidoExistente.MeseroId, // ✅ MANTENER EL MESERO ORIGINAL
+                EmpleadoNombre = pedidoExistente.EmpleadoNombre, // ✅ MANTENER EL NOMBRE ORIGINAL
                 NumeroMesa = pedidoExistente.NumeroMesa,
                 Detalles = detalles
             };
@@ -159,6 +160,7 @@ namespace QuickTableProyect.Interface
 
             return Json(new { success = true, message = "Pedido actualizado exitosamente." });
         }
+
         [HttpGet]
         public IActionResult ObtenerPedidosMesero()
         {
@@ -202,6 +204,44 @@ namespace QuickTableProyect.Interface
             _pedidoService.MarcarPedidoComoAceptado(pedidoId);
             return Json(new { success = true });
         }
+        [HttpGet]
+        public IActionResult ObtenerPedidosOtrosMeseros()
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            var empleadoIdString = HttpContext.Session.GetString("Id");
+
+            if (rol != "Mesero" || !int.TryParse(empleadoIdString, out int empleadoId))
+            {
+                return Unauthorized();
+            }
+
+            var pedidosOtros = _pedidoService.ObtenerPedidosActivos()
+                .Where(p => p.MeseroId != empleadoId)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.NumeroMesa,
+                    p.MeseroId,
+                    MeseroNombre = p.EmpleadoNombre,
+                    p.Estado,
+                    p.Subtotal,
+                    p.IVA,
+                    p.Total,
+                    Detalles = p.Detalles
+                        .Select(d => new
+                        {
+                            d.Nombre,
+                            d.Cantidad,
+                            d.Subtotal,
+                            comentario = d.Comentario ?? ""
+                        })
+                        .ToList()
+                })
+                .ToList();
+
+            return Json(pedidosOtros);
+        }
+
 
     }
 }

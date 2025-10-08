@@ -6,7 +6,11 @@ using System.Data.Entity;                                // EF 6 → Include()
 using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
-//puto git
+using QRCoder;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+
 namespace QuickTableProyect.Interface
 {
     public class LoginController : Controller
@@ -235,7 +239,43 @@ namespace QuickTableProyect.Interface
                 return Json(new { success = false, message = "Error: " + ex.Message });
             }
         }
+        //generar QR
+        [HttpGet]
+        public IActionResult GenerarQR()
+        {
+            try
+            {
+                // Obtener la IP y puerto del servidor
+                var request = HttpContext.Request;
+                var host = request.Host.Host;
+                var port = request.Host.Port ?? 5000;
 
+                // Construir la URL completa
+                string urlLogin = $"http://{host}:{port}/Login";
+
+                // Generar el codigo QR usando PngByteQRCode (compatible con .NET 8)
+                QRCodeGenerator qrGenerator = new QRCodeGenerator();
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(urlLogin, QRCodeGenerator.ECCLevel.Q);
+                PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
+
+                // Obtener el QR como array de bytes
+                byte[] qrCodeImage = qrCode.GetGraphic(20);
+
+                // Convertir a base64
+                string base64String = Convert.ToBase64String(qrCodeImage);
+
+                return Json(new
+                {
+                    success = true,
+                    qrImage = $"data:image/png;base64,{base64String}",
+                    url = urlLogin
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
 
 
     }

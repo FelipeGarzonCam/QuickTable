@@ -2,7 +2,29 @@
 @{
     ViewData["Title"] = "Editar Pedido";
 }
-<!--puta vida -->
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+    .border-primary {
+        border-width: 2px;
+    }
+
+    .fixed-bottom {
+        z-index: 1000;
+    }
+
+    textarea {
+        resize: none;
+    }
+</style>
+
+
 <div class="container-fluid">
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-warning text-white">
@@ -177,24 +199,3 @@
     });
 </script>
 
-<style>
-    .card {
-        transition: transform 0.2s;
-    }
-
-        .card:hover {
-            transform: translateY(-3px);
-        }
-
-    .border-primary {
-        border-width: 2px;
-    }
-
-    .fixed-bottom {
-        z-index: 1000;
-    }
-
-    textarea {
-        resize: none;
-    }
-</style>
