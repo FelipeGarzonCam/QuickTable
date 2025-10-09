@@ -52,6 +52,7 @@
             padding: 10px;
         }
     }
+
     /* Mejorar visualización de alertas de pedidos listos */
     .callout.callout-success {
         border-left: 5px solid #28a745;
@@ -95,7 +96,37 @@
         font-size: 1.1rem;
         padding: 12px;
     }
+    /* Iconos para tarjetas de otros meseros - CORREGIDO */
+    .small-box .icon {
+        position: absolute;
+        top: 0px;
+        right: 10px;
+        transform: translateY(-50%);
+        z-index: 1;
+        font-size: 35px;
+        color: rgba(0,0,0,.25);
+        pointer-events: none;
+    }
 
+   
+
+    /* Cuando la tarjeta está desplegada, ocupa todo el ancho */
+    .tarjeta-otro-container.col-12 .card {
+        width: 100%;
+    }
+
+    }
+
+    /* Mejoras para desktop */
+    @@media (min-width: 769px) {
+        .small-box .icon
+
+    {
+        font-size: 40px;
+        right: 15px;
+    }
+
+    }
 </style>
 
 <div class="content-wrapper">
@@ -117,7 +148,6 @@
     <section class="content">
         <div class="container-fluid">
             <!-- Info del Mesero -->
-            <!-- Info del Mesero -->
             <div class="row mb-2">
                 <div class="col-12">
                     <div class="small-box bg-dark">
@@ -127,7 +157,6 @@
                     </div>
                 </div>
             </div>
-
 
             <!-- Botón Nuevo Pedido -->
             <div class="row mb-3">
@@ -147,6 +176,30 @@
             <div class="row" id="pedidosContainer">
                 <!-- Los pedidos se cargarán aquí -->
             </div>
+
+            <!-- NUEVA SECCIÓN: Pedidos de Otros Meseros -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card card-secondary collapsed-card">
+                        <div class="card-header" style="cursor: pointer;" data-card-widget="collapse">
+                            <h3 class="card-title">
+                                <i class="fas fa-users"></i> Pedidos de Otros Meseros
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body" style="display: none;">
+                            <div id="pedidosOtrosMeserosContainer" class="row">
+                                <!-- Los pedidos se cargarán aquí dinámicamente -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </div>
@@ -162,9 +215,14 @@
             solicitarPermisosNotificacion();
 
             loadPedidos();
-            setInterval(loadPedidos, 2000);
-        });
+            loadPedidosOtrosMeseros();
 
+            // CORREGIDO: Actualizar ambas funciones cada 2 segundos
+            setInterval(function () {
+                loadPedidos();
+                loadPedidosOtrosMeseros();
+            }, 2000);
+        });
 
         function loadPedidos() {
             $.ajax({
@@ -175,6 +233,19 @@
                 },
                 error: function (xhr, status, error) {
                     console.log('Error al cargar datos:', error);
+                }
+            });
+        }
+
+        function loadPedidosOtrosMeseros() {
+            $.ajax({
+                url: '@Url.Action("ObtenerPedidosOtrosMeseros", "Mesero")',
+                type: 'GET',
+                success: function (data) {
+                    renderPedidosOtrosMeseros(data);
+                },
+                error: function (xhr, status, error) {
+                    console.log('Error al cargar pedidos de otros meseros:', error);
                 }
             });
         }
@@ -272,7 +343,143 @@
             });
         }
 
-                function renderPedidosListos() {
+        function renderPedidosOtrosMeseros(items) {
+            var container = $('#pedidosOtrosMeserosContainer');
+
+            // GUARDAR el estado de las tarjetas abiertas ANTES de limpiar
+            var tarjetasAbiertas = {};
+            container.find('[id^="detalle-otro-"]').each(function() {
+                var id = $(this).attr('id').replace('detalle-otro-', '');
+                if ($(this).is(':visible')) {
+                    tarjetasAbiertas[id] = true;
+                }
+            });
+
+            container.empty();
+
+            if (items.length === 0) {
+                container.append('<div class="col-12"><p class="text-muted text-center"><i class="fas fa-info-circle"></i> No hay otros pedidos activos</p></div>');
+                return;
+            }
+
+            $.each(items, function (index, item) {
+                var estadoColor = item.estado === 'Listo' ? 'success' :
+                                 item.estado === 'En Preparación' ? 'warning' : 'info';
+
+                // DETERMINAR si la tarjeta debe estar abierta
+                var detalleStyle = tarjetasAbiertas[item.id] ? 'display: block;' : 'display: none;';
+                var isOpen = tarjetasAbiertas[item.id] ? true : false;
+
+                // CLASE DINÁMICA: Si está abierta, ocupa toda la fila en móvil
+                var colClass = isOpen ? 'col-12' : 'col-6 col-md-4 col-lg-3';
+
+                var compactCard = `
+                    <div class="tarjeta-otro-container ${colClass} mb-3" data-pedido-id="${item.id}">
+                        <div class="small-box bg-${estadoColor}" style="cursor: pointer;" onclick="toggleDetalleOtro(${item.id})">
+                            <div class="inner">
+                                <h4>Mesa ${item.numeroMesa}</h4>
+                                <p>${item.meseroNombre}</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                        </div>
+
+                        <div id="detalle-otro-${item.id}" class="card card-${estadoColor} card-outline mt-2" style="${detalleStyle}">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-utensils"></i> Mesa ${item.numeroMesa} - ${item.meseroNombre}
+                                </h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" onclick="toggleDetalleOtro(${item.id})">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <dl class="row mb-2">
+                                    <dt class="col-5">Pedido #:</dt>
+                                    <dd class="col-7">${item.id}</dd>
+                                </dl>
+
+                                <table class="table table-sm table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Plato</th>
+                                            <th class="text-center">Cant.</th>
+                                            <th class="text-right">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${item.detalles.map(d => `
+                                            <tr>
+                                                <td>
+                                                    ${d.nombre}
+                                                    ${d.comentario ? `<br><em class="text-muted small">${d.comentario}</em>` : ''}
+                                                </td>
+                                                <td class="text-center">${d.cantidad}</td>
+                                                <td class="text-right">$${parseInt(d.subtotal).toLocaleString('es-CO')}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+
+                                <div class="totales">
+                                    <div class="row">
+                                        <div class="col-6">Subtotal:</div>
+                                        <div class="col-6 text-right">$${parseInt(item.subtotal).toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">IVA (19%):</div>
+                                        <div class="col-6 text-right">$${parseInt(item.iva).toLocaleString('es-CO')}</div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-6"><strong>Total:</strong></div>
+                                        <div class="col-6 text-right"><strong class="text-lg">$${parseInt(item.total).toLocaleString('es-CO')}</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="@Url.Action("EditarPedido", "Mesero")?pedidoId=${item.id}" class="btn btn-warning btn-block">
+                                    <i class="fas fa-edit"></i> Modificar Pedido
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.append(compactCard);
+            });
+        }
+
+
+
+        function toggleDetalleOtro(pedidoId) {
+            // Prevenir el evento de propagación si es necesario
+            if (event) event.stopPropagation();
+
+            var detalle = $('#detalle-otro-' + pedidoId);
+            var container = $(`.tarjeta-otro-container[data-pedido-id="${pedidoId}"]`);
+
+            // Verificar si está abierto o cerrado
+            var isVisible = detalle.is(':visible');
+
+            if (isVisible) {
+                // CERRAR: Cambiar a tamaño compacto
+                detalle.slideUp(200, function() {
+                    container.removeClass('col-12').addClass('col-6 col-md-4 col-lg-3');
+                });
+            } else {
+                // ABRIR: Cambiar a ancho completo en móvil
+                container.removeClass('col-6 col-md-4 col-lg-3').addClass('col-12');
+                detalle.slideDown(200);
+            }
+        }
+
+
+
+        function renderPedidosListos() {
             var listosContainer = $('#pedidosListos');
             listosContainer.empty();
 
@@ -296,7 +503,6 @@
 
                 // Mostrar notificación del sistema
                 mostrarNotificacion('Pedido Listo!', `Mesa ${item.numeroMesa} - Tu pedido está listo`);
-
 
                 // Vibrar dispositivo (doble seguridad)
                 vibrar();
@@ -361,14 +567,7 @@
                 console.log("Permiso de notificación denegado");
             }
         }
-
-
-        // Función para vibrar el dispositivo
-        function vibrar() {
-            if ("vibrate" in navigator) {
-                navigator.vibrate([200, 100, 200, 100, 200]);
-            }
-        }
+       
 
         function aceptarPedido(pedidoId) {
             $.post('@Url.Action("MarcarPedidoAceptado", "Mesero")', { pedidoId: pedidoId })
@@ -382,6 +581,4 @@
                 });
         }
     </script>
-
-
 }

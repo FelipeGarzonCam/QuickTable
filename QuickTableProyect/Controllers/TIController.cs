@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using System.Data.Entity;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
-
+//puto git
 
 namespace QuickTableProyect.Interface
 {

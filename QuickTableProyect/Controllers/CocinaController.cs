@@ -4,7 +4,7 @@ using QuickTableProyect.Dominio;
 using System;
 using System.Data.Entity;
 using System.Linq;
-
+//puto git
 namespace QuickTableProyect.Interface
 {
     public class CocinaController : Controller

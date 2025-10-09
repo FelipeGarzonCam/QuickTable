@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using QuickTableProyect.Models;
 using System.Diagnostics;
-
+//puto git
 namespace QuickTableProyect.Controllers
 {
     public class HomeController : Controller

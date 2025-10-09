@@ -7,5 +7,6 @@
         public DateTime FechaHoraConexion { get; set; }
         public string? FechaHoraDesconexion { get; set; }
         public Empleado Empleado { get; set; } // Relación con Empleado
+        public bool MarcoTarjetaSalida { get; set; }
     }
-}
+}//puto git

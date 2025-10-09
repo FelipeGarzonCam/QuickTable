@@ -58,13 +58,7 @@
                         <a href="#" class="nav-link" style="color: #FFF" onclick="handleBackButton()">
                             <i class="fas fa-arrow-left"></i> Regresar
                         </a>
-                    </li>
-                    <!-- NUEVO: Botón Finalizar Día -->
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" style="color: #FFC107" onclick="finalizarDia(event)">
-                            <i class="fas fa-calendar-check"></i> Finalizar Día
-                        </a>
-                    </li>
+                    </li>                    
                     <!-- Botón de Cerrar Sesión -->
                     <li class="nav-item">
                         <a asp-action="Logout" asp-controller="Login" class="nav-link" style="color: #FFF">
@@ -163,46 +157,7 @@
     @RenderSection("Scripts", required: false)
 
     <script>
-        // Función para finalizar el día laboral
-        function finalizarDia(event) {
-            event.preventDefault();
-
-            Swal.fire({
-                title: 'Finalizar Día Laboral',
-                text: '¿Estás seguro de que deseas finalizar tu jornada laboral? Esto cerrará tu sesión.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, finalizar día',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '@Url.Action("FinalizarDia", "Login")',
-                        type: 'POST',
-                        success: function(response) {
-                            if (response.success) {
-                                Swal.fire({
-                                    title: 'Día Finalizado',
-                                    text: response.message,
-                                    icon: 'success',
-                                    timer: 2000,
-                                    showConfirmButton: false
-                                }).then(() => {
-                                    window.location.href = '@Url.Action("Index", "Login")';
-                                });
-                            } else {
-                                Swal.fire('Error', response.message, 'error');
-                            }
-                        },
-                        error: function() {
-                            Swal.fire('Error', 'No se pudo finalizar el día laboral', 'error');
-                        }
-                    });
-                }
-            });
-        }
+        
 
         document.addEventListener('DOMContentLoaded', function () {
             const themeToggle = document.querySelector('.toggle-theme');

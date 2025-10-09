@@ -1,65 +1,930 @@
 ﻿@model List<QuickTableProyect.Dominio.Empleado>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Gestión de Empleados y Tarjetas NFC";
+}
+<!--puta vida -->
+@section Styles {
+    <style>
+        /* SweetAlert2 Basic Styles - Essential offline version */
+        .swal2-popup {
+            display: flex !important;
+            flex-direction: column;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1060;
+            background: #fff;
+            border-radius: 0.3125rem;
+            box-shadow: 0 0 1px rgba(0,0,0,0.075), 0 1px 2px rgba(0,0,0,0.075);
+            padding: 1.25em;
+            min-width: 300px;
+            max-width: 500px;
+        }
 
-<div class="container">
-    <h2>Lista de Empleados</h2>
+        .swal2-title {
+            font-size: 1.875em;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #545454;
+        }
 
-    <a asp-action="CrearEmpleado" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Agregar Empleado</a>
+        .swal2-content {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #545454;
+        }
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Rol</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var empleado in Model)
-            {
-                <tr>
-                    <td>@empleado.Id</td>
-                    <td>@empleado.Nombre</td>
-                    <td>@empleado.Rol</td>
-                    <td>
-                        <a class="btn btn-warning btn-sm" href="@Url.Action("EditarEmpleado", "Administrador", new { id = empleado.Id })">
-                            <i class="fa fa-edit"></i>
-                        </a>
-                        <button class="btn btn-danger btn-sm" onclick="showDeleteModal(@empleado.Id)">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
+        .swal2-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+
+        .swal2-confirm {
+            background-color: #7066e0;
+            color: #fff;
+            border: none;
+            border-radius: 0.25em;
+            padding: 0.625em 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .swal2-cancel {
+            background-color: #6e7881;
+            color: #fff;
+            border: none;
+            border-radius: 0.25em;
+            padding: 0.625em 1.1em;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .swal2-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1040;
+        }
+
+        .swal2-icon {
+            width: 80px;
+            height: 80px;
+            border: 4px solid transparent;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+            .swal2-icon.swal2-success {
+                border-color: #a5dc86;
+                color: #a5dc86;
             }
-        </tbody>
-    </table>
-</div>
 
-<!-- Modal de confirmación de eliminación -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Confirmación de eliminación</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                ¿Está seguro de que desea eliminar este empleado?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <a id="confirmDeleteButton" class="btn btn-danger">Eliminar</a>
+            .swal2-icon.swal2-error {
+                border-color: #f27474;
+                color: #f27474;
+            }
+
+            .swal2-icon.swal2-warning {
+                border-color: #f8bb86;
+                color: #f8bb86;
+            }
+
+            .swal2-icon.swal2-info {
+                border-color: #3fc3ee;
+                color: #3fc3ee;
+            }
+
+            .swal2-icon.swal2-question {
+                border-color: #87adbd;
+                color: #87adbd;
+            }
+
+        /* Vista principal */
+        .employee-card {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            background: #fff;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+            .employee-card:hover {
+                transform: translateY(-3px) scale(1.02);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+                border-color: #007bff;
+            }
+
+            /* Animaciones de filtrado */
+            .employee-card.filtered-out {
+                opacity: 0;
+                transform: scale(0.8);
+                pointer-events: none;
+            }
+
+            .employee-card.filtered-in {
+                opacity: 1;
+                transform: scale(1);
+                pointer-events: auto;
+            }
+
+        /* Modo oscuro */
+        .dark-mode .employee-card {
+            background: #343a40;
+            border-color: #495057;
+            color: #fff;
+        }
+
+            .dark-mode .employee-card:hover {
+                border-color: #17a2b8;
+            }
+
+        .card-header-custom {
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            padding: 1rem;
+        }
+
+        .role-badge {
+            font-size: 0.9em;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .role-mesero {
+            background: #28a745;
+            color: white;
+        }
+
+        .role-cocina {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .role-cajero {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .nfc-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .nfc-assigned {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+
+        .nfc-unassigned {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        /* Modo oscuro para estados NFC */
+        .dark-mode .nfc-assigned {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border-color: rgba(40, 167, 69, 0.4);
+        }
+
+        .dark-mode .nfc-unassigned {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border-color: rgba(255, 193, 7, 0.4);
+        }
+
+        .btn-nfc {
+            width: 100%;
+            margin-bottom: 8px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+            .btn-nfc:hover {
+                transform: scale(1.02);
+            }
+
+        .stats-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+            .stats-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                border-color: #007bff;
+            }
+
+            .stats-card.active {
+                background: #007bff;
+                color: white;
+                border-color: #007bff;
+            }
+
+                .stats-card.active h3 {
+                    color: white !important;
+                }
+
+                .stats-card.active p {
+                    color: white !important;
+                }
+
+            .stats-card h3 {
+                color: #007bff;
+                margin-bottom: 0.5rem;
+                font-size: 2rem;
+                font-weight: bold;
+            }
+
+            .stats-card p {
+                color: #6c757d;
+                margin-bottom: 0;
+                font-weight: 500;
+            }
+
+        /* Modo oscuro para tarjetas de estadísticas */
+        .dark-mode .stats-card {
+            background: #495057;
+            border-color: #6c757d;
+        }
+
+            .dark-mode .stats-card:hover {
+                border-color: #17a2b8;
+            }
+
+            .dark-mode .stats-card.active {
+                background: #17a2b8;
+                border-color: #17a2b8;
+            }
+
+            .dark-mode .stats-card h3 {
+                color: #17a2b8;
+            }
+
+            .dark-mode .stats-card p {
+                color: #adb5bd;
+            }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+            .action-buttons .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+        }
+
+            .empty-state i {
+                color: #6c757d;
+                margin-bottom: 1rem;
+            }
+
+            .empty-state h3 {
+                color: #495057;
+                margin-bottom: 1rem;
+            }
+
+            .empty-state p {
+                color: #6c757d;
+                margin-bottom: 2rem;
+            }
+
+        /* Modo oscuro para estado vacío */
+        .dark-mode .empty-state h3 {
+            color: #adb5bd;
+        }
+
+        .dark-mode .empty-state p {
+            color: #6c757d;
+        }
+
+        /* Filtros activos indicator */
+        .filter-indicator {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+            .filter-indicator.show {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            .filter-indicator .btn-close-filter {
+                background: none;
+                border: none;
+                color: white;
+                margin-left: 10px;
+                cursor: pointer;
+            }
+
+
+
+
+
+    </style>
+}
+
+
+    <section class="content-header">
+        <div style="padding: 0 15px; width: 100%; max-width: 100%;">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1><i class="fas fa-users-cog"></i> @ViewData["Title"]</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a asp-action="Index">Panel Admin</a></li>
+                        <li class="breadcrumb-item active">Gestión de Empleados</li>
+                    </ol>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    </section>
 
-<script>
-    function showDeleteModal(id) {
-        const confirmDeleteButton = document.getElementById("confirmDeleteButton");
-        confirmDeleteButton.href = '@Url.Action("EliminarEmpleado", "Administrador")' + "?id=" + id;
+    <section class="content">
+        <div style="padding: 0 15px; width: 100%; max-width: 100%;">
+            <!-- Indicador de filtros activos -->
+            <div id="filterIndicator" class="filter-indicator">
+                <span id="filterText"></span>
+                <button class="btn-close-filter" onclick="clearFilters()">×</button>
+            </div>
 
-        const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
-        deleteModal.show();
-    }
-</script>
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <i class="fas fa-exclamation-triangle"></i> @TempData["Error"]
+                </div>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                </div>
+            }
+
+            <!-- Botón para agregar empleado -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <a asp-action="CrearEmpleado" class="btn btn-success btn-lg">
+                        <i class="fas fa-user-plus"></i> Agregar Nuevo Empleado
+                    </a>
+                </div>
+            </div>
+
+            <!-- Estadísticas INTERACTIVAS -->
+            <div class="row mb-4">
+                <div class="col-xl-3 col-lg-6 col-md-6" style="padding-left: 8px; padding-right: 8px;">
+                    <div class="stats-card" onclick="filterEmployees('all')" id="filter-all">
+                        <h3>@Model.Where(e => e.Rol != "Admin").Count()</h3>
+                        <p><i class="fas fa-users"></i> Total Empleados</p>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6" style="padding-left: 8px; padding-right: 8px;">
+                    <div class="stats-card" onclick="filterEmployees('with-nfc')" id="filter-with-nfc">
+                        <h3>@Model.Count(e => e.Rol != "Admin" && !string.IsNullOrEmpty(e.TarjetaUID))</h3>
+                        <p><i class="fas fa-id-card"></i> Con Tarjeta NFC</p>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6" style="padding-left: 8px; padding-right: 8px;">
+                    <div class="stats-card" onclick="filterEmployees('without-nfc')" id="filter-without-nfc">
+                        <h3>@Model.Count(e => e.Rol != "Admin" && string.IsNullOrEmpty(e.TarjetaUID))</h3>
+                        <p><i class="fas fa-exclamation-triangle"></i> Sin Tarjeta</p>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-lg-6 col-md-6" style="padding-left: 8px; padding-right: 8px;">
+                    <div class="stats-card" onclick="showRoleFilter()" id="filter-roles">
+                        <h3>@Model.Where(e => e.Rol != "Admin").GroupBy(e => e.Rol).Count()</h3>
+                        <p><i class="fas fa-layer-group"></i> Filtrar por Rol</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de empleados -->
+            <div class="row" id="employeesContainer">
+                @foreach (var empleado in Model.Where(e => e.Rol != "Admin"))
+                {
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 mb-4 employee-item" style="padding-left: 8px; padding-right: 8px;"
+                         data-role="@empleado.Rol.ToLower()"
+                         data-has-nfc="@(!string.IsNullOrEmpty(empleado.TarjetaUID) ? "true" : "false")">
+                        <div class="card employee-card filtered-in">
+                            <div class="card-header-custom text-center">
+                                <h4 class="mb-2"><i class="fas fa-user-circle"></i> @empleado.Nombre</h4>
+                                <span class="role-badge role-@empleado.Rol.ToLower()">
+                                    @switch (empleado.Rol)
+                                    {
+                                        case "Mesero":
+                                            <i class="fas fa-concierge-bell"></i>
+                                            break;
+                                        case "Cocina":
+                                            <i class="fas fa-utensils"></i>
+                                            break;
+                                        case "Cajero":
+                                            <i class="fas fa-cash-register"></i>
+                                            break;
+                                    }
+                                    @empleado.Rol
+                                </span>
+                            </div>
+
+                            <div class="card-body text-center">
+                                <!-- Estado de tarjeta NFC -->
+                                <div class="mb-3">
+                                    @if (!string.IsNullOrEmpty(empleado.TarjetaUID))
+                                    {
+                                        <div class="nfc-status nfc-assigned">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            Tarjeta NFC Asignada
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="nfc-status nfc-unassigned">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Sin Tarjeta NFC
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="action-buttons">
+                                    <a asp-action="EditarEmpleado" asp-route-id="@empleado.Id"
+                                       class="btn btn-warning">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                    <button class="btn btn-danger" onclick="confirmarEliminacion(@empleado.Id, '@empleado.Nombre')">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </div>
+
+                                <!-- Botones de tarjeta NFC -->
+                                <div class="nfc-actions">
+                                    @if (!string.IsNullOrEmpty(empleado.TarjetaUID))
+                                    {
+                                        <button class="btn btn-info btn-nfc" onclick="reasignarTarjeta(@empleado.Id, '@empleado.Nombre', '@empleado.Rol')">
+                                            <i class="fas fa-sync-alt"></i> Reasignar Tarjeta
+                                        </button>
+                                        <button class="btn btn-outline-warning btn-nfc" onclick="desasignarTarjeta(@empleado.Id, '@empleado.Nombre')">
+                                            <i class="fas fa-times"></i> Quitar Tarjeta
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-success btn-nfc" onclick="asignarTarjeta(@empleado.Id, '@empleado.Nombre', '@empleado.Rol')">
+                                            <i class="fas fa-plus-circle"></i> Asignar Tarjeta NFC
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (!Model.Any(e => e.Rol != "Admin"))
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body empty-state">
+                                <i class="fas fa-users fa-5x"></i>
+                                <h3>No hay empleados registrados</h3>
+                                <p>Comienza agregando tu primer empleado para poder gestionar tarjetas NFC.</p>
+                                <a asp-action="CrearEmpleado" class="btn btn-success btn-lg">
+                                    <i class="fas fa-user-plus"></i> Crear Primer Empleado
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+
+@section Scripts {
+    <script>
+        // Mini SweetAlert2 offline version - Solo funciones básicas
+        window.Swal = {
+            fire: function(options) {
+                if (typeof options === 'string') {
+                    options = { title: arguments[0], text: arguments[1], icon: arguments[2] };
+                }
+                return this.showModal(options);
+            },
+
+            showModal: function(options) {
+                return new Promise((resolve, reject) => {
+                    // Crear backdrop
+                    const backdrop = document.createElement('div');
+                    backdrop.className = 'swal2-backdrop';
+                    document.body.appendChild(backdrop);
+
+                    // Crear popup
+                    const popup = document.createElement('div');
+                    popup.className = 'swal2-popup';
+
+                    let html = '';
+
+                    // Icono
+                    if (options.icon) {
+                        html += `<div class="swal2-icon swal2-${options.icon}">`;
+                        switch(options.icon) {
+                            case 'success':
+                                html += '<i class="fas fa-check"></i>';
+                                break;
+                            case 'error':
+                                html += '<i class="fas fa-times"></i>';
+                                break;
+                            case 'warning':
+                                html += '<i class="fas fa-exclamation-triangle"></i>';
+                                break;
+                            case 'info':
+                                html += '<i class="fas fa-info"></i>';
+                                break;
+                            case 'question':
+                                html += '<i class="fas fa-question"></i>';
+                                break;
+                        }
+                        html += '</div>';
+                    }
+
+                    // Título
+                    if (options.title) {
+                        html += `<h2 class="swal2-title">${options.title}</h2>`;
+                    }
+
+                    // Contenido
+                    if (options.text) {
+                        html += `<div class="swal2-content">${options.text}</div>`;
+                    }
+                    if (options.html) {
+                        html += `<div class="swal2-content">${options.html}</div>`;
+                    }
+
+                    // Botones
+                    html += '<div class="swal2-actions">';
+                    if (options.showCancelButton) {
+                        html += `<button class="swal2-cancel" type="button">${options.cancelButtonText || 'Cancelar'}</button>`;
+                    }
+                    html += `<button class="swal2-confirm" type="button">${options.confirmButtonText || 'OK'}</button>`;
+                    html += '</div>';
+
+                    popup.innerHTML = html;
+                    document.body.appendChild(popup);
+
+                    // Event listeners
+                    const confirmBtn = popup.querySelector('.swal2-confirm');
+                    const cancelBtn = popup.querySelector('.swal2-cancel');
+
+                    const cleanup = () => {
+                        document.body.removeChild(backdrop);
+                        document.body.removeChild(popup);
+                    };
+
+                    confirmBtn.addEventListener('click', () => {
+                        cleanup();
+                        resolve({ isConfirmed: true });
+                    });
+
+                    if (cancelBtn) {
+                        cancelBtn.addEventListener('click', () => {
+                            cleanup();
+                            resolve({ isConfirmed: false });
+                        });
+                    }
+
+                    backdrop.addEventListener('click', () => {
+                        cleanup();
+                        resolve({ isConfirmed: false });
+                    });
+
+                    // Auto close
+                    if (options.timer) {
+                        setTimeout(() => {
+                            cleanup();
+                            resolve({ isConfirmed: false });
+                        }, options.timer);
+                    }
+                });
+            }
+        };
+
+        // Variables globales para filtros
+        let currentFilter = 'all';
+
+        // Función para filtrar empleados
+        function filterEmployees(filterType) {
+            const employees = document.querySelectorAll('.employee-item');
+            const filterIndicator = document.getElementById('filterIndicator');
+            const filterText = document.getElementById('filterText');
+
+            // Limpiar filtros activos previos
+            document.querySelectorAll('.stats-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Marcar filtro activo
+            document.getElementById(`filter-${filterType}`).classList.add('active');
+            currentFilter = filterType;
+
+            let visibleCount = 0;
+            let filterLabel = '';
+
+            employees.forEach(emp => {
+                const hasNfc = emp.dataset.hasNfc === 'true';
+                const card = emp.querySelector('.employee-card');
+                let show = false;
+
+                switch(filterType) {
+                    case 'all':
+                        show = true;
+                        filterLabel = 'Todos los empleados';
+                        break;
+                    case 'with-nfc':
+                        show = hasNfc;
+                        filterLabel = 'Solo empleados con tarjeta NFC';
+                        break;
+                    case 'without-nfc':
+                        show = !hasNfc;
+                        filterLabel = 'Solo empleados sin tarjeta NFC';
+                        break;
+                }
+
+                if (show) {
+                    card.classList.remove('filtered-out');
+                    card.classList.add('filtered-in');
+                    visibleCount++;
+                } else {
+                    card.classList.remove('filtered-in');
+                    card.classList.add('filtered-out');
+                }
+            });
+
+            // Mostrar indicador de filtro
+            if (filterType !== 'all') {
+                filterText.textContent = `${filterLabel} (${visibleCount} empleados)`;
+                filterIndicator.classList.add('show');
+            } else {
+                filterIndicator.classList.remove('show');
+            }
+        }
+
+        // Función para mostrar filtros de roles
+        function showRoleFilter() {
+            Swal.fire({
+                title: 'Filtrar por Rol',
+                html: `
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn btn-success" style="width: 100%;" onclick="filterByRole('mesero')">
+                            <i class="fas fa-concierge-bell"></i> Solo Meseros
+                        </button>
+                        <button class="btn btn-info" style="width: 100%;" onclick="filterByRole('cocina')">
+                            <i class="fas fa-utensils"></i> Solo Cocina
+                        </button>
+                        <button class="btn btn-warning" style="width: 100%;" onclick="filterByRole('cajero')">
+                            <i class="fas fa-cash-register"></i> Solo Cajeros
+                        </button>                       
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Cerrar'
+            });
+        }
+
+        // Función para filtrar por rol específico
+        function filterByRole(role) {
+            const employees = document.querySelectorAll('.employee-item');
+            const filterIndicator = document.getElementById('filterIndicator');
+            const filterText = document.getElementById('filterText');
+
+            // Limpiar filtros activos previos
+            document.querySelectorAll('.stats-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Marcar filtro de roles como activo
+            document.getElementById('filter-roles').classList.add('active');
+            currentFilter = role;
+
+            let visibleCount = 0;
+            const roleNames = {
+                'mesero': 'Meseros',
+                'cocina': 'Personal de Cocina',
+                'cajero': 'Cajeros'
+            };
+
+            employees.forEach(emp => {
+                const empRole = emp.dataset.role;
+                const card = emp.querySelector('.employee-card');
+
+                if (empRole === role) {
+                    card.classList.remove('filtered-out');
+                    card.classList.add('filtered-in');
+                    visibleCount++;
+                } else {
+                    card.classList.remove('filtered-in');
+                    card.classList.add('filtered-out');
+                }
+            });
+
+            // Mostrar indicador
+            filterText.textContent = `Solo ${roleNames[role]} (${visibleCount} empleados)`;
+            filterIndicator.classList.add('show');
+
+            // Cerrar SweetAlert
+            document.querySelector('.swal2-backdrop').click();
+        }
+
+        // Función para limpiar filtros
+        function clearFilters() {
+            filterEmployees('all');
+            currentFilter = 'all';
+        }
+
+        // Función para confirmar eliminación de empleado
+        function confirmarEliminacion(empleadoId, nombreEmpleado) {
+            Swal.fire({
+                title: '¿Eliminar empleado?',
+                text: `¿Estás seguro de eliminar a ${nombreEmpleado}? Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '@Url.Action("EliminarEmpleado")?id=' + empleadoId;
+                }
+            });
+        }
+
+        // Función para asignar tarjeta NFC
+        function asignarTarjeta(empleadoId, nombreEmpleado, rolEmpleado) {
+            Swal.fire({
+                title: 'Generando código...',
+                text: `Asignando tarjeta NFC para ${nombreEmpleado} (${rolEmpleado})`,
+                icon: 'info'
+            });
+
+            $.ajax({
+                url: '@Url.Action("AsignarTarjetaEmpleado")',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ empleadoId: empleadoId }),
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Código Generado',
+                            html: `
+                                <div style="text-align: center;">
+                                    <h2 style="color: #007bff; margin-bottom: 1rem;">${response.codigoSesion}</h2>
+                                    <p><strong>Empleado:</strong> ${response.nombreEmpleado}</p>
+                                    <p><strong>Rol:</strong> ${response.rolEmpleado}</p>
+                                    <hr>
+                                    <p style="color: #6c757d;">
+                                        <i class="fas fa-info-circle"></i>
+                                        Vaya a la Raspberry Pi e ingrese este código para asignar la tarjeta NFC.
+                                    </p>
+                                    <p style="color: #ffc107;">
+                                        <i class="fas fa-clock"></i>
+                                        El código expira en 10 minutos.
+                                    </p>
+                                </div>
+                            `,
+                            icon: 'success',
+                            confirmButtonText: 'Entendido'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.message,
+                            icon: 'error'
+                        });
+                    }
+                },
+                error: function() {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'No se pudo generar el código de sesión',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+
+        // Función para reasignar tarjeta NFC
+        function reasignarTarjeta(empleadoId, nombreEmpleado, rolEmpleado) {
+            Swal.fire({
+                title: '¿Reasignar tarjeta?',
+                text: `¿Deseas reasignar una nueva tarjeta NFC para ${nombreEmpleado}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, reasignar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    asignarTarjeta(empleadoId, nombreEmpleado, rolEmpleado);
+                }
+            });
+        }
+
+        // Función para desasignar tarjeta NFC
+        function desasignarTarjeta(empleadoId, nombreEmpleado) {
+            Swal.fire({
+                title: '¿Quitar tarjeta?',
+                text: `¿Estás seguro de quitar la tarjeta NFC de ${nombreEmpleado}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, quitar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '@Url.Action("DesasignarTarjetaEmpleado")',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ empleadoId: empleadoId }),
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Tarjeta Eliminada',
+                                    text: response.message,
+                                    icon: 'success',
+                                    timer: 2000
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Error',
+                                    text: response.message,
+                                    icon: 'error'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                title: 'Error',
+                                text: 'No se pudo desasignar la tarjeta',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

@@ -8,7 +8,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using static QuickTableProyect.Aplicacion.PedidoService;
-
+using QuickTableProyect.Persistencia.Datos;
+//puto git
 namespace QuickTableProyect.Controllers
 {
     public class AdministradorController : Controller
@@ -18,6 +19,9 @@ namespace QuickTableProyect.Controllers
         private readonly RegistroSesionService _registroSesionService;
         private readonly IPedidoService _pedidoService;
         private readonly HistorialPedidoService _historialPedidoService;
+
+        // AGREGAR contexto para gestión de tarjetas
+        private readonly SistemaQuickTableContext ctx;
 
         // Asegúrate de que este sea el único constructor en la clase
         public AdministradorController(MenuService menuService, EmpleadoService empleadoService,
@@ -29,6 +33,9 @@ namespace QuickTableProyect.Controllers
             _registroSesionService = registroSesionService;
             _pedidoService = pedidoService;
             _historialPedidoService = historialPedidoService;
+
+            // AGREGAR inicialización del contexto
+            ctx = new SistemaQuickTableContext();
 
             // Establecer el contexto de licencia de EPPlus
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
@@ -193,7 +200,6 @@ namespace QuickTableProyect.Controllers
             ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero" };
             return View();
         }
-
         [HttpPost]
         public IActionResult CrearEmpleado(Empleado empleado)
         {
@@ -202,14 +208,41 @@ namespace QuickTableProyect.Controllers
             {
                 return RedirectToAction("Index", "Login");
             }
+
+            // DEPURACIÓN - AGREGAR ESTAS LÍNEAS:
+            System.Diagnostics.Debug.WriteLine($"=== CREAR EMPLEADO ===");
+            System.Diagnostics.Debug.WriteLine($"Nombre: {empleado.Nombre}");
+            System.Diagnostics.Debug.WriteLine($"Rol: {empleado.Rol}");
+            System.Diagnostics.Debug.WriteLine($"Contrasena: {empleado.Contrasena}");
+            System.Diagnostics.Debug.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
+
+            foreach (var error in ModelState)
+            {
+                System.Diagnostics.Debug.WriteLine($"Campo: {error.Key}, Errores: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+            }
+
             if (ModelState.IsValid)
             {
-                _empleadoService.CrearEmpleado(empleado);
-                return RedirectToAction(nameof(ModificarEmpleados));
+                empleado.Activo = true;
+                System.Diagnostics.Debug.WriteLine("Llamando _empleadoService.CrearEmpleado");
+
+                try
+                {
+                    _empleadoService.CrearEmpleado(empleado);
+                    System.Diagnostics.Debug.WriteLine("Empleado creado exitosamente");
+                    return RedirectToAction(nameof(ModificarEmpleados));
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ERROR CREANDO EMPLEADO: {ex.Message}");
+                    ModelState.AddModelError("", $"Error: {ex.Message}");
+                }
             }
-            ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero" };
+
+            ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero", "Admin" };
             return View(empleado);
         }
+
 
         public IActionResult EditarEmpleado(int id)
         {
@@ -245,18 +278,85 @@ namespace QuickTableProyect.Controllers
             _empleadoService.EliminarEmpleado(id);
             return RedirectToAction(nameof(ModificarEmpleados));
         }
-
         [HttpGet]
-        public IActionResult RegistroSesiones()
+        public IActionResult RegistroSesiones(DateTime? fecha = null, int? empleadoId = null, string rol = null)
         {
-            var rol = HttpContext.Session.GetString("Rol");
-            if (rol != "Admin")
+            var rolActual = HttpContext.Session.GetString("Rol");
+            if (rolActual != "Admin")
             {
                 return RedirectToAction("Index", "Login");
             }
-            var registros = _registroSesionService.ObtenerRegistrosPorFechaRolIdNombre(null, "", null, "");
-            return View(registros);
+
+            var empleados = _empleadoService.ObtenerEmpleados();
+            ViewBag.Empleados = empleados;
+            ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero", "Admin" };
+
+            var jornadas = _registroSesionService.ObtenerJornadasDiarias(fecha, empleadoId, rol);
+
+            if (jornadas == null)
+            {
+                jornadas = new List<JornadaDiariaDto>();
+            }
+
+            ViewBag.Fecha = fecha;
+            ViewBag.EmpleadoId = empleadoId;
+            ViewBag.RolSeleccionado = rol;
+
+            return View(jornadas);
         }
+
+        [HttpGet]
+        public IActionResult ExportarExcel(DateTime? fecha = null, int? empleadoId = null, string rol = null)
+        {
+            var jornadas = _registroSesionService.ObtenerJornadasDiarias(fecha, empleadoId, rol);
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Jornadas Laborales");
+
+                worksheet.Cells[1, 1].Value = "Empleado";
+                worksheet.Cells[1, 2].Value = "Rol";
+                worksheet.Cells[1, 3].Value = "Fecha";
+                worksheet.Cells[1, 4].Value = "Primera Entrada";
+                worksheet.Cells[1, 5].Value = "Última Salida";
+                worksheet.Cells[1, 6].Value = "Tiempo Trabajado";
+                worksheet.Cells[1, 7].Value = "Sesiones";
+                worksheet.Cells[1, 8].Value = "Anotación";
+
+                using (var range = worksheet.Cells[1, 1, 1, 8])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+                }
+
+                int row = 2;
+                foreach (var jornada in jornadas)
+                {
+                    worksheet.Cells[row, 1].Value = jornada.EmpleadoNombre;
+                    worksheet.Cells[row, 2].Value = jornada.Rol;
+                    worksheet.Cells[row, 3].Value = jornada.Fecha.ToString("dd/MM/yyyy");
+                    worksheet.Cells[row, 4].Value = jornada.PrimeraEntrada?.ToString("HH:mm") ?? "-";
+                    worksheet.Cells[row, 5].Value = jornada.UltimaSalida?.ToString("HH:mm") ?? "-";
+                    worksheet.Cells[row, 6].Value = $"{(int)jornada.TiempoTrabajado.TotalHours}h {jornada.TiempoTrabajado.Minutes}m";
+                    worksheet.Cells[row, 7].Value = jornada.TotalSesiones;
+                    worksheet.Cells[row, 8].Value = jornada.Anotacion;
+                    row++;
+                }
+
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+
+                string fileName = $"Jornadas_Laborales_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
+
+
+
 
         [HttpGet]
         public IActionResult ObtenerRegistrosSesiones(DateTime? fecha, string rol, int? empleadoId, string nombre, int pageNumber = 1, int pageSize = 10, string sortColumn = "FechaHoraConexion", string sortOrder = "desc")
@@ -327,7 +427,8 @@ namespace QuickTableProyect.Controllers
                     nombre = r.Empleado.Nombre,
                     rol = r.Empleado.Rol,
                     fechaHoraConexion = r.FechaHoraConexion.ToString("yyyy-MM-ddTHH:mm:ss"),
-                    fechaHoraDesconexion = r.FechaHoraDesconexion
+                    fechaHoraDesconexion = r.FechaHoraDesconexion,
+                    marcoTarjetaSalida = r.MarcoTarjetaSalida // NUEVO CAMPO
                 })
                 .ToList();
 
@@ -403,6 +504,7 @@ namespace QuickTableProyect.Controllers
                 worksheet.Cells[1, 3].Value = "Rol";
                 worksheet.Cells[1, 4].Value = "Fecha y Hora Conexión";
                 worksheet.Cells[1, 5].Value = "Fecha y Hora Desconexión";
+                worksheet.Cells[1, 6].Value = "Método Salida"; // NUEVA COLUMNA
 
                 int row = 2;
                 foreach (var registro in sortedRegistros)
@@ -414,11 +516,12 @@ namespace QuickTableProyect.Controllers
                     worksheet.Cells[row, 5].Value = registro.FechaHoraDesconexion is null ? "En línea" : registro.FechaHoraDesconexion == "Error al cerrar sesión"
                           ? registro.FechaHoraDesconexion
                         : registro.FechaHoraDesconexion;
+                    worksheet.Cells[row, 6].Value = registro.MarcoTarjetaSalida ? "Tarjeta NFC" : "Manual/Timeout"; // NUEVA COLUMNA
                     row++;
                 }
 
                 // Estilizar tabla
-                using (var range = worksheet.Cells[1, 1, 1, 5])
+                using (var range = worksheet.Cells[1, 1, 1, 6]) // ACTUALIZADO A 6 COLUMNAS
                 {
                     range.Style.Font.Bold = true;
                     range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
@@ -623,10 +726,10 @@ namespace QuickTableProyect.Controllers
             }
 
             if (!string.IsNullOrEmpty(nombreMesero))
-    {
-        query = query.Where(h => h.MeseroNombre != null && 
-                               h.MeseroNombre.Contains(nombreMesero, StringComparison.OrdinalIgnoreCase));
-    }
+            {
+                query = query.Where(h => h.MeseroNombre != null &&
+                                       h.MeseroNombre.Contains(nombreMesero, StringComparison.OrdinalIgnoreCase));
+            }
 
             if (!string.IsNullOrEmpty(mesa))
             {
@@ -736,5 +839,141 @@ namespace QuickTableProyect.Controllers
                     $"HistorialPedidos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
             }
         }
+
+        // ============= MÉTODOS NUEVOS PARA GESTIÓN DE TARJETAS NFC =============
+
+        [HttpGet]
+        public IActionResult GestionarTarjetas()
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "Admin")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            try
+            {
+                var empleados = ctx.Empleados
+                    .Where(e => e.Rol != "Admin") // Solo empleados normales (Mesero, Cocina, Cajero)
+                    .OrderBy(e => e.Nombre)
+                    .ToList();
+
+                return View(empleados);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error al cargar empleados: {ex.Message}";
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AsignarTarjetaEmpleado([FromBody] AsignarTarjetaRequest request)
+        {
+            try
+            {
+                if (request == null || request.empleadoId <= 0)
+                {
+                    return Json(new { success = false, message = "Datos inválidos" });
+                }
+
+                var empleado = ctx.Empleados.Find(request.empleadoId);
+                if (empleado == null)
+                {
+                    return Json(new { success = false, message = "Empleado no encontrado" });
+                }
+
+                // Generar código de sesión (6 dígitos)
+                string codigoSesion = Math.Abs(HttpContext.Session.Id.GetHashCode()).ToString("000000").Substring(0, 6);
+
+                // Crear registro temporal en tabla Codigos2FA (reutilizamos la tabla existente)
+                var codigoTemporal = new Codigo2FA
+                {
+                    EmpleadoId = request.empleadoId,
+                    Codigo = codigoSesion,
+                    Expiracion = DateTime.Now.AddMinutes(10), // 10 minutos para usar el código
+                    EsParaTarjetaEmpleado = true // Indica que es para asignar tarjeta de empleado
+                };
+
+                // Limpiar códigos vencidos primero
+                var vencidos = ctx.Codigos2FA.Where(c => c.Expiracion < DateTime.Now).ToList();
+                ctx.Codigos2FA.RemoveRange(vencidos);
+
+                ctx.Codigos2FA.Add(codigoTemporal);
+                ctx.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    codigoSesion = codigoSesion,
+                    nombreEmpleado = empleado.Nombre,
+                    rolEmpleado = empleado.Rol
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DesasignarTarjetaEmpleado([FromBody] DesasignarTarjetaRequest request)
+        {
+            try
+            {
+                if (request == null || request.empleadoId <= 0)
+                {
+                    return Json(new { success = false, message = "ID de empleado inválido" });
+                }
+
+                var empleado = ctx.Empleados.Find(request.empleadoId);
+                if (empleado == null)
+                {
+                    return Json(new { success = false, message = "Empleado no encontrado" });
+                }
+
+                if (string.IsNullOrEmpty(empleado.TarjetaUID))
+                {
+                    return Json(new { success = false, message = $"{empleado.Nombre} no tiene tarjeta asignada" });
+                }
+
+                // Desasignar tarjeta
+                empleado.TarjetaUID = null;
+                ctx.SaveChanges();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Tarjeta desasignada de {empleado.Nombre}",
+                    nombreEmpleado = empleado.Nombre
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // Liberar recursos del contexto
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ctx?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+
+    // ============= CLASES AUXILIARES =============
+
+    public class AsignarTarjetaRequest
+    {
+        public int empleadoId { get; set; }
+    }
+
+    public class DesasignarTarjetaRequest
+    {
+        public int empleadoId { get; set; }
     }
 }

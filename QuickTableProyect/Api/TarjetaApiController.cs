@@ -1,10 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using System.Data.Entity; // IMPORTANTE: EF6, no EF Core
+using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
+using System;
+using System.Data.Entity; // IMPORTANTE: EF6, no EF Core
+using System.Linq;
 
 namespace QuickTableProyect.Interface.Api
 {
@@ -13,6 +14,13 @@ namespace QuickTableProyect.Interface.Api
     public class TarjetaApiController : ControllerBase
     {
         private readonly SistemaQuickTableContext ctx = new();
+        private readonly CryptoService cryptoService; 
+
+        // AGREGAR CONSTRUCTOR
+        public TarjetaApiController()
+        {
+            cryptoService = new CryptoService();
+        }
 
         // 1. devuelve UIDs pendientes de grabar
         [HttpGet("pendientes")]
@@ -58,9 +66,6 @@ namespace QuickTableProyect.Interface.Api
                 return BadRequest(new { error = ex.Message });
             }
         }
-
-
-
 
         // 3. Endpoint para polling desde el navegador
         [HttpGet("estado")]
@@ -116,8 +121,6 @@ namespace QuickTableProyect.Interface.Api
                 return BadRequest(new { valid = false, error = ex.Message });
             }
         }
-
-
 
         // 5. Obtener información específica de una sesión
         [HttpGet("sesion-info")]
@@ -237,5 +240,181 @@ namespace QuickTableProyect.Interface.Api
             });
         }
 
+        // 9. CORREGIDO: Asignar tarjeta a empleado
+        [HttpPost("asignar-empleado")]
+        public IActionResult AsignarTarjetaEmpleado([FromBody] AsignarEmpleadoRequest request)
+        {
+            try
+            {
+                if (request == null || request.EmpleadoId <= 0 || string.IsNullOrEmpty(request.Uid))
+                {
+                    return BadRequest(new { success = false, message = "Datos inválidos" });
+                }
+
+                var empleado = ctx.Empleados.Find(request.EmpleadoId);
+                if (empleado == null)
+                {
+                    return BadRequest(new { success = false, message = "Empleado no encontrado" });
+                }
+
+                // CORREGIDO: Usar el UID tal como viene (ya está procesado por el Python)
+                var uidParaGuardar = request.Uid;
+
+                // Verificar que la tarjeta no esté ya asignada a otro empleado
+                var empleadoExistente = ctx.Empleados
+                    .FirstOrDefault(e => e.TarjetaUID == uidParaGuardar && e.Id != request.EmpleadoId);
+
+                if (empleadoExistente != null)
+                {
+                    return BadRequest(new { success = false, message = $"Tarjeta ya asignada a {empleadoExistente.Nombre}" });
+                }
+
+                // Asignar tarjeta al empleado
+                empleado.TarjetaUID = uidParaGuardar;
+                ctx.SaveChanges();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Tarjeta asignada a {empleado.Nombre}",
+                    nombre = empleado.Nombre,
+                    rol = empleado.Rol
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // 10. CORREGIDO: Validar código de sesión para empleados
+        [HttpPost("validar-sesion-empleado")]
+        public IActionResult ValidarSesionEmpleado([FromForm] string sessionCode)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(sessionCode) || sessionCode.Length != 6 || !sessionCode.All(char.IsDigit))
+                {
+                    return Ok(new { valid = false, message = "Código inválido" });
+                }
+
+                // BUSCAR código de sesión en Codigos2FA (como funciona para TI y Admin)
+                var codigoSesion = ctx.Codigos2FA
+                    .Include(c => c.Empleado)
+                    .FirstOrDefault(c => c.Codigo == sessionCode &&
+                                       c.Expiracion > DateTime.Now &&
+                                       c.EsParaTarjetaEmpleado == true);
+
+                if (codigoSesion != null)
+                {
+                    return Ok(new
+                    {
+                        valid = true,
+                        tipo = "tarjeta-empleado",
+                        empleadoId = codigoSesion.EmpleadoId,
+                        nombre = codigoSesion.Empleado?.Nombre ?? "Sin nombre",
+                        rolEmpleado = codigoSesion.Empleado?.Rol ?? "Sin rol"
+                    });
+                }
+
+                return Ok(new { valid = false, message = "Código de empleado inválido o expirado" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { valid = false, error = ex.Message });
+            }
+        }
+
+
+
+        // Health check endpoint
+        [HttpGet("health")]
+        public IActionResult Health()
+        {
+            try
+            {
+                // Comprobar conexión a base de datos
+                var count = ctx.Empleados.Count();
+
+                return Ok(new
+                {
+                    status = "OK",
+                    timestamp = DateTime.Now,
+                    database = "Connected",
+                    message = "Sistema funcionando correctamente"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    status = "ERROR",
+                    timestamp = DateTime.Now,
+                    database = "Disconnected",
+                    error = ex.Message
+                });
+            }
+        }
+        
+        public class AsignarEmpleadoRequest
+        {
+            public int EmpleadoId { get; set; }  
+            public string Uid { get; set; }     
+        }
+
+        // AGREGAR este método al TarjetaApiController existente
+        [HttpPost("marcar-salida-empleado")]
+        public IActionResult MarcarSalidaEmpleado([FromForm] string tarjetaUID)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(tarjetaUID))
+                    return BadRequest(new { message = "UID de tarjeta requerido" });
+
+                // BÚSQUEDA UNIFICADA: Empleados normales O admins con TarjetasRC
+                var empleado = ctx.Empleados
+                    .Where(e =>
+                        e.TarjetaUID == tarjetaUID || // Empleados normales
+                        ctx.TarjetasRC.Any(t =>
+                            t.EmpleadoId == e.Id &&
+                            t.Activa &&
+                            t.UidFisico == tarjetaUID)) // Admins
+                    .FirstOrDefault();
+
+                if (empleado == null)
+                    return BadRequest(new { message = "Tarjeta no autorizada" });
+
+                // Resto igual que el sistema existente de salida...
+                var sesionActiva = ctx.RegistroSesiones
+                    .Where(r => r.EmpleadoId == empleado.Id && r.FechaHoraDesconexion == null)
+                    .OrderByDescending(r => r.FechaHoraConexion)
+                    .FirstOrDefault();
+
+                if (sesionActiva != null)
+                {
+                    sesionActiva.FechaHoraDesconexion = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    sesionActiva.MarcoTarjetaSalida = true;
+                    ctx.SaveChanges();
+
+                    return Ok(new
+                    {
+                        empleado = empleado.Nombre,
+                        accion = "Salida registrada",
+                        tipo = "salida"
+                    });
+                }
+                else
+                {
+                    return BadRequest(new { message = "No hay sesión activa para marcar salida" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error: {ex.Message}" });
+            }
+        }
+
     }
+
+
 }

@@ -16,5 +16,10 @@ namespace QuickTableProyect.Dominio
 
         public int EmpleadoId { get; set; }
         public Empleado Empleado { get; set; }
+
+        public bool EsParaTarjetaEmpleado { get; set; }
+
+        public bool Usado { get; set; }
     }
 }
+//puto git
