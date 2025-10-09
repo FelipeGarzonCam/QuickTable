@@ -1,306 +1,561 @@
 ﻿@model List<QuickTableProyect.Dominio.MenuItem>
-<!--puta vida -->
+@{
+    ViewData["Title"] = "Gestión del Menú";
+}
+
 @section Styles {
-    @* <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />      
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"> *@
     <style>
-    /* Estilo para la tabla con fondo oscuro */
-        #menuItemsTable {
-            background-color: #343a40;
+        .menu-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-            #menuItemsTable thead th {
-                border-bottom: 1px solid #6c757d;
-                padding: 8px 16px;
-                position: relative;
-            }
-
-        .sortable {
-            cursor: pointer;
-            user-select: none;
+        .dark-mode .menu-header {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Estilo minimalista para las flechas */
-        .sort-icon {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 14px;
-            opacity: 0.5;
+        .menu-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 600;
         }
 
-            .sort-icon.active {
-                opacity: 1;
-                color: #45aaf2;
-            }
+        .menu-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+        }
 
-        /* Campo de búsqueda con estilo oscuro */
-        #searchInput {
-            background-color: #2d3339;
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode .filter-section {
+            background: #343a40;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-item-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+
+        .dark-mode .menu-item-card {
+            background: #343a40;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark-mode .menu-item-card:hover {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .menu-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+
+        .menu-item-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0 0 0.3rem 0;
+        }
+
+
+        .dark-mode .menu-item-title {
+            color: #f8f9fa;
+        }
+
+        .menu-item-category {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .category-entradas {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .category-platos-fuertes {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .category-postres {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .category-bebidas {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .menu-item-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #28a745;
+            margin: 0;
+        }
+
+        .menu-item-description {
+            color: #6c757d;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+
+        .dark-mode .menu-item-description {
+            color: #adb5bd;
+        }
+
+        .menu-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             color: white;
-            padding: 10px 15px;
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
-            #searchInput::placeholder {
-                color: #adb5bd;
+
+            .btn-edit:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+                color: white;
             }
 
-        .pagination {
-            margin-top: 20px;
+        .btn-delete {
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
-        .page-item.active .page-link {
-            background-color: #007bff;
-            border-color: #007bff;
+
+            .btn-delete:hover {
+                background: #c82333;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+                color: white;
+            }
+
+        .btn-create {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);
         }
+
+            .btn-create:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(67, 233, 123, 0.5);
+                color: white;
+            }
+
+        .no-items {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+            .no-items i {
+                font-size: 4rem;
+                margin-bottom: 1rem;
+                opacity: 0.5;
+            }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .pagination-info {
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        .dark-mode .pagination-info {
+            color: #adb5bd;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+            .pagination-btn:hover:not(:disabled) {
+                background: #667eea;
+                color: white;
+            }
+
+            .pagination-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                border-color: #ccc;
+                color: #ccc;
+            }
+
+        .dark-mode .pagination-btn {
+            background: #343a40;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+            .dark-mode .pagination-btn:hover:not(:disabled) {
+                background: #667eea;
+                color: white;
+            }
+
+            .dark-mode .pagination-btn:disabled {
+                border-color: #4b545c;
+                color: #6c757d;
+            }
+
+        @@media (max-width: 768px) {
+            .menu-item-header
+
+        {
+            flex-direction: column;
+        }
+
+        .menu-item-actions {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-edit, .btn-delete {
+            flex: 1;
+        }
+
+        .pagination-container {
+            flex-direction: column;
+        }
+
+        }
+        /* SweetAlert2 Custom Styles */
+        .swal-delete-popup {
+            border-radius: 15px !important;
+            padding: 2rem !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .swal-delete-title {
+            color: #f8f9fa !important;
+        }
+
+        .swal-delete-confirm {
+            border-radius: 8px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4) !important;
+        }
+
+            .swal-delete-confirm:hover {
+                background-color: #c82333 !important;
+                transform: translateY(-2px);
+            }
+
+        .swal-delete-cancel {
+            border-radius: 8px !important;
+            padding: 0.75rem 2rem !important;
+            font-weight: 600 !important;
+            font-size: 1rem !important;
+        }
+
+            .swal-delete-cancel:hover {
+                background-color: #5a6268 !important;
+                transform: translateY(-2px);
+            }
+
+        .swal2-popup {
+            font-family: inherit !important;
+        }
+
+        .swal2-loader {
+            border-color: #dc3545 transparent #dc3545 transparent !important;
+        }
+
+
     </style>
 }
-<div class="container-fluid mt-4">
-    <h2>@ViewBag.Title</h2>
 
-    <a asp-action="CrearMenuItem" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Agregar Item</a>
-
-    <!-- Campo de búsqueda -->
-    <div class="mb-3">
-        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por Plato..." />
+<div class="container-fluid">
+    <div class="menu-header">
+        <h1><i class="fas fa-utensils mr-2"></i>Gestión del Menú</h1>
+        <p>Administra los platos disponibles en el restaurante</p>
     </div>
 
-    <table class="table" id="menuItemsTable">
-        <thead>
-            <tr>
-                <th scope="col" data-column="Id" data-order="asc" class="sortable">
-                    ID
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Nombre" data-order="asc" class="sortable">
-                    Plato
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Categoria" data-order="asc" class="sortable">
-                    Categoría
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Descripcion" data-order="asc" class="sortable">
-                    Descripción
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Precio" data-order="asc" class="sortable">
-                    Precio
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col">Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Los datos se insertan acá -->
-        </tbody>
-    </table>
-
-    <!-- Controles de paginación -->
-    <nav>
-        <ul class="pagination justify-content-center" id="pagination">
-            <!-- Páginas generadas dinámicamente -->
-        </ul>
-    </nav>
-
-</div>
-
-<!-- Modal de confirmación de eliminación -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirmación de eliminación</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+    <div class="filter-section">
+        <div class="row align-items-end">
+            <div class="col-md-4 mb-2 mb-md-0">
+                <label class="mb-1"><i class="fas fa-search mr-1"></i> Buscar plato</label>
+                <input type="text"
+                       id="searchInput"
+                       class="form-control"
+                       placeholder="Nombre del plato..."
+                       onkeyup="filterMenu()">
             </div>
-            <div class="modal-body">
-                ¿Está seguro de que desea eliminar este item del menú?
+            <div class="col-md-4 mb-2 mb-md-0">
+                <label class="mb-1"><i class="fas fa-filter mr-1"></i> Filtrar por categoría</label>
+                <select id="categoryFilter" class="form-control" onchange="filterMenu()">
+                    <option value="">Todas</option>
+                    <option value="Entrada">Entradas</option>
+                    <option value="Platos fuertes">Platos fuertes</option>
+                    <option value="Postres">Postres</option>
+                    <option value="Bebida">Bebidas</option>
+                </select>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <a id="confirmDeleteButton" class="btn btn-danger">Eliminar</a>
+            <div class="col-md-4 text-md-right">
+                <a href="@Url.Action("CrearMenuItem", "Administrador")" class="btn btn-create w-100 w-md-auto">
+                    <i class="fas fa-plus-circle mr-2"></i>Crear Nuevo Plato
+                </a>
             </div>
         </div>
     </div>
+
+    <div id="menuItemsContainer">
+        @if (Model.Count == 0)
+        {
+            <div class="no-items">
+                <i class="fas fa-utensils"></i>
+                <h4>No hay platos en el menú</h4>
+                <p>Comienza agregando tu primer plato al menú</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                string categoryClass = item.Categoria.Replace(" ", "-").ToLower();
+
+                <div class="menu-item-card" data-name="@item.Nombre.ToLower()" data-category="@item.Categoria">
+                    <div class="menu-item-header">
+                        <div>
+                            <h3 class="menu-item-title">@item.Nombre</h3>
+                            <span class="menu-item-category category-@categoryClass">
+                                <i class="fas fa-tag mr-1"></i>@item.Categoria
+                            </span>
+                        </div>
+                        <p class="menu-item-price">$@item.Precio.ToString("N0")</p>
+                    </div>
+
+                    <p class="menu-item-description">
+                        <i class="fas fa-info-circle mr-1"></i>@item.Descripcion
+                    </p>
+
+                    <div class="menu-item-actions">
+                        <a href="@Url.Action("EditarMenuItem", "Administrador", new { id = item.Id })"
+                           class="btn btn-edit">
+                            <i class="fas fa-edit mr-1"></i>Editar
+                        </a>
+                        <button class="btn btn-delete" onclick="confirmarEliminacion(@item.Id, '@item.Nombre')">
+                            <i class="fas fa-trash-alt mr-1"></i>Eliminar
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="pagination-container" id="paginationContainer" style="display: none;">
+        <button class="pagination-btn" id="prevBtn" onclick="previousPage()">
+            <i class="fas fa-chevron-left mr-1"></i> Anterior
+        </button>
+        <span class="pagination-info">
+            Página <span id="currentPageSpan">1</span> de <span id="totalPagesSpan">1</span>
+        </span>
+        <button class="pagination-btn" id="nextBtn" onclick="nextPage()">
+            Siguiente <i class="fas fa-chevron-right ml-1"></i>
+        </button>
+    </div>
 </div>
+
 @section Scripts {
-  @*   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script> *@
     <script>
-        $(document).ready(function () {
-            var currentPage = 1;
-            var totalPages = 1;
-            var pageSize = 10;
-            var sortColumn = 'Id';
-            var sortOrder = 'asc';
-            var searchTerm = '';
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let filteredItems = [];
 
-            // Función para cargar los datos
-            function loadData() {
-                $.ajax({
-                    url: '@Url.Action("ObtenerMenuItems", "Administrador")',
-                    type: 'GET',
-                    data: {
-                        page: currentPage,
-                        pageSize: pageSize,
-                        sortColumn: sortColumn,
-                        sortOrder: sortOrder,
-                        searchTerm: searchTerm
-                    },
-                    success: function (data) {
-                        totalPages = data.totalPages;
-                        renderTable(data.items);
-                        renderPagination();
-                        updateSortIcons();
-                    },
-                    error: function (xhr, status, error) {
-                        alert('Ocurrió un error al cargar los datos: ' + error);
-                    }
-                });
-            }
-
-            // Función para renderizar la tabla
-            function renderTable(items) {
-                var rows = '';
-                $.each(items, function (index, item) {
-                    rows += '<tr>';
-                    rows += '<td>' + item.id + '</td>';
-                    rows += '<td>' + item.nombre + '</td>';
-                    rows += '<td>' + item.categoria + '</td>';
-                    rows += '<td>' + item.descripcion + '</td>';
-                    rows += '<td>$' + item.precio + '</td>';
-                    rows += '<td>';
-                    rows += '<a class="btn btn-warning btn-sm" href="/Administrador/EditarMenuItem/' + item.id + '">';
-                    rows += '<i class="fa fa-edit"></i>';
-                    rows += '</a> ';
-                    rows += '<button class="btn btn-danger btn-sm" onclick="showDeleteModal(' + item.id + ')">';
-                    rows += '<i class="fa fa-trash"></i>';
-                    rows += '</button>';
-                    rows += '</td>';
-                    rows += '</tr>';
-                });
-                $('#menuItemsTable tbody').html(rows);
-            }
-
-            // Función para renderizar la paginación
-            function renderPagination() {
-                var pagination = '';
-
-                // Rango de páginas a mostrar
-                var maxPagesToShow = 5;
-                var startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-                var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-                // Ajustar el inicio si cerca del final
-                if (endPage - startPage < maxPagesToShow - 1) {
-                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
-                }
-
-                // "Anterior"
-                if (currentPage > 1) {
-                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Anterior</a></li>';
-                } else {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
-                }
-
-                // Páginas
-                for (var i = startPage; i <= endPage; i++) {
-                    if (i === currentPage) {
-                        pagination += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
-                    } else {
-                        pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-                    }
-                }
-
-                //"Siguiente"
-                if (currentPage < totalPages) {
-                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Siguiente</a></li>';
-                } else {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Siguiente</span></li>';
-                }
-
-                // Mostrar la página actual y la cantidad total de páginas
-                pagination += '<li class="page-item disabled"><span class="page-link">Página ' + currentPage + ' de ' + totalPages + '</span></li>';
-
-                $('#pagination').html(pagination);
-            }
-
-            // Evento de clic en los enlaces de paginación
-            $('#pagination').on('click', 'a.page-link', function (e) {
-                e.preventDefault();
-                var selectedPage = parseInt($(this).data('page'));
-                if (selectedPage !== currentPage) {
-                    currentPage = selectedPage;
-                    loadData();
-                }
-            });
-
-            // Evento para ordenar las columnas
-            $('#menuItemsTable thead').on('click', 'th.sortable', function () {
-                var column = $(this).data('column');
-
-                // Si se hace clic en la misma columna, alternar el orden
-                if (sortColumn === column) {
-                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortColumn = column;
-                    sortOrder = 'asc';
-                }
-
-                currentPage = 1; // Reiniciar a la primera página
-                loadData();
-            });
-
-            // Actualizar los iconos de ordenamiento
-            function updateSortIcons() {
-                // Primero eliminar todas las clases y restablecer todos los iconos
-                $('.sort-icon i').removeClass('bi-caret-up-fill bi-caret-down-fill').addClass('bi-caret-up-fill');
-                $('.sort-icon').removeClass('active');
-
-                // Luego actualizar solo la columna activa
-                var activeHeader = $('th[data-column="' + sortColumn + '"]');
-                var sortIcon = activeHeader.find('.sort-icon');
-                sortIcon.addClass('active');
-
-                // Cambiar el ícono según el orden
-                if (sortOrder === 'asc') {
-                    sortIcon.find('i').removeClass('bi-caret-down-fill').addClass('bi-caret-up-fill');
-                } else {
-                    sortIcon.find('i').removeClass('bi-caret-up-fill').addClass('bi-caret-down-fill');
-                }
-            }
-
-            // Evento para el campo de búsqueda
-            $('#searchInput').on('keyup', function () {
-                searchTerm = $(this).val();
-                currentPage = 1; // Reiniciar a la primera página
-                loadData();
-            });
-
-            // Función para mostrar el modal de eliminación
-            window.showDeleteModal = function (id) {
-                $('#confirmDeleteButton').attr('href', '@Url.Action("EliminarMenuItem", "Administrador")' + '?id=' + id);
-                $('#deleteModal').modal('show');
-            };
-
-            loadData();
+        document.addEventListener('DOMContentLoaded', function() {
+            filterMenu();
         });
+
+                function filterMenu() {
+            const searchValue = document.getElementById('searchInput').value.toLowerCase();
+            const categoryValue = document.getElementById('categoryFilter').value.trim();
+            const allItems = document.querySelectorAll('.menu-item-card');
+
+            console.log('Filtro categoría seleccionada:', categoryValue);
+
+            filteredItems = Array.from(allItems).filter(item => {
+                const name = item.getAttribute('data-name');
+                const category = item.getAttribute('data-category').trim();
+
+                console.log('Item:', name, '- Categoría:', category);
+
+                const matchesSearch = name.includes(searchValue);
+                const matchesCategory = !categoryValue || category.toLowerCase() === categoryValue.toLowerCase();
+
+                return matchesSearch && matchesCategory;
+            });
+
+            console.log('Items filtrados:', filteredItems.length);
+
+            currentPage = 1;
+            displayPage();
+        }
+
+
+        function displayPage() {
+            const allItems = document.querySelectorAll('.menu-item-card');
+            allItems.forEach(item => item.style.display = 'none');
+
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+
+            filteredItems.slice(start, end).forEach(item => {
+                item.style.display = 'block';
+            });
+
+            updatePaginationControls(totalPages);
+        }
+
+        function updatePaginationControls(totalPages) {
+            const paginationContainer = document.getElementById('paginationContainer');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const currentPageSpan = document.getElementById('currentPageSpan');
+            const totalPagesSpan = document.getElementById('totalPagesSpan');
+
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+            } else {
+                paginationContainer.style.display = 'flex';
+                currentPageSpan.textContent = currentPage;
+                totalPagesSpan.textContent = totalPages;
+
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                displayPage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                displayPage();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+               function confirmarEliminacion(id, nombre) {
+            Swal.fire({
+                title: '<span style="color: #f8f9fa;">¿Eliminar este plato?</span>',
+                html: `
+                    <div style="text-align: center;">
+                        <i class="fas fa-utensils" style="font-size: 4rem; color: #ff6b6b; margin-bottom: 1rem;"></i>
+                        <h4 style="margin-bottom: 0.5rem; color: #f8f9fa; font-weight: 600;">${nombre}</h4>
+                        <p style="color: #ced4da; margin: 0;">Esta acción no se puede deshacer</p>
+                    </div>
+                `,
+                background: '#343a40',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-trash-alt mr-2"></i>Sí, eliminar',
+                cancelButtonText: '<i class="fas fa-times mr-2"></i>Cancelar',
+                reverseButtons: true,
+                backdrop: 'rgba(0,0,0,0.7)',
+                customClass: {
+                    popup: 'swal-delete-popup',
+                    title: 'swal-delete-title',
+                    confirmButton: 'swal-delete-confirm',
+                    cancelButton: 'swal-delete-cancel'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: '<span style="color: #f8f9fa;">Eliminando...</span>',
+                        html: '<span style="color: #ced4da;">Por favor espera</span>',
+                        background: '#343a40',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        allowEnterKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    window.location.href = '@Url.Action("EliminarMenuItem", "Administrador")?id=' + id;
+                }
+            });
+        }
+
+
     </script>
 }

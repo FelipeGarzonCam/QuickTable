@@ -1,32 +1,194 @@
 ﻿@model QuickTableProyect.Dominio.MenuItem
-//puto git
-<div class="container">
-    <h2>Editar Elemento del Menú</h2>
+@{
+    ViewData["Title"] = "Editar Plato";
+}
 
-    <form asp-action="EditarMenuItem" method="post">
-        <div class="form-group">
-            <label for="Nombre">Nombre</label>
-            <input type="text" class="form-control" id="Nombre" name="Nombre" value="@Model.Nombre" required />
+@section Styles {
+    <style>
+        .form-container {
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+
+        .form-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark-mode .form-card {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 1.5rem;
+        }
+
+            .form-header h2 {
+                margin: 0;
+                font-size: 1.75rem;
+                font-weight: 600;
+            }
+
+            .form-header p {
+                margin: 0.5rem 0 0 0;
+                opacity: 0.9;
+            }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .dark-mode .form-group label {
+            color: #c2c7d0;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e3e6f0;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+            .form-control:focus {
+                border-color: #f5576c;
+                box-shadow: 0 0 0 0.2rem rgba(245, 87, 108, 0.25);
+            }
+
+        .dark-mode .form-control {
+            background-color: #3a4047;
+            border-color: #4b545c;
+            color: #c2c7d0;
+        }
+
+            .dark-mode .form-control:focus {
+                background-color: #454d55;
+                border-color: #f5576c;
+            }
+
+        .btn-custom {
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: white;
+        }
+
+            .btn-update:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(245, 87, 108, 0.4);
+                color: white;
+            }
+
+        .btn-cancel {
+            background: #6c757d;
+            border: none;
+            color: white;
+        }
+
+            .btn-cancel:hover {
+                background: #5a6268;
+                transform: translateY(-2px);
+                color: white;
+            }
+    </style>
+}
+
+<div class="form-container">
+    <div class="card form-card">
+        <div class="form-header">
+            <h2><i class="fas fa-edit mr-2"></i>Editar Plato</h2>
+            <p>Modifica la información del elemento del menú</p>
         </div>
 
-        <div class="form-group">
-            <label for="Descripcion">Descripción</label>
-            <textarea class="form-control" id="Descripcion" name="Descripcion" rows="3" required>@Model.Descripcion</textarea>
-        </div>
+        <div class="form-body">
+            <form asp-action="EditarMenuItem" method="post">
+                <input type="hidden" name="Id" value="@Model.Id" />
 
-        <div class="form-group">
-            <label for="Categoria">Categoría</label>
-            <select asp-for="Categoria" class="form-control" asp-items="@(new SelectList(ViewBag.Categorias, Model.Categoria))" required>
-                <option value="">Seleccione una categoría</option>
-            </select>
-        </div>
+                <div class="form-group">
+                    <label for="Nombre">
+                        <i class="fas fa-utensils mr-1 text-primary"></i>
+                        Nombre del Plato
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           id="Nombre"
+                           name="Nombre"
+                           value="@Model.Nombre"
+                           required />
+                </div>
 
-        <div class="form-group">
-            <label for="Precio">Precio</label>
-            <input type="number" class="form-control" id="Precio" name="Precio" value="@(decimal.Truncate(Model.Precio))" min="0" required oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
-        </div>
+                <div class="form-group">
+                    <label for="Categoria">
+                        <i class="fas fa-tags mr-1 text-warning"></i>
+                        Categoría
+                    </label>
+                    <select asp-for="Categoria" class="form-control" required style="width: 100%; height: auto; padding: 0.75rem;">
+                        <option value="">-- Seleccionar --</option>
+                        @foreach (var categoria in ViewBag.Categorias)
+                        {
+                            <option value="@categoria">@categoria</option>
+                        }
+                    </select>
+                </div>
 
-        <button type="submit" class="btn btn-primary">Guardar cambios</button>
-        <a href="@Url.Action("ModificarMenu", "Administrador")" class="btn btn-secondary">Cancelar</a>
-    </form>
+
+                <div class="form-group">
+                    <label for="Descripcion">
+                        <i class="fas fa-align-left mr-1 text-info"></i>
+                        Descripción
+                    </label>
+                    <textarea class="form-control"
+                              id="Descripcion"
+                              name="Descripcion"
+                              rows="3"
+                              required>@Model.Descripcion</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="Precio">
+                        <i class="fas fa-dollar-sign mr-1 text-success"></i>
+                        Precio (COP)
+                    </label>
+                    <input type="number"
+                           class="form-control"
+                           id="Precio"
+                           name="Precio"
+                           value="@(decimal.Truncate(Model.Precio))"
+                           min="0"
+                           required
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                </div>
+
+                <div class="form-group mt-4">
+                    <div class="row">
+                        <div class="col-6">
+                            <a href="@Url.Action("ModificarMenu", "Administrador")"
+                               class="btn btn-cancel btn-custom btn-block">
+                                <i class="fas fa-times mr-2"></i>Cancelar
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-update btn-custom btn-block">
+                                <i class="fas fa-check mr-2"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
