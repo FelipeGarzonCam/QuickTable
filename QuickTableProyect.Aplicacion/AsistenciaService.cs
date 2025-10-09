@@ -15,24 +15,19 @@ namespace QuickTableProyect.Aplicacion
             this.context = context;
         }
 
-
-        // CAMBIAR el método MarcarSalidaConTarjeta en AsistenciaService.cs:
-
         public ResultadoMarcarSalida MarcarSalidaConTarjeta(string tarjetaUIDEncriptada)
         {
             try
             {
-                                // DECODIFICAR BASE64
+                // DECODIFICAR BASE64
                 string uidDecimal = "";
                 try
                 {
                     byte[] data = Convert.FromBase64String(tarjetaUIDEncriptada);
                     uidDecimal = System.Text.Encoding.UTF8.GetString(data);
-                    
                 }
                 catch (Exception ex)
                 {
-                    
                     return new ResultadoMarcarSalida
                     {
                         Exito = false,
@@ -46,22 +41,26 @@ namespace QuickTableProyect.Aplicacion
                 {
                     long decimalValue = long.Parse(uidDecimal);
                     uidHex = decimalValue.ToString("X16"); // Convertir a hexadecimal 16 dígitos
-                    
                 }
                 catch (Exception ex)
-                {                    
+                {
                     uidHex = uidDecimal;
                 }
 
-                // BUSCAR empleado con AMBOS FORMATOS
+                // BUSCAR empleado con AMBOS FORMATOS Y TAMBIÉN EN TarjetasRC (para admins)
                 var empleado = context.Empleados
-                    .FirstOrDefault(e => (e.TarjetaUID == uidHex || e.TarjetaUID == uidDecimal) && e.Activo == true);
-
-               
+                    .Where(e => e.Activo == true)
+                    .Where(e =>
+                        e.TarjetaUID == uidHex ||
+                        e.TarjetaUID == uidDecimal ||
+                        context.TarjetasRC.Any(t =>
+                            t.EmpleadoId == e.Id &&
+                            t.Activa &&
+                            (t.UidFisico == uidHex || t.UidFisico == uidDecimal)))
+                    .FirstOrDefault();
 
                 if (empleado == null)
                 {
-                    
                     return new ResultadoMarcarSalida
                     {
                         Exito = false,
@@ -78,11 +77,8 @@ namespace QuickTableProyect.Aplicacion
                     .OrderByDescending(r => r.FechaHoraConexion)
                     .FirstOrDefault();
 
-                
-
                 if (registroActivo == null)
                 {
-                   
                     return new ResultadoMarcarSalida
                     {
                         Exito = false,
@@ -95,7 +91,6 @@ namespace QuickTableProyect.Aplicacion
                 registroActivo.MarcoTarjetaSalida = true;
 
                 context.SaveChanges();
-                
 
                 var tiempoTrabajado = horaSalida - registroActivo.FechaHoraConexion;
 
@@ -112,7 +107,6 @@ namespace QuickTableProyect.Aplicacion
             }
             catch (Exception ex)
             {
-               
                 return new ResultadoMarcarSalida
                 {
                     Exito = false,
@@ -120,13 +114,8 @@ namespace QuickTableProyect.Aplicacion
                 };
             }
         }
-
-
-
-
     }
 
-    // Clase para el resultado de marcar salida
     public class ResultadoMarcarSalida
     {
         public bool Exito { get; set; }
@@ -138,4 +127,3 @@ namespace QuickTableProyect.Aplicacion
         public string TiempoTrabajado { get; set; }
     }
 }
-//puto git

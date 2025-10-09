@@ -14,7 +14,7 @@ namespace QuickTableProyect.Interface.Api
     public class TarjetaApiController : ControllerBase
     {
         private readonly SistemaQuickTableContext ctx = new();
-        private readonly CryptoService cryptoService; // AGREGAR ESTA LÍNEA
+        private readonly CryptoService cryptoService; 
 
         // AGREGAR CONSTRUCTOR
         public TarjetaApiController()

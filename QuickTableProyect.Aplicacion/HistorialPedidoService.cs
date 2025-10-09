@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
 
-//puto git
+
 namespace QuickTableProyect.Aplicacion
 {
     public class HistorialPedidoService
