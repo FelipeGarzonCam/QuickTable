@@ -59,10 +59,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i> Buscar
-                            </button>
+                        <div class="col-md-12">                            
                             <a href="@Url.Action("RegistroSesiones")" class="btn btn-secondary">
                                 <i class="fas fa-eraser"></i> Limpiar
                             </a>
@@ -236,6 +233,23 @@
                     ]
                 });
             }
+
+            // Filtros automáticos
+            $('#fecha, #empleadoId, #rol').on('change', function() {
+                $('#formFiltros').submit();
+            });
+
+            // Mejorar botón Limpiar
+            $('a[href*="RegistroSesiones"]').on('click', function(e) {
+                if ($(this).hasClass('btn-secondary')) {
+                    e.preventDefault();
+                    $('#fecha').val('');
+                    $('#empleadoId').val('');
+                    $('#rol').val('');
+                    window.location.href = '@Url.Action("RegistroSesiones")';
+                }
+            });
         });
     </script>
 }
+

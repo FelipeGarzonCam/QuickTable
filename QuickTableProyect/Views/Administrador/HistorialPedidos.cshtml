@@ -1,552 +1,523 @@
-﻿@model IEnumerable<QuickTableProyect.Dominio.HistorialPedido>
+﻿
 @{
+    ViewData["Title"] = "Historial de Pedidos";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Historial De Pedidos";
 }
-<!--puta vida -->
+<style>
+    .pedido-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-left: 4px solid #007bff;
+    }
 
-@section Styles {
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css" />
-    <!-- Estilos personalizados aquí -->
-    <style>
-        #pedidosTable {
-            background-color: #343a40;
-            color: white;
+        .pedido-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
 
-            #pedidosTable thead th {
-                border-bottom: 1px solid #6c757d;
-                padding: 8px 16px;
-                position: relative;
-            }
+    .tiempo-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.5rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        max-width: 100%;
+    }
 
-        .sortable {
-            cursor: pointer;
-            user-select: none;
+
+    .badge-tiempo-excelente {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .badge-tiempo-normal {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .badge-tiempo-aceptable {
+        background-color: #fd7e14;
+        color: white;
+    }
+
+    .badge-tiempo-lento {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .detalle-pedido {
+        background-color: rgba(0, 0, 0, 0.03);
+        border-radius: 5px;
+        padding: 1rem;
+    }
+
+    .dark-mode .detalle-pedido {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .tabla-items {
+        font-size: 0.9rem;
+    }
+
+    .dark-mode .tabla-items {
+        color: #c2c7d0;
+    }
+
+        .dark-mode .tabla-items thead th {
+            color: #c2c7d0;
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* Estilo minimalista para las flechas */
-        .sort-icon {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 14px;
-            opacity: 0.5;
+        .dark-mode .tabla-items tbody td {
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
-            .sort-icon.active {
-                opacity: 1;
-                color: #45aaf2;
-            }
-
-        /* Filtros con estilo oscuro */
-        .filter-form {
-            background-color: #2d3339;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        .dark-mode .tabla-items tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
         }
 
-            .filter-form .form-control {
-                background-color: #383f45;
-                border: none;
-                color: white;
-                padding: 10px 15px;
-            }
+    .loading-spinner {
+        text-align: center;
+        padding: 2rem;
+    }
 
-                .filter-form .form-control::placeholder {
-                    color: #adb5bd;
-                }
+    .dark-mode .loading-spinner {
+        color: #c2c7d0;
+    }
 
-        .pagination {
-            margin-top: 20px;
-        }
+    .detalle-pedido .row {
+        color: inherit;
+    }
 
-        .page-item.active .page-link {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
+    .dark-mode .detalle-pedido .row {
+        color: #c2c7d0;
+    }
 
-        .metodo-pago-badge {
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-weight: bold;
-        }
+    .dark-mode .card-body.detalle-pedido {
+        background-color: #343a40;
+        color: #c2c7d0;
+    }
 
-        .metodo-efectivo {
-            background-color: #28a745;
-            color: white;
-        }
+    .dark-mode .border-top {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+</style>
 
-        .metodo-tarjeta {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        .metodo-qr {
-            background-color: #6f42c1;
-            color: white;
-        }
-
-        .tiempo-badge {
-            padding: 3px 6px;
-            border-radius: 3px;
-            font-size: 0.85em;
-        }
-
-        .tiempo-rapido {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .tiempo-normal {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        .tiempo-lento {
-            background-color: #dc3545;
-            color: white;
-        }
-    </style>
-}
-
-<div class="container-fluid mt-4">
-    <h2>@ViewData["Title"]</h2>
-
-    <!-- Botón de exportar -->
-    <button id="exportarExcel" class="btn btn-success mb-3">
-        <i class="fas fa-file-export"></i> Exportar a Excel
-    </button>
-
-    <!-- Formulario de filtros -->
-    <div class="filter-form">
-        <form id="filterForm" class="row">
-            <div class="form-group col-md-3">
-                <label for="fecha" class="text-light">Fecha:</label>
-                <input type="date" id="fecha" class="form-control">
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Historial de Pedidos</h1>
             </div>
-            <div class="form-group col-md-2">
-                <label for="metodoPago" class="text-light">Método de Pago:</label>
-                <select id="metodoPago" class="form-control">
-                    <option value="">Todos</option>
-                    <option value="Efectivo">Efectivo</option>
-                    <option value="Tarjeta">Tarjeta</option>
-                    <option value="QR">QR</option>
-                </select>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/Administrador/Index">Inicio</a></li>
+                    <li class="breadcrumb-item active">Historial de Pedidos</li>
+                </ol>
             </div>
-            <div class="form-group col-md-2">
-                <label for="mesero" class="text-light">Mesero:</label>
-                <input type="text" id="mesero" class="form-control">
-            </div>
-            <div class="form-group col-md-2">
-                <label for="mesa" class="text-light">Mesa:</label>
-                <input type="text" id="mesa" class="form-control">
-            </div>
-            <div class="form-group col-md-3 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
-            </div>
-        </form>
+        </div>
     </div>
-
-    <table class="table" id="pedidosTable">
-        <thead>
-            <tr>
-                <th scope="col" data-column="Id" data-order="asc" class="sortable">
-                    ID Pedido
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Mesa" data-order="asc" class="sortable">
-                    Mesa
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="MeseroId" data-order="asc" class="sortable">
-                    Mesero
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="FechaHora" data-order="asc" class="sortable">
-                    Fecha/Hora
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="TiempoCocina" data-order="asc" class="sortable">
-                    T. Cocina
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="TiempoEntrega" data-order="asc" class="sortable">
-                    T. Entrega
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="TiempoTotal" data-order="asc" class="sortable">
-                    T. Total
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Total" data-order="asc" class="sortable">
-                    Total
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-
-                <th scope="col" data-column="MetodoPago" data-order="asc" class="sortable">
-                    Método Pago
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Los datos se insertan dinámicamente -->
-        </tbody>
-    </table>
-
-    <!-- Controles de paginación -->
-    <nav>
-        <ul class="pagination justify-content-center" id="pagination">
-            <!-- Páginas generadas dinámicamente -->
-        </ul>
-    </nav>
 </div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-history mr-2"></i>
+                    Registro Completo de Pedidos
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3 align-items-end">
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-2 mb-lg-0">
+                        <label class="mb-1">Fecha</label>
+                        <input type="date" id="filtroFecha" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-2 mb-lg-0">
+                        <label class="mb-1">Método de Pago</label>
+                        <select id="filtroMetodoPago" class="form-control form-control-sm">
+                            <option value="">Todos</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="QR">QR</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-2 mb-lg-0">
+                        <label class="mb-1">Mesero</label>
+                        <input type="text" id="filtroMesero" class="form-control form-control-sm" placeholder="Nombre del mesero">
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 mb-2 mb-lg-0">
+                        <label class="mb-1">Mesa</label>
+                        <input type="text" id="filtroMesa" class="form-control form-control-sm" placeholder="Núm. mesa">
+                    </div>
+                    <div class="col-lg-4 col-md-12 text-lg-right">                       
+                        <button id="btnLimpiar" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-eraser"></i> Limpiar
+                        </button>
+                        <button id="btnExportar" class="btn btn-success btn-sm">
+                            <i class="fas fa-file-excel"></i> Exportar a Excel
+                        </button>
+                    </div>
+                </div>
+
+                <div id="pedidosContainer" class="row">
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <nav>
+                            <ul class="pagination justify-content-center" id="paginacion">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
 @section Scripts {
     <script>
+        let currentPage = 1;
+        let totalPages = 1;
+
         $(document).ready(function () {
-            if (typeof $.fn.pushMenu !== 'undefined') {
-                $('[data-widget="pushmenu"]').pushMenu();
-            }
-            var currentPage = 1;
-            var totalPages = 1;
-            var pageSize = 10;
-            var sortColumn = 'FechaHora';
-            var sortOrder = 'desc';
-            var filters = {
-                fecha: '',
-                metodoPago: '',
-                nombreMesero: '', 
-                mesa: ''
-            };
+            cargarPedidos();
 
-            // Función para cargar los datos
-            function loadData() {
-                $.ajax({
-                    url: '@Url.Action("ObtenerHistorialPedidos", "Administrador")',
-                    type: 'GET',
-                    data: {
-                        pageNumber: currentPage,
-                        pageSize: pageSize,
-                        sortColumn: sortColumn,
-                        sortOrder: sortOrder,
-                        fecha: filters.fecha || '',
-                        metodoPago: filters.metodoPago || '',
-                        nombreMesero: filters.nombreMesero || '',
-                        mesa: filters.mesa || ''
-                    },
-                    success: function (response) {
-                        totalPages = response.totalPages;
-                        renderTable(response.pedidos);
-                        renderPagination();
-                        updateSortIcons();
-                    },
-                    error: function (xhr, status, error) {
-                        alert('Ocurrió un error al cargar los datos: ' + error);
-                    }
-                });
-            }
-
-            // Función para renderizar la tabla
-            function renderTable(pedidos) {
-                var rows = '';
-                if (!pedidos || pedidos.length === 0) {
-                    $('#pedidosTable tbody').html('<tr><td colspan="9" class="text-center">No hay datos disponibles</td></tr>');
-                    return;
-                }
-
-                $.each(pedidos, function (index, pedido) {
-                    try {
-                        var fechaHora = formatDate(new Date(pedido.fechaCreacion));
-
-                        // Formatear los tiempos
-                        var tiempoCocina = formatTimeSpan(pedido.tiempoCocinaAListo);
-                        var tiempoEntrega = formatTimeSpan(pedido.tiempoListoAAceptado);
-                        var tiempoTotal = formatTimeSpan(pedido.tiempoTotal);  // Nueva línea
-
-                        // Clases para el tiempo
-                        var claseTiempoCocina = getTiempoClass(pedido.tiempoCocinaAListo);
-                        var claseTiempoEntrega = getTiempoClass(pedido.tiempoListoAAceptado);
-                        var claseTiempoTotal = getTiempoClass(pedido.tiempoTotal);  // Nueva línea
-
-                        // Clase para método de pago
-                        var claseMetodoPago = getMetodoPagoClass(pedido.medioPago);
-
-                        rows += '<tr>'
-                            + '<td>' + pedido.pedidoId + '</td>'
-                            + '<td>' + pedido.mesa + '</td>'
-                            + '<td>' + pedido.nombreMesero + ' (' + pedido.meseroId + ')</td>'
-                            + '<td>' + fechaHora + '</td>'
-                            + '<td><span class="tiempo-badge ' + claseTiempoCocina + '">' + tiempoCocina + '</span></td>'
-                            + '<td><span class="tiempo-badge ' + claseTiempoEntrega + '">' + tiempoEntrega + '</span></td>'
-                            + '<td><span class="tiempo-badge ' + claseTiempoTotal + '">' + tiempoTotal + '</span></td>'  // Nueva columna
-                            + '<td>$' + pedido.total.toLocaleString('es-CO') + '</td>'
-                            + '<td><span class="metodo-pago-badge ' + claseMetodoPago + '">' + pedido.medioPago + '</span></td>'
-                            + '</tr>';
-                    } catch (e) {
-                        console.error("Error al procesar pedido:", e, pedido);
-                    }
-                });
-                $('#pedidosTable tbody').html(rows);
-            }
-        
-            // Helper to extract seconds from TimeSpan string or object
-            function extractSeconds(timespan) {
-                if (!timespan) return 0;
-
-                if (typeof timespan === 'string') {
-                    // Parse from string like "-00:00:25.0660000"
-                    var isNegative = timespan.startsWith('-');
-                    var cleanTime = timespan.replace('-', '');
-                    var parts = cleanTime.split(':');
-
-                    if (parts.length >= 3) {
-                        var hours = parseInt(parts[0]) || 0;
-                        var minutes = parseInt(parts[1]) || 0;
-                        var seconds = parseFloat(parts[2]) || 0;
-
-                        var totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                        return isNegative ? -totalSeconds : totalSeconds;
-                    }
-                    return 0;
-                }
-
-                return timespan.totalSeconds || 0;
-            }
-
-            // Función para obtener la clase CSS para el método de pago
-            function getMetodoPagoClass(metodoPago) {
-                switch (metodoPago) {
-                    case 'Efectivo':
-                        return 'metodo-efectivo';
-                    case 'Tarjeta':
-                        return 'metodo-tarjeta';
-                    case 'QR':
-                        return 'metodo-qr';
-                    default:
-                        return '';
-                }
-            }
-
-            // Función para obtener la clase CSS para el tiempo (rápido, normal, lento)
-            function getTiempoClass(timespan) {
-                if (typeof timespan === 'string') {
-                    // Si es string, convertir a segundos
-                    var parts = timespan.split(':');
-                    var seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
-                } else {
-                    // Si es un objeto timespan, tomar solo los segundos
-                    var seconds = timespan.totalSeconds || 0;
-                }
-
-                if (seconds < 300) { // menos de 5 minutos
-                    return 'tiempo-rapido';
-                } else if (seconds < 900) { // menos de 15 minutos
-                    return 'tiempo-normal';
-                } else {
-                    return 'tiempo-lento';
-                }
-            }
-
-            // Función para formatear TimeSpan
-            // Función para formatear TimeSpan
-            function formatTimeSpan(timespan) {
-                if (!timespan) return '00:00';
-
-                var totalSeconds;
-
-                if (typeof timespan === 'string') {
-                    // Parse the timespan string to extract total seconds
-                    var isNegative = timespan.startsWith('-');
-                    var cleanTime = timespan.replace('-', '');
-                    var parts = cleanTime.split(':');
-
-                    if (parts.length >= 3) {
-                        var hours = parseInt(parts[0]) || 0;
-                        var minutes = parseInt(parts[1]) || 0;
-                        // Handle decimal seconds
-                        var secondsParts = parts[2].split('.');
-                        var seconds = parseInt(secondsParts[0]) || 0;
-
-                        totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                        totalSeconds = Math.abs(totalSeconds); // Always use positive value for display
-                    } else {
-                        return '00:00';
-                    }
-                } else if (timespan.totalSeconds !== undefined) {
-                    totalSeconds = Math.abs(timespan.totalSeconds);
-                } else {
-                    return '00:00';
-                }
-
-                // Format the seconds into mm:ss
-                var minutes = Math.floor(totalSeconds / 60);
-                var seconds = Math.floor(totalSeconds % 60);
-
-                return pad(minutes) + ':' + pad(seconds);
-            }
-
-
-
-            function pad(num) {
-                return (num < 10 ? '0' : '') + num;
-            }
-
-            // Función para formatear fecha
-            function formatDate(date) {
-                if (!(date instanceof Date) || isNaN(date)) {
-                    return '';
-                }
-
-                return date.toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-            }
-
-            // Función para renderizar la paginación
-            function renderPagination() {
-                var pagination = '';
-
-                // Rango de páginas a mostrar
-                var maxPagesToShow = 5;
-                var startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-                var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-                // Ajustar el inicio si cerca del final
-                if (endPage - startPage < maxPagesToShow - 1) {
-                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
-                }
-
-                // "Anterior"
-                if (currentPage > 1) {
-                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Anterior</a></li>';
-                } else {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
-                }
-
-                // Páginas
-                for (var i = startPage; i <= endPage; i++) {
-                    if (i === currentPage) {
-                        pagination += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
-                    } else {
-                        pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-                    }
-                }
-
-                //"Siguiente"
-                if (currentPage < totalPages) {
-                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Siguiente</a></li>';
-                } else {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Siguiente</span></li>';
-                }
-
-                // Mostrar la página actual y la cantidad total de páginas
-                if (totalPages > 0) {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Página ' + currentPage + ' de ' + totalPages + '</span></li>';
-                }
-
-                $('#pagination').html(pagination);
-            }
-
-            // Evento de clic en los enlaces de paginación
-            $('#pagination').on('click', 'a.page-link', function (e) {
-                e.preventDefault();
-                var selectedPage = parseInt($(this).data('page'));
-                if (selectedPage !== currentPage) {
-                    currentPage = selectedPage;
-                    loadData();
-                }
+            $('#filtroFecha, #filtroMetodoPago, #filtroMesero, #filtroMesa').on('change keyup', function () {
+                currentPage = 1;
+                cargarPedidos();
             });
 
-            // Evento para ordenar las columnas
-            $('#pedidosTable thead').on('click', 'th.sortable', function () {
-                var column = $(this).data('column');
-
-                // Si se hace clic en la misma columna, alternar el orden
-                if (sortColumn === column) {
-                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortColumn = column;
-                    sortOrder = 'asc';
-                }
-
-                currentPage = 1; // Reiniciar a la primera página
-                loadData();
+            $('#btnLimpiar').click(function () {
+                $('#filtroFecha').val('');
+                $('#filtroMetodoPago').val('');
+                $('#filtroMesero').val('');
+                $('#filtroMesa').val('');
+                currentPage = 1;
+                cargarPedidos();
             });
 
-            // Actualizar los iconos de ordenamiento
-            function updateSortIcons() {
-                // Primero eliminar todas las clases y restablecer todos los iconos
-                $('.sort-icon i').removeClass('bi-caret-up-fill bi-caret-down-fill').addClass('bi-caret-up-fill');
-                $('.sort-icon').removeClass('active');
-
-                // Luego actualizar solo la columna activa
-                var activeHeader = $('th[data-column="' + sortColumn + '"]');
-                var sortIcon = activeHeader.find('.sort-icon');
-                sortIcon.addClass('active');
-
-                // Cambiar el ícono según el orden
-                if (sortOrder === 'asc') {
-                    sortIcon.find('i').removeClass('bi-caret-down-fill').addClass('bi-caret-up-fill');
-                } else {
-                    sortIcon.find('i').removeClass('bi-caret-up-fill').addClass('bi-caret-down-fill');
-                }
-            }
-
-            // Evento para el formulario de filtros
-            $('#filterForm').submit(function (e) {
-                e.preventDefault();
-                filters = {
-                    fecha: $('#fecha').val(),
-                    metodoPago: $('#metodoPago').val(),
-                    nombreMesero: $('#mesero').val().trim(), // Obtenemos el valor del campo y lo asignamos a nombreMesero
-                    mesa: $('#mesa').val()
-                };
-                currentPage = 1; // Reiniciar a la primera página
-                loadData();
+            $('#btnExportar').click(function () {
+                exportarExcel();
             });
-
-            // Evento para el botón de exportar a Excel
-            $('#exportarExcel').click(function () {
-                // Construir la URL con todos los filtros y ordenamiento
-                var url = '@Url.Action("DescargarHistorialPedidosExcel", "Administrador")' +
-                    '?fecha=' + encodeURIComponent(filters.fecha || '') +
-                    '&metodoPago=' + encodeURIComponent(filters.metodoPago || '') +
-                    '&nombreMesero=' + encodeURIComponent(filters.nombreMesero || '') +
-                    '&mesa=' + encodeURIComponent(filters.mesa || '') +
-                    '&sortColumn=' + encodeURIComponent(sortColumn) +
-                    '&sortOrder=' + encodeURIComponent(sortOrder);
-
-                // Redirigir al método de descarga con todos los parámetros
-                window.location.href = url;
-            });
-
-            // Carga inicial de datos
-            loadData();
         });
+
+        function cargarPedidos(pageNumber = 1) {
+            const fecha = $('#filtroFecha').val();
+            const metodoPago = $('#filtroMetodoPago').val();
+            const mesero = $('#filtroMesero').val();
+            const mesa = $('#filtroMesa').val();
+
+            $.ajax({
+                url: '/Administrador/ObtenerHistorialPedidos',
+                type: 'GET',
+                data: {
+                    fecha: fecha,
+                    metodoPago: metodoPago,
+                    nombreMesero: mesero,
+                    mesa: mesa,
+                    pageNumber: pageNumber,
+                    pageSize: 10
+                },
+                success: function (response) {
+                    renderPedidos(response.pedidos);
+                    currentPage = response.currentPage;
+                    totalPages = response.totalPages;
+                    renderPaginacion();
+                },
+                error: function () {
+                    toastr.error('Error al cargar los pedidos');
+                }
+            });
+        }
+
+        function renderPedidos(pedidos) {
+            const container = $('#pedidosContainer');
+            container.empty();
+
+            if (pedidos.length === 0) {
+                container.html('<div class="col-12"><div class="alert alert-info">No se encontraron pedidos con los filtros aplicados.</div></div>');
+                return;
+            }
+
+            pedidos.forEach(pedido => {
+                const card = crearCardPedido(pedido);
+                container.append(card);
+            });
+        }
+
+        function crearCardPedido(pedido) {
+            const fechaFormateada = new Date(pedido.fechaCreacion).toLocaleString('es-CO', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const totalFormateado = pedido.total.toLocaleString('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            });
+
+            return `
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card pedido-card" onclick="toggleDetalle(${pedido.pedidoId})">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-receipt mr-2"></i>
+                                Pedido #${pedido.pedidoId}
+                                <span class="float-right">Mesa ${pedido.mesa}</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <strong><i class="fas fa-user mr-1"></i> Mesero:</strong> ${pedido.nombreMesero}
+                            </div>
+                            <div class="mb-2">
+                                <strong><i class="fas fa-clock mr-1"></i> Fecha:</strong> ${fechaFormateada}
+                            </div>
+                            <div class="mb-3">
+                                <strong><i class="fas fa-credit-card mr-1"></i> Pago:</strong>
+                                <span class="badge badge-info">${pedido.medioPago}</span>
+                            </div>
+
+                            <div class="row text-center mb-2 mx-0">
+                                <div class="col-4 px-1">
+                                    <small class="d-block text-muted">
+                                        <i class="fas fa-fire"></i> Cocina
+                                    </small>
+                                    <span class="badge tiempo-badge ${getClaseTiempoCocina(pedido.tiempoCocinaAListo)}">
+                                        ${formatearTiempo(pedido.tiempoCocinaAListo)}
+                                    </span>
+                                </div>
+                                <div class="col-4 px-1">
+                                    <small class="d-block text-muted">
+                                        <i class="fas fa-running"></i> Entrega
+                                    </small>
+                                    <span class="badge tiempo-badge ${getClaseTiempoEntrega(pedido.tiempoListoAAceptado)}">
+                                        ${formatearTiempo(pedido.tiempoListoAAceptado)}
+                                    </span>
+                                </div>
+                                <div class="col-4 px-1">
+                                    <small class="d-block text-muted">
+                                        <i class="fas fa-stopwatch"></i> Total
+                                    </small>
+                                    <span class="badge tiempo-badge ${getClaseTiempoTotal(pedido.tiempoTotal)}">
+                                        ${formatearTiempo(pedido.tiempoTotal)}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-3 pt-3 border-top">
+                                <h4 class="mb-0 text-success">
+                                    <strong>${totalFormateado}</strong>
+                                </h4>
+                            </div>
+                        </div>
+                        <div class="card-footer text-center bg-light">
+                            <small class="text-muted">
+                                <i class="fas fa-chevron-down"></i> Click para ver detalles
+                            </small>
+                        </div>
+                        <div id="detalle-${pedido.pedidoId}" class="collapse">
+                            <div class="card-body detalle-pedido">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                                    <p>Cargando detalles...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatearTiempo(timeSpanString) {
+            if (!timeSpanString || timeSpanString === "00:00:00") {
+                return "0:00 min";
+            }
+
+            const parts = timeSpanString.split(':');
+            const hours = parseInt(parts[0]);
+            const minutes = parseInt(parts[1]);
+            const seconds = parseInt(parts[2]);
+
+            const totalMinutes = (hours * 60) + minutes;
+
+            return `${totalMinutes}:${seconds.toString().padStart(2, '0')} min`;
+        }
+
+        function getClaseTiempoCocina(tiempo) {
+            const minutos = getMinutosTotales(tiempo);
+            if (minutos < 10) return 'badge-tiempo-excelente';
+            if (minutos < 20) return 'badge-tiempo-normal';
+            if (minutos < 30) return 'badge-tiempo-aceptable';
+            return 'badge-tiempo-lento';
+        }
+
+        function getClaseTiempoEntrega(tiempo) {
+            const minutos = getMinutosTotales(tiempo);
+            if (minutos < 2) return 'badge-tiempo-excelente';
+            if (minutos < 5) return 'badge-tiempo-normal';
+            if (minutos < 10) return 'badge-tiempo-aceptable';
+            return 'badge-tiempo-lento';
+        }
+
+        function getClaseTiempoTotal(tiempo) {
+            const minutos = getMinutosTotales(tiempo);
+            if (minutos < 15) return 'badge-tiempo-excelente';
+            if (minutos < 25) return 'badge-tiempo-normal';
+            if (minutos < 35) return 'badge-tiempo-aceptable';
+            return 'badge-tiempo-lento';
+        }
+
+        function getMinutosTotales(timeSpanString) {
+            if (!timeSpanString) return 0;
+            const parts = timeSpanString.split(':');
+            const hours = parseInt(parts[0]) || 0;
+            const minutes = parseInt(parts[1]) || 0;
+            return (hours * 60) + minutes;
+        }
+
+        function toggleDetalle(pedidoId) {
+            const detalleDiv = $(`#detalle-${pedidoId}`);
+
+            if (detalleDiv.hasClass('show')) {
+                detalleDiv.collapse('hide');
+            } else {
+                if (detalleDiv.find('.loading-spinner').length > 0) {
+                    cargarDetallePedido(pedidoId);
+                }
+                detalleDiv.collapse('show');
+            }
+        }
+
+        function cargarDetallePedido(pedidoId) {
+            $.ajax({
+                url: '/Administrador/ObtenerDetallePedido',
+                type: 'GET',
+                data: { pedidoId: pedidoId },
+                success: function (response) {
+                    renderDetallePedido(pedidoId, response);
+                },
+                error: function () {
+                    $(`#detalle-${pedidoId}`).html('<div class="alert alert-danger">Error al cargar los detalles</div>');
+                }
+            });
+        }
+
+        function renderDetallePedido(pedidoId, datos) {
+            const detalleDiv = $(`#detalle-${pedidoId}`);
+
+            let itemsHtml = '<table class="table table-sm tabla-items table-striped">';
+            itemsHtml += '<thead><tr><th>Plato</th><th class="text-center">Cant.</th><th class="text-right">P. Unit.</th><th class="text-right">Subtotal</th></tr></thead>';
+            itemsHtml += '<tbody>';
+
+            datos.items.forEach(item => {
+                const precioUnitario = item.precioUnitario.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                const subtotal = item.subtotal.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+
+                itemsHtml += `
+                    <tr>
+                        <td>${item.nombreItem}</td>
+                        <td class="text-center">${item.cantidad}</td>
+                        <td class="text-right">${precioUnitario}</td>
+                        <td class="text-right"><strong>${subtotal}</strong></td>
+                    </tr>
+                `;
+            });
+
+            itemsHtml += '</tbody></table>';
+
+            const subtotal = datos.subtotal.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+            const iva = datos.iva.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+            const propina = datos.propina.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+            const total = datos.total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+
+            const resumenHtml = `
+                <div class="mt-3 pt-3 border-top">
+                    <div class="row">
+                        <div class="col-6 text-right"><strong>Subtotal:</strong></div>
+                        <div class="col-6 text-right">${subtotal}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 text-right"><strong>IVA:</strong></div>
+                        <div class="col-6 text-right">${iva}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 text-right"><strong>Propina:</strong></div>
+                        <div class="col-6 text-right">${propina}</div>
+                    </div>
+                    <div class="row mt-2 pt-2 border-top">
+                        <div class="col-6 text-right"><h5><strong>TOTAL:</strong></h5></div>
+                        <div class="col-6 text-right"><h5 class="text-success"><strong>${total}</strong></h5></div>
+                    </div>
+                </div>
+            `;
+
+            detalleDiv.html(`<div class="card-body detalle-pedido">${itemsHtml}${resumenHtml}</div>`);
+        }
+
+        function renderPaginacion() {
+            const paginacion = $('#paginacion');
+            paginacion.empty();
+
+            if (totalPages <= 1) return;
+
+            paginacion.append(`
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="cambiarPagina(${currentPage - 1}); return false;">Anterior</a>
+                </li>
+            `);
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginacion.append(`
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="cambiarPagina(${i}); return false;">${i}</a>
+                        </li>
+                    `);
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginacion.append('<li class="page-item disabled"><a class="page-link" href="#">...</a></li>');
+                }
+            }
+
+            paginacion.append(`
+                <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="cambiarPagina(${currentPage + 1}); return false;">Siguiente</a>
+                </li>
+            `);
+        }
+
+        function cambiarPagina(pageNumber) {
+            if (pageNumber < 1 || pageNumber > totalPages) return;
+            cargarPedidos(pageNumber);
+        }
+
+        function exportarExcel() {
+            const fecha = $('#filtroFecha').val();
+            const metodoPago = $('#filtroMetodoPago').val();
+            const mesero = $('#filtroMesero').val();
+            const mesa = $('#filtroMesa').val();
+
+            const params = new URLSearchParams({
+                fecha: fecha || '',
+                metodoPago: metodoPago || '',
+                nombreMesero: mesero || '',
+                mesa: mesa || ''
+            });
+
+            window.location.href = `/Administrador/DescargarHistorialPedidosExcel?${params.toString()}`;
+        }
     </script>
 }
+

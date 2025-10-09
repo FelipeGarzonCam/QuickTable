@@ -355,9 +355,6 @@ namespace QuickTableProyect.Controllers
             }
         }
 
-
-
-
         [HttpGet]
         public IActionResult ObtenerRegistrosSesiones(DateTime? fecha, string rol, int? empleadoId, string nombre, int pageNumber = 1, int pageSize = 10, string sortColumn = "FechaHoraConexion", string sortOrder = "desc")
         {
@@ -780,65 +777,124 @@ namespace QuickTableProyect.Controllers
 
                 worksheet.Cells[1, 1].Value = "ID Pedido";
                 worksheet.Cells[1, 2].Value = "Mesa";
-                worksheet.Cells[1, 3].Value = "ID Mesero";
-                worksheet.Cells[1, 4].Value = "Nombre Mesero";
-                worksheet.Cells[1, 5].Value = "Fecha y Hora";
-                worksheet.Cells[1, 6].Value = "Tiempo en Cocina";
-                worksheet.Cells[1, 7].Value = "Tiempo de Entrega";
-                worksheet.Cells[1, 8].Value = "Tiempo Total";  // Nueva columna
+                worksheet.Cells[1, 3].Value = "Mesero";
+                worksheet.Cells[1, 4].Value = "Fecha y Hora";
+                worksheet.Cells[1, 5].Value = "Tiempo Cocina (min)";
+                worksheet.Cells[1, 6].Value = "Tiempo Entrega (min)";
+                worksheet.Cells[1, 7].Value = "Tiempo Total (min)";
+                worksheet.Cells[1, 8].Value = "Items del Pedido";
                 worksheet.Cells[1, 9].Value = "Subtotal";
                 worksheet.Cells[1, 10].Value = "IVA";
                 worksheet.Cells[1, 11].Value = "Propina";
-                worksheet.Cells[1, 12].Value = "Total (con propina)";  // Modificado
+                worksheet.Cells[1, 12].Value = "Total";
                 worksheet.Cells[1, 13].Value = "Método de Pago";
 
-                int row = 2;
-                foreach (var pedido in sortedQuery)
-                {
-                    worksheet.Cells[row, 1].Value = pedido.Id;
-                    worksheet.Cells[row, 2].Value = pedido.NumeroMesa;
-                    worksheet.Cells[row, 3].Value = pedido.MeseroId;
-                    worksheet.Cells[row, 4].Value = pedido.MeseroNombre;
-                    worksheet.Cells[row, 5].Value = pedido.FechaHora.ToString("dd/MM/yyyy HH:mm:ss");
-
-                    // Calculos de tiempo
-                    var tiempoCocina = pedido.CocinaListoAt.HasValue ?
-                        (pedido.CocinaListoAt.Value - pedido.FechaHora).ToString(@"hh\:mm\:ss") : "00:00:00";
-                    var tiempoEntrega = (pedido.MeseroAceptadoAt.HasValue && pedido.CocinaListoAt.HasValue) ?
-                        (pedido.MeseroAceptadoAt.Value - pedido.CocinaListoAt.Value).ToString(@"hh\:mm\:ss") : "00:00:00";
-                    var tiempoTotal = pedido.MeseroAceptadoAt.HasValue ?
-                        (pedido.MeseroAceptadoAt.Value - pedido.FechaHora).ToString(@"hh\:mm\:ss") : "00:00:00";
-
-                    worksheet.Cells[row, 6].Value = tiempoCocina;
-                    worksheet.Cells[row, 7].Value = tiempoEntrega;
-                    worksheet.Cells[row, 8].Value = tiempoTotal;  // Nueva columna
-                    worksheet.Cells[row, 9].Value = pedido.Subtotal;
-                    worksheet.Cells[row, 10].Value = pedido.IVA;
-                    worksheet.Cells[row, 11].Value = pedido.Propina;
-                    worksheet.Cells[row, 12].Value = pedido.Total + pedido.Propina;  // Total con propina
-                    worksheet.Cells[row, 13].Value = pedido.MetodoPago;
-
-                    row++;
-                }
-
-                // Estilizar tabla
-                using (var range = worksheet.Cells[1, 1, 1, 13])  // Ajustado a 13 columnas
+                using (var range = worksheet.Cells[1, 1, 1, 13])
                 {
                     range.Style.Font.Bold = true;
                     range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
                 }
 
-                worksheet.Cells.AutoFitColumns();
+                int row = 2;
+                foreach (var pedido in sortedQuery)
+                {
+                    var tiempoCocina = pedido.CocinaListoAt.HasValue && pedido.CocinaListoAt.Value > pedido.FechaHora
+                        ? (pedido.CocinaListoAt.Value - pedido.FechaHora).TotalMinutes
+                        : 0;
+
+                    var tiempoEntrega = pedido.MeseroAceptadoAt.HasValue && pedido.CocinaListoAt.HasValue && pedido.MeseroAceptadoAt.Value > pedido.CocinaListoAt.Value
+                        ? (pedido.MeseroAceptadoAt.Value - pedido.CocinaListoAt.Value).TotalMinutes
+                        : 0;
+
+                    var tiempoTotal = pedido.MeseroAceptadoAt.HasValue && pedido.MeseroAceptadoAt.Value > pedido.FechaHora
+                        ? (pedido.MeseroAceptadoAt.Value - pedido.FechaHora).TotalMinutes
+                        : 0;
+
+                    var itemsDetalle = string.Join(", ", pedido.Detalles.Select(d => $"{d.Nombre} x{d.Cantidad} (${d.Valor:N0})"));
+
+                    worksheet.Cells[row, 1].Value = pedido.Id;
+                    worksheet.Cells[row, 2].Value = pedido.NumeroMesa;
+                    worksheet.Cells[row, 3].Value = pedido.MeseroNombre;
+                    worksheet.Cells[row, 4].Value = pedido.FechaHora.ToString("dd/MM/yyyy HH:mm:ss");
+                    worksheet.Cells[row, 5].Value = Math.Round(tiempoCocina, 2);
+                    worksheet.Cells[row, 6].Value = Math.Round(tiempoEntrega, 2);
+                    worksheet.Cells[row, 7].Value = Math.Round(tiempoTotal, 2);
+                    worksheet.Cells[row, 8].Value = itemsDetalle;
+                    worksheet.Cells[row, 9].Value = pedido.Subtotal;
+                    worksheet.Cells[row, 10].Value = pedido.IVA;
+                    worksheet.Cells[row, 11].Value = pedido.Propina;
+                    worksheet.Cells[row, 12].Value = pedido.Total + pedido.Propina;
+                    worksheet.Cells[row, 13].Value = pedido.MetodoPago;
+
+                    worksheet.Cells[row, 9].Style.Numberformat.Format = "$#,##0";
+                    worksheet.Cells[row, 10].Style.Numberformat.Format = "$#,##0";
+                    worksheet.Cells[row, 11].Style.Numberformat.Format = "$#,##0";
+                    worksheet.Cells[row, 12].Style.Numberformat.Format = "$#,##0";
+
+                    row++;
+                }
+
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
                 var stream = new MemoryStream();
                 package.SaveAs(stream);
                 stream.Position = 0;
 
-                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    $"HistorialPedidos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx");
+                string excelName = $"HistorialPedidos_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", excelName);
             }
         }
+
+        
+        [HttpGet]
+        public IActionResult ObtenerDetallePedido(int pedidoId)
+        {
+            var rolSession = HttpContext.Session.GetString("Rol");
+            if (rolSession != "Admin")
+            {
+                return Json(new { error = "No autorizado" });
+            }
+
+            try
+            {
+                var pedido = _historialPedidoService.ObtenerHistorialPedidos()
+                    .FirstOrDefault(p => p.Id == pedidoId);
+
+                if (pedido == null)
+                {
+                    return Json(new { error = "Pedido no encontrado" });
+                }
+
+                var items = pedido.Detalles.Select(d => new
+                {
+                    nombreItem = d.Nombre,
+                    cantidad = d.Cantidad,
+                    precioUnitario = d.Valor,
+                    subtotal = d.Cantidad * d.Valor
+                }).ToList();
+
+                var subtotal = pedido.Total;
+                var iva = pedido.IVA;
+                var propina = pedido.Propina;
+                var total = subtotal + propina;
+
+                return Json(new
+                {
+                    items = items,
+                    subtotal = subtotal,
+                    iva = iva,
+                    propina = propina,
+                    total = total
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "Error al obtener detalles: " + ex.Message });
+            }
+        }
+
+
 
         // ============= MÉTODOS NUEVOS PARA GESTIÓN DE TARJETAS NFC =============
 

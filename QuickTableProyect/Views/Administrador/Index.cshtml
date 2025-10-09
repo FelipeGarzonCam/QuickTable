@@ -1,106 +1,234 @@
 ﻿@{
     ViewData["Title"] = "Panel de Administrador";
 }
-<!--puta vida -->
-@section Styles {
-    <link rel="stylesheet" href="~/css/views/administrador/index.css" />
-    <style>
-            /* Estilos base */
-        .container {
-            padding-left: 15px;
-            padding-right: 15px;
-            max-width: 100%;
-        }
 
-        /* Estilos para los botones */
-        .btn-primary {
-            width: 100%;
-            height: 100%;
-            border-radius: 10px;
+@section Styles {
+    <style>
+        /* Contenedor principal centrado vertical y horizontalmente */
+        .admin-dashboard {
+            min-height: calc(100vh - 120px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px !important;
-            margin-bottom: 15px;
+            padding: 20px;
         }
 
-        /* Ajustes para dispositivos móviles */
-        @@media (max-width: 767px) {
-            .row {
-                display: flex;
-                flex-wrap: wrap;
-                margin-right: -10px;
-                margin-left: -10px;
-                justify-content: space-between;
-            }
-    
-            .col-6 {
-                padding-right: 10px;
-                padding-left: 10px;
-                margin-bottom: 20px;
-            }
-    
-            .btn-primary {
-                padding: 15px 10px !important;
-            }
-    
-            .btn-primary i {
-                font-size: 2em !important; /* Icono más pequeño en móvil */
-            }
-    
-            .btn-primary span {
-                font-size: 0.9em !important; /* Texto más pequeño en móvil */
-                text-align: center;
-                margin-top: 10px;
-            }
+        /* Título del panel */
+        .dashboard-title {
+            text-align: center;
+            margin-bottom: 3rem;
         }
 
-        /* Para pantallas muy pequeñas */
-        @@media (max-width: 360px) {
-            .col-6 {
-                flex: 0 0 100%;
-                max-width: 100%;
+            .dashboard-title h1 {
+                font-size: 2.5rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
             }
+
+            .dashboard-title p {
+                font-size: 1.1rem;
+                color: #6c757d;
+                margin: 0;
+            }
+
+        .dark-mode .dashboard-title p {
+            color: #adb5bd;
+        }
+
+        /* Grid de botones */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Cards de botones */
+        .dashboard-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .dark-mode .dashboard-card {
+            background: #343a40;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            text-decoration: none;
+            border-color: #007bff;
+        }
+
+        .dark-mode .dashboard-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        /* Iconos de las cards */
+        .dashboard-card-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover .dashboard-card-icon {
+            transform: scale(1.1);
+        }
+
+        /* Colores específicos por card */
+        .card-menu .dashboard-card-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .card-empleados .dashboard-card-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .card-sesiones .dashboard-card-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .card-historial .dashboard-card-icon {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        /* Títulos de las cards */
+        .dashboard-card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .dark-mode .dashboard-card-title {
+            color: #f8f9fa;
+        }
+
+        /* Descripciones de las cards */
+        .dashboard-card-description {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .dark-mode .dashboard-card-description {
+            color: #adb5bd;
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .dashboard-title h1
+
+        {
+            font-size: 2rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .dashboard-card {
+            padding: 1.5rem;
+            min-height: 180px;
+        }
+
+        .dashboard-card-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-card-title {
+            font-size: 1.1rem;
+        }
+
+        }
+
+        @@media (max-width: 576px) {
+            .dashboard-grid
+
+        {
+            grid-template-columns: 1fr;
+            max-width: 400px;
+        }
+
+        .admin-dashboard {
+            min-height: auto;
+            padding: 15px;
+        }
+
+        .dashboard-title {
+            margin-bottom: 2rem;
+        }
+
         }
     </style>
-
 }
 
-<div class="container text-center my-5">
-    <div class="row justify-content-around justify-content-md-center">
-        <!-- Botón para Modificar Menú -->
-        <div class="col-6 col-md-3 mb-3">
-            <a href="@Url.Action("ModificarMenu", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
-                <i class="fas fa-utensils fa-3x mb-2"></i>
-                <span style="font-size: 1.2em;">Modificar Menú</span>
-            </a>
-        </div>
-
-        <!-- Botón para Modificar Empleados -->
-        <div class="col-6 col-md-3 mb-3">
-            <a href="@Url.Action("ModificarEmpleados", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
-                <i class="fas fa-users-cog fa-3x mb-2"></i>
-                <span style="font-size: 1.2em;">Modificar Empleados</span>
-            </a>
-        </div>
-        <!-- Botón para Registro sesiones -->
-        <div class="col-6 col-md-3 mb-3">
-            <a href="@Url.Action("RegistroSesiones", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
-                <i class="fas fa-calendar-check fa-3x mb-2"></i>
-                <span style="font-size: 1.2em;">Registro de Sesiones</span>
-            </a>
-        </div>
-        <!-- Botón para Historial pedidos -->
-        <div class="col-6 col-md-3 mb-3">
-            <a href="@Url.Action("HistorialPedidos", "Administrador")" class="btn btn-primary btn-lg d-flex flex-column align-items-center p-4">
-                <i class="fas fa-history fa-3x mb-2"></i>
-                <span style="font-size: 1.2em;">Historial De Pedidos</span>
-            </a>
-        </div>
+<div class="admin-dashboard">
+    <div class="dashboard-title">
+        <h1><i class="fas fa-tachometer-alt mr-2"></i>Panel de Administrador</h1>
+        <p>Gestiona todos los aspectos de tu restaurante desde aquí</p>
     </div>
 
+    <div class="dashboard-grid">
+        <a href="@Url.Action("ModificarMenu", "Administrador")" class="dashboard-card card-menu">
+            <div class="dashboard-card-icon">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <div class="dashboard-card-title">Modificar Menú</div>
+            <p class="dashboard-card-description">Gestiona platos, precios y categorías del menú</p>
+        </a>
 
+        <a href="@Url.Action("ModificarEmpleados", "Administrador")" class="dashboard-card card-empleados">
+            <div class="dashboard-card-icon">
+                <i class="fas fa-users-cog"></i>
+            </div>
+            <div class="dashboard-card-title">Modificar Empleados</div>
+            <p class="dashboard-card-description">Administra usuarios y permisos del sistema</p>
+        </a>
+
+        <a href="@Url.Action("RegistroSesiones", "Administrador")" class="dashboard-card card-sesiones">
+            <div class="dashboard-card-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="dashboard-card-title">Registro de Sesiones</div>
+            <p class="dashboard-card-description">Consulta jornadas laborales y asistencias</p>
+        </a>
+
+        <a href="@Url.Action("HistorialPedidos", "Administrador")" class="dashboard-card card-historial">
+            <div class="dashboard-card-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="dashboard-card-title">Historial de Pedidos</div>
+            <p class="dashboard-card-description">Revisa pedidos completados y estadísticas</p>
+        </a>
+    </div>
 </div>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
