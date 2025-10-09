@@ -1,396 +1,241 @@
-﻿@model IEnumerable<QuickTableProyect.Dominio.RegistroSesion>
+﻿@model IEnumerable<QuickTableProyect.Dominio.JornadaDiariaDto>
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Registro De Sesiones";
-}
-<!--puta vida -->
-@section Styles {
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/css/adminlte.min.css" />
-  @*   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css"> *@
-    <!-- Tus estilos personalizados aquí -->
-    <style>        
-        #sesionesTable {
-            background-color: #343a40;
-            color: white;
-        }
-
-            #sesionesTable thead th {
-                border-bottom: 1px solid #6c757d;
-                padding: 8px 16px;
-                position: relative;
-            }
-
-        .sortable {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        /* Estilo minimalista para las flechas */
-        .sort-icon {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 14px;
-            opacity: 0.5;
-        }
-
-            .sort-icon.active {
-                opacity: 1;
-                color: #45aaf2;
-            }
-
-        /* Filtros con estilo oscuro */
-        .filter-form {
-            background-color: #2d3339;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-            .filter-form .form-control {
-                background-color: #383f45;
-                border: none;
-                color: white;
-                padding: 10px 15px;
-            }
-
-                .filter-form .form-control::placeholder {
-                    color: #adb5bd;
-                }
-
-        .pagination {
-            margin-top: 20px;
-        }
-
-        .page-item.active .page-link {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-
-        .online-status {
-            color: #28a745;
-            font-weight: bold;
-        }
-
-        .text-danger {
-            color: #dc3545 !important;
-            font-weight: bold;
-        }
-
-    </style>
+    ViewData["Title"] = "Registro de Jornadas Laborales";
 }
 
-<div class="container-fluid mt-4">
-    <h2>@ViewData["Title"]</h2>
-
-    <!-- El botón de exportar ahora es un elemento normal, no un enlace -->
-    <button id="exportarExcel" class="btn btn-success mb-3">
-        <i class="fas fa-file-export"></i> Exportar a Excel
-    </button>
-
-    <!-- Formulario de filtros -->
-    <div class="filter-form">
-        <form id="filterForm" class="row">
-            <div class="form-group col-md-3">
-                <label for="fecha" class="text-light">Fecha:</label>
-                <input type="date" id="fecha" class="form-control">
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Registro de Jornadas Laborales</h1>
             </div>
-            <div class="form-group col-md-2">
-                <label for="rol" class="text-light">Rol:</label>
-                <select id="rol" class="form-control">
-                    <option value="">Todos</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Mesero">Mesero</option>
-                    <option value="Cocina">Cocina</option>
-                    <option value="Cajero">Cajero</option>
-                </select>
-            </div>
-            <div class="form-group col-md-2">
-                <label for="empleadoId" class="text-light">ID Empleado:</label>
-                <input type="number" id="empleadoId" class="form-control">
-            </div>
-            <div class="form-group col-md-3">
-                <label for="nombre" class="text-light">Nombre:</label>
-                <input type="text" id="nombre" class="form-control">
-            </div>
-            <div class="form-group col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary btn-block">Filtrar</button>
-            </div>
-        </form>
+        </div>
     </div>
+</section>
 
-    <table class="table" id="sesionesTable">
-        <thead>
-            <tr>
-                <th scope="col" data-column="EmpleadoId" data-order="asc" class="sortable">
-                    ID Empleado
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Nombre" data-order="asc" class="sortable">
-                    Nombre
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="Rol" data-order="asc" class="sortable">
-                    Rol
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="FechaHoraConexion" data-order="asc" class="sortable">
-                    Conexión
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-                <th scope="col" data-column="FechaHoraDesconexion" data-order="asc" class="sortable">
-                    Desconexión
-                    <span class="sort-icon">
-                        <i class="bi bi-caret-up-fill"></i>
-                    </span>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Los datos se insertan dinámicamente -->
-        </tbody>
-    </table>
+<section class="content">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-filter"></i> Filtros de Búsqueda</h3>
+            </div>
+            <div class="card-body">
+                <form id="formFiltros" method="get" asp-action="RegistroSesiones">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Fecha</label>
+                                <input type="date" class="form-control" name="fecha" id="fecha" 
+                                       value="@ViewBag.Fecha?.ToString("yyyy-MM-dd")" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Empleado</label>
+                                <select class="form-control" name="empleadoId" id="empleadoId">
+                                    <option value="">Todos</option>
+                                    @foreach (var emp in ViewBag.Empleados)
+                                    {
+                                        <option value="@emp.Id" selected="@(ViewBag.EmpleadoId == emp.Id)">
+                                            @emp.Nombre
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Rol</label>
+                                <select class="form-control" name="rol" id="rol">
+                                    <option value="">Todos</option>
+                                    @foreach (var rolItem in ViewBag.Roles)
+                                    {
+                                        <option value="@rolItem" selected="@(ViewBag.RolSeleccionado == rolItem)">
+                                            @rolItem
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Buscar
+                            </button>
+                            <a href="@Url.Action("RegistroSesiones")" class="btn btn-secondary">
+                                <i class="fas fa-eraser"></i> Limpiar
+                            </a>
+                            <a href="@Url.Action("ExportarExcel", new { 
+                                fecha = ViewBag.Fecha, 
+                                empleadoId = ViewBag.EmpleadoId, 
+                                rol = ViewBag.RolSeleccionado 
+                            })" class="btn btn-success float-right">
+                                <i class="fas fa-file-excel"></i> Exportar a Excel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-    <!-- Controles de paginación -->
-    <nav>
-        <ul class="pagination justify-content-center" id="pagination">
-            <!-- Páginas generadas dinámicamente -->
-        </ul>
-    </nav>
-</div>
-@section Scripts {   
- 
-    @* <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.1/dist/js/adminlte.min.js"></script> *@
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-calendar-day"></i> Jornadas Registradas</h3>
+                <div class="card-tools">
+                    <span class="badge badge-primary">Total: @(Model?.Count() ?? 0) jornadas</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover table-bordered" id="tablaJornadas">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Empleado</th>
+                            <th>Rol</th>
+                            <th>Fecha</th>
+                            <th>Primera Entrada</th>
+                            <th>Última Salida</th>
+                            <th>Tiempo Trabajado</th>
+                            <th>Sesiones</th>
+                            <th>Estado/Anotación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                    <p>No hay registros para mostrar con los filtros seleccionados</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var jornada in Model)
+                            {
+                                <tr>
+                                    <td><strong>@jornada.EmpleadoNombre</strong></td>
+                                    <td>
+                                        <span class="badge badge-@(jornada.Rol switch {
+                                            "Admin" => "danger",
+                                            "Mesero" => "info",
+                                            "Cocina" => "warning",
+                                            "Cajero" => "success",
+                                            _ => "secondary"
+                                        })">
+                                            @jornada.Rol
+                                        </span>
+                                    </td>
+                                    <td>@jornada.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        @if (jornada.PrimeraEntrada.HasValue)
+                                        {
+                                            <i class="fas fa-sign-in-alt text-success"></i>
+                                            <span>@jornada.PrimeraEntrada.Value.ToString("hh:mm tt")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (jornada.UltimaSalida.HasValue)
+                                        {
+                                            <i class="fas fa-sign-out-alt text-danger"></i>
+                                            <span>@jornada.UltimaSalida.Value.ToString("hh:mm tt")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-warning">Sin salida</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (jornada.TiempoTrabajado.TotalMinutes > 0)
+                                        {
+                                            <strong>@((int)jornada.TiempoTrabajado.TotalHours)h @jornada.TiempoTrabajado.Minutes m</strong>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-pill badge-info">@jornada.TotalSesiones</span>
+                                    </td>
+                                    <td>
+                                        @if (jornada.Anotacion.Contains("completada con tarjeta"))
+                                        {
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-id-card"></i> @jornada.Anotacion
+                                            </span>
+                                        }
+                                        else if (jornada.Anotacion.Contains("manualmente"))
+                                        {
+                                            <span class="badge badge-primary">
+                                                <i class="fas fa-hand-paper"></i> @jornada.Anotacion
+                                            </span>
+                                        }
+                                        else if (jornada.Anotacion.Contains("timeout"))
+                                        {
+                                            <span class="badge badge-danger">
+                                                <i class="fas fa-clock"></i> @jornada.Anotacion
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> @jornada.Anotacion
+                                            </span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/AdminLTE/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
+    <script src="~/AdminLTE/plugins/datatables/jquery.dataTables.js"></script>
+    <script src="~/AdminLTE/plugins/datatables-bs4/js/dataTables.bootstrap4.js"></script>
+    
     <script>
-        $(document).ready(function () {
-            if (typeof $.fn.pushMenu !== 'undefined') {
-                $('[data-widget="pushmenu"]').pushMenu();
-            }
-            var currentPage = 1;
-            var totalPages = 1;
-            var pageSize = 10;
-            var sortColumn = 'FechaHoraConexion';
-            var sortOrder = 'desc';
-            var filters = {
-                fecha: '',
-                rol: '',
-                empleadoId: '',
-                nombre: ''
-            };
-
-            // Función para cargar los datos
-            function loadData() {
-                $.ajax({
-                    url: '@Url.Action("ObtenerRegistrosSesiones", "Administrador")',
-                    type: 'GET',
-                    data: {
-                        pageNumber: currentPage,
-                        pageSize: pageSize,
-                        sortColumn: sortColumn,
-                        sortOrder: sortOrder,
-                        fecha: filters.fecha || '',
-                        rol: filters.rol || '',
-                        empleadoId: filters.empleadoId || '',
-                        nombre: filters.nombre || ''
+        $(document).ready(function() {
+            var tieneRegistros = @((Model != null && Model.Any()) ? "true" : "false");
+            
+            if (tieneRegistros) {
+                $('#tablaJornadas').DataTable({
+                    "language": {
+                        "emptyTable": "No hay registros disponibles",
+                        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                        "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+                        "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                        "lengthMenu": "Mostrar _MENU_ registros",
+                        "loadingRecords": "Cargando...",
+                        "processing": "Procesando...",
+                        "search": "Buscar:",
+                        "zeroRecords": "No se encontraron coincidencias",
+                        "paginate": {
+                            "first": "Primero",
+                            "last": "Último",
+                            "next": "Siguiente",
+                            "previous": "Anterior"
+                        }
                     },
-                    success: function (response) {
-                        totalPages = response.totalPages;
-                        renderTable(response.registros);
-                        renderPagination();
-                        updateSortIcons();
-                    },
-                    error: function (xhr, status, error) {
-                        alert('Ocurrió un error al cargar los datos: ' + error);
-                    }
+                    "order": [[2, "desc"]],
+                    "pageLength": 25,
+                    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "Todos"]],
+                    "responsive": true,
+                    "columnDefs": [
+                        { "orderable": false, "targets": 7 }
+                    ]
                 });
             }
-
-            // Función para renderizar la tabla
-            function renderTable(registros) {
-                var rows = '';
-                $.each(registros, function (index, sesion) {
-                    var fechaConexion = formatDate(new Date(sesion.fechaHoraConexion));
-
-                    // Ahora tratamos explícitamente el null
-                    var fechaDesconexion;
-                    if (sesion.fechaHoraDesconexion === null) {
-                        // null → “En línea”
-                        fechaDesconexion = '<span class="online-status">En línea</span>';
-                    }
-                    else if (sesion.fechaHoraDesconexion === "Error al cerrar sesión") {
-                        // Error → en rojo
-                        fechaDesconexion = '<span class="text-danger font-weight-bold">'
-                            + sesion.fechaHoraDesconexion +
-                            '</span>';
-                    }
-                    else {
-                        // Fecha válida → formatear
-                        fechaDesconexion = formatDate(new Date(sesion.fechaHoraDesconexion));
-                    }
-
-                    rows += '<tr>'
-                        + '<td>' + sesion.empleadoId + '</td>'
-                        + '<td>' + sesion.nombre + '</td>'
-                        + '<td>' + sesion.rol + '</td>'
-                        + '<td>' + fechaConexion + '</td>'
-                        + '<td>' + fechaDesconexion + '</td>'
-                        + '</tr>';
-                });
-                $('#sesionesTable tbody').html(rows);
-            }
-
-
-
-            // Función para formatear fecha
-            function formatDate(date) {
-                if (!(date instanceof Date) || isNaN(date)) {
-                    return '';
-                }
-
-                return date.toLocaleDateString('es-ES', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                });
-            }
-
-            // Función para renderizar la paginación
-            function renderPagination() {
-                var pagination = '';
-
-                // Rango de páginas a mostrar
-                var maxPagesToShow = 5;
-                var startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-                var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
-                // Ajustar el inicio si cerca del final
-                if (endPage - startPage < maxPagesToShow - 1) {
-                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
-                }
-
-                // "Anterior"
-                if (currentPage > 1) {
-                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage - 1) + '">Anterior</a></li>';
-                } else {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
-                }
-
-                // Páginas
-                for (var i = startPage; i <= endPage; i++) {
-                    if (i === currentPage) {
-                        pagination += '<li class="page-item active"><span class="page-link">' + i + '</span></li>';
-                    } else {
-                        pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-                    }
-                }
-
-                //"Siguiente"
-                if (currentPage < totalPages) {
-                    pagination += '<li class="page-item"><a class="page-link" href="#" data-page="' + (currentPage + 1) + '">Siguiente</a></li>';
-                } else {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Siguiente</span></li>';
-                }
-
-                // Mostrar la página actual y la cantidad total de páginas
-                if (totalPages > 0) {
-                    pagination += '<li class="page-item disabled"><span class="page-link">Página ' + currentPage + ' de ' + totalPages + '</span></li>';
-                }
-
-                $('#pagination').html(pagination);
-            }
-
-            // Evento de clic en los enlaces de paginación
-            $('#pagination').on('click', 'a.page-link', function (e) {
-                e.preventDefault();
-                var selectedPage = parseInt($(this).data('page'));
-                if (selectedPage !== currentPage) {
-                    currentPage = selectedPage;
-                    loadData();
-                }
-            });
-
-            // Evento para ordenar las columnas
-            $('#sesionesTable thead').on('click', 'th.sortable', function () {
-                var column = $(this).data('column');
-
-                // Si se hace clic en la misma columna, alternar el orden
-                if (sortColumn === column) {
-                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortColumn = column;
-                    sortOrder = 'asc';
-                }
-
-                currentPage = 1; // Reiniciar a la primera página
-                loadData();
-            });
-
-            // Actualizar los iconos de ordenamiento
-            function updateSortIcons() {
-                // Primero eliminar todas las clases y restablecer todos los iconos
-                $('.sort-icon i').removeClass('bi-caret-up-fill bi-caret-down-fill').addClass('bi-caret-up-fill');
-                $('.sort-icon').removeClass('active');
-
-                // Luego actualizar solo la columna activa
-                var activeHeader = $('th[data-column="' + sortColumn + '"]');
-                var sortIcon = activeHeader.find('.sort-icon');
-                sortIcon.addClass('active');
-
-                // Cambiar el ícono según el orden
-                if (sortOrder === 'asc') {
-                    sortIcon.find('i').removeClass('bi-caret-down-fill').addClass('bi-caret-up-fill');
-                } else {
-                    sortIcon.find('i').removeClass('bi-caret-up-fill').addClass('bi-caret-down-fill');
-                }
-            }
-
-            // Evento para el formulario de filtros
-            $('#filterForm').submit(function (e) {
-                e.preventDefault();
-                filters = {
-                    fecha: $('#fecha').val(),
-                    rol: $('#rol').val(),
-                    empleadoId: $('#empleadoId').val(),
-                    nombre: $('#nombre').val()
-                };
-                currentPage = 1; // Reiniciar a la primera página
-                loadData();
-            });
-
-            // Evento para el botón de exportar a Excel
-            $('#exportarExcel').click(function () {
-                // Construir la URL con todos los filtros y ordenamiento
-                var url = '@Url.Action("DescargarRegistrosSesionesExcel", "Administrador")' +
-                    '?fecha=' + encodeURIComponent(filters.fecha || '') +
-                    '&rol=' + encodeURIComponent(filters.rol || '') +
-                    '&empleadoId=' + encodeURIComponent(filters.empleadoId || '') +
-                    '&nombre=' + encodeURIComponent(filters.nombre || '') +
-                    '&sortColumn=' + encodeURIComponent(sortColumn) +
-                    '&sortOrder=' + encodeURIComponent(sortOrder);
-
-                // Redirigir al método de descarga con todos los parámetros
-                window.location.href = url;
-            });
-
-            // Carga inicial de datos
-            loadData();
         });
     </script>
 }
-
-  
-
-   

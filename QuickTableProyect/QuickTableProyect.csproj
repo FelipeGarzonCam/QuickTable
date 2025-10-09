@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="JornadaDiariaDto.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.5.3" />
 	  <PackageReference Include="EntityFramework" Version="6.5.1" />
 	  <PackageReference Include="QRCoder" Version="1.6.0" />

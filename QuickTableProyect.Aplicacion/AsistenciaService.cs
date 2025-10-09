@@ -67,9 +67,14 @@ namespace QuickTableProyect.Aplicacion
                         Mensaje = "Tarjeta no reconocida. Contacte al administrador."
                     };
                 }
-
-                // EL RESTO IGUAL...
+              
                 var hoy = DateTime.Today;
+                var primeraSesionDelDia = context.RegistroSesiones
+                    .Where(r => r.EmpleadoId == empleado.Id)
+                    .Where(r => DbFunctions.TruncateTime(r.FechaHoraConexion) == hoy)
+                    .OrderBy(r => r.FechaHoraConexion)  // CORREGIDO: toma la primera
+                    .FirstOrDefault();
+
                 var registroActivo = context.RegistroSesiones
                     .Where(r => r.EmpleadoId == empleado.Id)
                     .Where(r => DbFunctions.TruncateTime(r.FechaHoraConexion) == hoy)
@@ -92,7 +97,9 @@ namespace QuickTableProyect.Aplicacion
 
                 context.SaveChanges();
 
-                var tiempoTrabajado = horaSalida - registroActivo.FechaHoraConexion;
+                var tiempoTrabajado = primeraSesionDelDia != null
+                    ? horaSalida - primeraSesionDelDia.FechaHoraConexion
+                    : TimeSpan.Zero;
 
                 return new ResultadoMarcarSalida
                 {
@@ -100,7 +107,7 @@ namespace QuickTableProyect.Aplicacion
                     Mensaje = "Salida registrada correctamente",
                     NombreEmpleado = empleado.Nombre,
                     RolEmpleado = empleado.Rol,
-                    HoraIngreso = registroActivo.FechaHoraConexion.ToString("HH:mm"),
+                    HoraIngreso = primeraSesionDelDia?.FechaHoraConexion.ToString("HH:mm") ?? "--:--",
                     HoraSalida = horaSalida.ToString("HH:mm"),
                     TiempoTrabajado = $"{(int)tiempoTrabajado.TotalHours}h {tiempoTrabajado.Minutes}m"
                 };

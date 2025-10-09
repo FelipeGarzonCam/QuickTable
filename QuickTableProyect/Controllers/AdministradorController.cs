@@ -278,18 +278,85 @@ namespace QuickTableProyect.Controllers
             _empleadoService.EliminarEmpleado(id);
             return RedirectToAction(nameof(ModificarEmpleados));
         }
-
         [HttpGet]
-        public IActionResult RegistroSesiones()
+        public IActionResult RegistroSesiones(DateTime? fecha = null, int? empleadoId = null, string rol = null)
         {
-            var rol = HttpContext.Session.GetString("Rol");
-            if (rol != "Admin")
+            var rolActual = HttpContext.Session.GetString("Rol");
+            if (rolActual != "Admin")
             {
                 return RedirectToAction("Index", "Login");
             }
-            var registros = _registroSesionService.ObtenerRegistrosPorFechaRolIdNombre(null, "", null, "");
-            return View(registros);
+
+            var empleados = _empleadoService.ObtenerEmpleados();
+            ViewBag.Empleados = empleados;
+            ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero", "Admin" };
+
+            var jornadas = _registroSesionService.ObtenerJornadasDiarias(fecha, empleadoId, rol);
+
+            if (jornadas == null)
+            {
+                jornadas = new List<JornadaDiariaDto>();
+            }
+
+            ViewBag.Fecha = fecha;
+            ViewBag.EmpleadoId = empleadoId;
+            ViewBag.RolSeleccionado = rol;
+
+            return View(jornadas);
         }
+
+        [HttpGet]
+        public IActionResult ExportarExcel(DateTime? fecha = null, int? empleadoId = null, string rol = null)
+        {
+            var jornadas = _registroSesionService.ObtenerJornadasDiarias(fecha, empleadoId, rol);
+
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Jornadas Laborales");
+
+                worksheet.Cells[1, 1].Value = "Empleado";
+                worksheet.Cells[1, 2].Value = "Rol";
+                worksheet.Cells[1, 3].Value = "Fecha";
+                worksheet.Cells[1, 4].Value = "Primera Entrada";
+                worksheet.Cells[1, 5].Value = "Última Salida";
+                worksheet.Cells[1, 6].Value = "Tiempo Trabajado";
+                worksheet.Cells[1, 7].Value = "Sesiones";
+                worksheet.Cells[1, 8].Value = "Anotación";
+
+                using (var range = worksheet.Cells[1, 1, 1, 8])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+                }
+
+                int row = 2;
+                foreach (var jornada in jornadas)
+                {
+                    worksheet.Cells[row, 1].Value = jornada.EmpleadoNombre;
+                    worksheet.Cells[row, 2].Value = jornada.Rol;
+                    worksheet.Cells[row, 3].Value = jornada.Fecha.ToString("dd/MM/yyyy");
+                    worksheet.Cells[row, 4].Value = jornada.PrimeraEntrada?.ToString("HH:mm") ?? "-";
+                    worksheet.Cells[row, 5].Value = jornada.UltimaSalida?.ToString("HH:mm") ?? "-";
+                    worksheet.Cells[row, 6].Value = $"{(int)jornada.TiempoTrabajado.TotalHours}h {jornada.TiempoTrabajado.Minutes}m";
+                    worksheet.Cells[row, 7].Value = jornada.TotalSesiones;
+                    worksheet.Cells[row, 8].Value = jornada.Anotacion;
+                    row++;
+                }
+
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+
+                string fileName = $"Jornadas_Laborales_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+        }
+
+
+
 
         [HttpGet]
         public IActionResult ObtenerRegistrosSesiones(DateTime? fecha, string rol, int? empleadoId, string nombre, int pageNumber = 1, int pageSize = 10, string sortColumn = "FechaHoraConexion", string sortOrder = "desc")
