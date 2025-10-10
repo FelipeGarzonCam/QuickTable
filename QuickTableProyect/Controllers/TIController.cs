@@ -6,11 +6,13 @@ using Microsoft.AspNetCore.Http;
 using System.Data.Entity;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
-//puto git
+using QuickTableProyect.Aplicacion;
+
+
 
 namespace QuickTableProyect.Interface
 {
-    // Clases para recibir JSON correctamente (sin JsonElement)
+    
     public class AdminRequest
     {
         public int adminId { get; set; }
@@ -25,6 +27,8 @@ namespace QuickTableProyect.Interface
     public class TIController : Controller
     {
         private readonly SistemaQuickTableContext _ctx = new();
+        private readonly PasswordService passwordService = new PasswordService();
+
 
         public override void OnActionExecuting(ActionExecutingContext ctx)
         {
@@ -64,7 +68,7 @@ namespace QuickTableProyect.Interface
                 var admin = new Empleado
                 {
                     Nombre = nombre,
-                    Contrasena = contrasena,
+                    Contrasena = passwordService.HashPassword(contrasena),
                     Rol = "Admin"
                 };
                 _ctx.Empleados.Add(admin);
@@ -106,7 +110,7 @@ namespace QuickTableProyect.Interface
                 if (admin == null)
                     return Json(new { success = false, message = "Administrador no encontrado" });
 
-                admin.Contrasena = data.nuevaClave;
+                admin.Contrasena = passwordService.HashPassword(data.nuevaClave);
                 _ctx.SaveChanges();
 
                 return Json(new { success = true, message = "Contraseña actualizada correctamente" });
@@ -246,5 +250,6 @@ namespace QuickTableProyect.Interface
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
     }
 }

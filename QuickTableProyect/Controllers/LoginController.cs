@@ -19,6 +19,9 @@ namespace QuickTableProyect.Interface
         private readonly RegistroSesionService _sesionService;
         private readonly SistemaQuickTableContext _ctx = new();      // EF6 DbContext
         private readonly RegistroSesionService sesionService;
+        private readonly PasswordService passwordService;
+
+
 
         public LoginController(
             EmpleadoService empleadoService,
@@ -27,6 +30,8 @@ namespace QuickTableProyect.Interface
             _empleadoService = empleadoService;
             _sesionService = sesionService;
             this.sesionService = sesionService;
+            passwordService = new PasswordService();
+
         }
 
         // ----------- GET /Login --------------
@@ -76,7 +81,7 @@ namespace QuickTableProyect.Interface
         {
             LimpiarCodigosVencidos();
             var emp = _empleadoService.ObtenerEmpleadoPorNombre(nombre);
-            if (emp == null || emp.Contrasena != contrasena)
+            if (emp == null || !passwordService.VerifyPassword(contrasena, emp.Contrasena))
                 return Json(new { success = false, message = "Nombre o contraseña incorrectos." });
 
             // 1) marca sesión anterior como error

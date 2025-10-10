@@ -4,7 +4,7 @@ using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
 using System;
-using System.Data.Entity; // IMPORTANTE: EF6, no EF Core
+using System.Data.Entity; 
 using System.Linq;
 
 namespace QuickTableProyect.Interface.Api
@@ -16,7 +16,7 @@ namespace QuickTableProyect.Interface.Api
         private readonly SistemaQuickTableContext ctx = new();
         private readonly CryptoService cryptoService; 
 
-        // AGREGAR CONSTRUCTOR
+        
         public TarjetaApiController()
         {
             cryptoService = new CryptoService();

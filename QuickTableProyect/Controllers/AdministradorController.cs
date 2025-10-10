@@ -9,7 +9,9 @@ using System.IO;
 using System.Threading.Tasks;
 using static QuickTableProyect.Aplicacion.PedidoService;
 using QuickTableProyect.Persistencia.Datos;
-//puto git
+
+
+
 namespace QuickTableProyect.Controllers
 {
     public class AdministradorController : Controller
@@ -19,6 +21,7 @@ namespace QuickTableProyect.Controllers
         private readonly RegistroSesionService _registroSesionService;
         private readonly IPedidoService _pedidoService;
         private readonly HistorialPedidoService _historialPedidoService;
+        private readonly PasswordService passwordService = new PasswordService();
 
         // AGREGAR contexto para gestión de tarjetas
         private readonly SistemaQuickTableContext ctx;
@@ -203,18 +206,12 @@ namespace QuickTableProyect.Controllers
         [HttpPost]
         public IActionResult CrearEmpleado(Empleado empleado)
         {
+
             var rol = HttpContext.Session.GetString("Rol");
             if (rol != "Admin")
             {
                 return RedirectToAction("Index", "Login");
-            }
-
-            // DEPURACIÓN - AGREGAR ESTAS LÍNEAS:
-            System.Diagnostics.Debug.WriteLine($"=== CREAR EMPLEADO ===");
-            System.Diagnostics.Debug.WriteLine($"Nombre: {empleado.Nombre}");
-            System.Diagnostics.Debug.WriteLine($"Rol: {empleado.Rol}");
-            System.Diagnostics.Debug.WriteLine($"Contrasena: {empleado.Contrasena}");
-            System.Diagnostics.Debug.WriteLine($"ModelState.IsValid: {ModelState.IsValid}");
+            }        
 
             foreach (var error in ModelState)
             {
@@ -224,8 +221,8 @@ namespace QuickTableProyect.Controllers
             if (ModelState.IsValid)
             {
                 empleado.Activo = true;
-                System.Diagnostics.Debug.WriteLine("Llamando _empleadoService.CrearEmpleado");
-
+                empleado.Contrasena = passwordService.HashPassword(empleado.Contrasena);  // HASHEAR LA CONTRASEÑAce.CrearEmpleado");
+                System.Diagnostics.Debug.WriteLine("Llamando empleadoService.CrearEmpleado");
                 try
                 {
                     _empleadoService.CrearEmpleado(empleado);
@@ -266,12 +263,28 @@ namespace QuickTableProyect.Controllers
             }
             if (ModelState.IsValid)
             {
+                // Solo hashear si se proporcionó una nueva contraseña
+                if (!string.IsNullOrEmpty(empleado.Contrasena))
+                {
+                    empleado.Contrasena = passwordService.HashPassword(empleado.Contrasena);
+                }
+                else
+                {
+                    // Mantener la contraseña actual del empleado
+                    var empleadoActual = _empleadoService.ObtenerEmpleadoPorId(empleado.Id);
+                    if (empleadoActual != null)
+                    {
+                        empleado.Contrasena = empleadoActual.Contrasena;
+                    }
+                }
+
                 _empleadoService.ActualizarEmpleado(empleado);
                 return RedirectToAction(nameof(ModificarEmpleados));
             }
             ViewBag.Roles = new List<string> { "Mesero", "Cocina", "Cajero" };
             return View(empleado);
         }
+
 
         public IActionResult EliminarEmpleado(int id)
         {

@@ -7,13 +7,13 @@ namespace QuickTableProyect.Persistencia.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class qwe : IMigrationMetadata
+    public sealed partial class AumentarTamanoContrasena : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(qwe));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(AumentarTamanoContrasena));
         
         string IMigrationMetadata.Id
         {
-            get { return "202510090112190_qwe"; }
+            get { return "202510101643257_AumentarTamanoContrasena"; }
         }
         
         string IMigrationMetadata.Source
