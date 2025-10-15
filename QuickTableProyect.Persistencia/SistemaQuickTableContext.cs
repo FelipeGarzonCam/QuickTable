@@ -9,10 +9,11 @@ namespace QuickTableProyect.Persistencia.Datos
         static string connectionString =
             "Server=localhost;" +
             "Database=QuickTableProyectDB;" +
-            "Trusted_Connection=True;"; 
+            "Trusted_Connection=True;";
 
         public SistemaQuickTableContext() : base(connectionString)
         {
+            this.Database.CommandTimeout = 10;
         }
 
         public DbSet<MenuItem> MenuItems { get; set; }

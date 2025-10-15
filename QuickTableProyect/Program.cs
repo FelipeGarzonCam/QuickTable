@@ -5,6 +5,8 @@ using QuickTableProyect.Dominio;
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using QuickTableProyect.Infrastructure;
+
 //
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -38,6 +40,8 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 var app = builder.Build();
+DatabaseInitializer.InicializarDatos();
+
 
 // Configuración de la aplicación
 if (!app.Environment.IsDevelopment())
