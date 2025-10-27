@@ -8,8 +8,6 @@ using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
 using QuickTableProyect.Aplicacion;
 
-
-
 namespace QuickTableProyect.Interface
 {
     
@@ -42,15 +40,24 @@ namespace QuickTableProyect.Interface
             public string codigoSesion { get; set; }
         }
 
-        /* ---------- LISTADO ---------- */
+        /* ---------- LISTADO ---------- */      
+
+        // Nuevo Index - Dashboard con 2 tarjetas
         public IActionResult Index()
+        {
+            ViewBag.NombreEmpleado = HttpContext.Session.GetString("Nombre");
+            return View();
+        }
+
+        // Nuevo método para gestión de tarjetas (el código que antes estaba en Index)
+        public IActionResult GestionTarjetas()
         {
             var tarjetas = _ctx.TarjetasRC.Include(t => t.Empleado)
                                           .OrderBy(t => t.Id)
                                           .ToList();
-
             return View(tarjetas);
         }
+
 
         /* ---------- NUEVO ADMIN + TARJETA ---------- */
         [HttpGet]
@@ -250,6 +257,19 @@ namespace QuickTableProyect.Interface
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        public IActionResult GestionBackups()
+        {
+            var rol = HttpContext.Session.GetString("Rol");
+            if (rol != "TI")
+            {
+                return RedirectToAction("Index", "Login");
+            }
+
+            ViewBag.NombreEmpleado = HttpContext.Session.GetString("Nombre");
+            return View();
+        }
+
 
     }
 }

@@ -500,7 +500,7 @@ class QuickTableControlAcceso:
             ['1', '2', '3'],
             ['4', '5', '6'], 
             ['7', '8', '9'],
-            ['Borrar', '0', 'Punto'],
+            ['Borrar', '0', 'Punto'],            
             ['IP', 'Puerto', 'Limpiar']
         ]
         
@@ -531,15 +531,15 @@ class QuickTableControlAcceso:
                 btn = tk.Button(
                     row_frame,
                     text=btn_text,
-                    font=('Arial', 10, 'bold'),
+                    font=('Arial', 16, 'bold'),
                     width=width,
-                    height=2,
+                    height=1,
                     bg=bg_color,
                     fg='white',
                     border=0,
                     command=lambda x=btn_text: self.on_config_key_press(x)
                 )
-                btn.pack(side='left', padx=1)
+                btn.pack(side='left', padx=2)
     
     def on_config_key_press(self, key):
         """Manejo de teclas del teclado tactil"""
@@ -569,7 +569,7 @@ class QuickTableControlAcceso:
             if current:
                 current_entry.delete(len(current)-1, tk.END)
         elif key == 'Punto':
-            if len(current) < 15 and '.' not in current[-3:]:
+            if len(current) < 15:
                 current_entry.insert(tk.END, '.')
         elif key.isdigit():
             if len(current) < 15:
@@ -907,50 +907,105 @@ class QuickTableControlAcceso:
     # PANTALLA DE CODIGO DE SESION (Modo Admin/TI/Empleado)
     # ========================================================================
     def mostrar_pantalla_codigo(self):
-        """Pantalla principal de codigo de sesion"""
+        """Pantalla principal de codigo de sesion - LAYOUT HORIZONTAL"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        main_frame = tk.Frame(self.root, bg='#343a40')
-        main_frame.place(relx=0.5, rely=0.5, anchor='center')
+        # Contenedor principal con dos columnas
+        main_container = tk.Frame(self.root, bg='#212529')
+        main_container.pack(fill='both', expand=True, padx=40, pady=40)
         
-        tk.Label(main_frame, text="Codigo de Sesion", 
-                font=('Arial', 24, 'bold'), 
-                fg='white', bg='#343a40').pack(pady=(0, 20))
+        # ========== COLUMNA IZQUIERDA ==========
+        left_frame = tk.Frame(main_container, bg='#343a40')
+        left_frame.pack(side='left', fill='both', expand=True, padx=(0, 20))
         
-        tk.Label(main_frame, text="Ingrese el codigo de 6 digitos", 
-                font=('Arial', 12), 
+        tk.Label(left_frame, text="Codigo de Sesion",
+                font=('Arial', 28, 'bold'),
+                fg='white', bg='#343a40').pack(pady=(20, 10))
+        
+        tk.Label(left_frame, text="Ingrese el codigo de 6 digitos",
+                font=('Arial', 14),
                 fg='#adb5bd', bg='#343a40').pack(pady=10)
         
-        # Campo codigo
-        code_frame = tk.Frame(main_frame, bg='#343a40')
-        code_frame.pack(pady=20)
+        # Campo codigo - MAS GRANDE
+        code_frame = tk.Frame(left_frame, bg='#343a40')
+        code_frame.pack(pady=30)
         
-        self.code_entry = tk.Entry(code_frame, font=('Arial', 22, 'bold'), 
-                                  width=8, justify='center', 
-                                  bg='white', fg='#495057')
-        
+        self.code_entry = tk.Entry(code_frame, font=('Arial', 32, 'bold'),
+                                width=12, justify='center',
+                                bg='white', fg='#495057')
         vcmd = (self.root.register(self.validate_code), '%P')
         self.code_entry.config(validate='key', validatecommand=vcmd)
-        self.code_entry.pack(pady=10)
+        self.code_entry.pack(pady=10, ipady=10)
         self.code_entry.focus()
         self.code_entry.bind('<Return>', lambda e: self.validar_codigo_sesion())
         
-        # Teclado
-        self.keyboard = AdminLTEKeyboard(main_frame, self.code_entry, self)
+        # Info servidor
+        info_frame = tk.Frame(left_frame, bg='#343a40')
+        info_frame.pack(pady=30)
         
-        # Info servidor y botones
-        info_frame = tk.Frame(main_frame, bg='#343a40')
-        info_frame.pack(pady=(20, 0))
-        
-        tk.Label(info_frame, text=f"Servidor: {self.server_url}", 
-                font=('Arial', 9), fg='#6c757d', bg='#343a40').pack(pady=(0, 10))
+        tk.Label(info_frame, text=f"Servidor: {self.server_url}",
+                font=('Arial', 11), fg='#6c757d', bg='#343a40').pack(pady=10)
         
         # Boton regreso
-        tk.Button(info_frame, text="Regresar al Menu Principal", 
-                 font=('Arial', 14, 'bold'), bg='#17a2b8', fg='white', 
-                 activebackground='#138496', width=25, height=2, 
-                 border=0, command=self.mostrar_pantalla_principal).pack(pady=10)
+        tk.Button(info_frame, text="Regresar al Menu Principal",
+                font=('Arial', 16, 'bold'), bg='#17a2b8', fg='white',
+                activebackground='#138496', width=28, height=2,
+                border=0, command=self.mostrar_pantalla_principal).pack(pady=20)
+        
+        # ========== COLUMNA DERECHA - TECLADO ==========
+        right_frame = tk.Frame(main_container, bg='#212529')
+        right_frame.pack(side='right', fill='both', expand=True)
+        
+        # Teclado numerico GRANDE
+        keyboard_frame = tk.Frame(right_frame, bg='#212529')
+        keyboard_frame.pack(expand=True, pady=5)
+        
+        buttons = [
+            ['1', '2', '3'],
+            ['4', '5', '6'],
+            ['7', '8', '9'],
+            ['Borrar', '0', 'Entrar']
+        ]
+        
+        for row in buttons:
+            row_frame = tk.Frame(keyboard_frame, bg='#212529')
+            row_frame.pack(pady=8)
+            
+            for btn_text in row:
+                if btn_text == 'Entrar':
+                    bg_color = '#007bff'
+                elif btn_text == 'Borrar':
+                    bg_color = '#dc3545'
+                else:
+                    bg_color = '#6c757d'
+                
+                btn = tk.Button(
+                    row_frame,
+                    text=btn_text,
+                    font=('Arial', 22, 'bold'),
+                    width=8,
+                    height=3,
+                    bg=bg_color,
+                    fg='white',
+                    border=0,
+                    command=lambda x=btn_text: self.on_session_key_press(x)
+                )
+                btn.pack(side='left', padx=8)
+
+    def on_session_key_press(self, key):
+        """Manejo de teclas para pantalla de codigo de sesion"""
+        current = self.code_entry.get()
+        
+        if key == 'Borrar':
+            if current:
+                self.code_entry.delete(len(current)-1, tk.END)
+        elif key == 'Entrar':
+            self.validar_codigo_sesion()
+        elif key.isdigit():
+            if len(current) < 6:
+                self.code_entry.insert(tk.END, key)
+
     
     def validate_code(self, value):
         return len(value) <= 6 and (value.isdigit() or value == "")
@@ -1168,7 +1223,7 @@ class QuickTableControlAcceso:
         
         # Estado
         self.ti_status_label = tk.Label(main_frame, 
-                                      text="Acerca la tarjeta MIFARE al lector...", 
+                                      text="Acerca la tarjeta al lector...", 
                                       font=('Arial', 14), fg='#17a2b8', bg='#343a40')
         self.ti_status_label.pack(pady=30)
         

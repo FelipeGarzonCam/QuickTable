@@ -1,0 +1,504 @@
+﻿@{
+    ViewData["Title"] = "Gestión de Backups";
+}
+
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1><i class="fas fa-database mr-2"></i>Gestión de Backups</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "TI")">Panel TI</a></li>
+                    <li class="breadcrumb-item active">Gestión de Backups</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <!-- Espacio Disponible -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="stats-icon">
+                        <i class="fas fa-hdd"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h6>Espacio Disponible</h6>
+                        <h3 id="espacioDisponible">Cargando...</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Backups -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <div class="stats-icon">
+                        <i class="fas fa-save"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h6>Total Backups</h6>
+                        <h3 id="totalBackups">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Último Backup -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h6>Último Backup</h6>
+                        <div id="ultimoBackup">
+                            <small>Sin backups</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crear Backup -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card stats-card-action" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" onclick="crearBackup()">
+                    <div class="stats-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h6>Acción Rápida</h6>
+                        <h4>Crear Backup</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Backups -->
+        <div class="card bg-dark">
+            <div class="card-header border-0">
+                <h3 class="card-title">
+                    <i class="fas fa-history mr-2"></i>Historial de Backups
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-sm btn-info" onclick="cargarBackups()">
+                        <i class="fas fa-sync-alt"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Nombre Archivo</th>
+                                <th>Tamaño</th>
+                                <th>Usuario</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="backupsTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                                    <p class="mb-0">Cargando backups...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .stats-card {
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+    .stats-card-action {
+        cursor: pointer;
+    }
+
+        .stats-card-action:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+    .stats-icon {
+        font-size: 2.5rem;
+        opacity: 0.9;
+    }
+
+    .stats-content {
+        flex: 1;
+    }
+
+        .stats-content h6 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+
+        .stats-content h3, .stats-content h4 {
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .stats-content small {
+            font-size: 0.9rem;
+            display: block;
+        }
+
+    .table-dark {
+        background: #2d3748;
+    }
+
+        .table-dark thead th {
+            background: #1a202c;
+            border-bottom: 2px solid #4a5568;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 15px 10px;
+            font-weight: 600;
+        }
+
+        .table-dark tbody tr {
+            transition: all 0.2s ease;
+        }
+
+            .table-dark tbody tr:hover {
+                background: #374151;
+            }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 0.875rem;
+        border-radius: 5px;
+        margin: 0 2px;
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+        .btn-info:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+    .btn-warning {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        border: none;
+    }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #fee140 0%, #fa709a 100%);
+        }
+
+    .badge-success {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .card-dark {
+        background: #2d3748;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    const nombreEmpleado = '@ViewBag.NombreEmpleado';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        cargarBackups();
+        cargarEspacioDisponible();
+    });
+
+    function cargarBackups() {
+        fetch('/api/backup/listar')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('backupsTableBody');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
+                                <p class="mb-0">No hay backups disponibles</p>
+                            </td>
+                        </tr>`;
+                    document.getElementById('totalBackups').textContent = '0';
+                    return;
+                }
+
+                document.getElementById('totalBackups').textContent = data.length;
+
+                const ultimo = data[0];
+                const fechaUltimo = new Date(ultimo.fechaCreacion);
+                document.getElementById('ultimoBackup').innerHTML = `
+                    <small>${fechaUltimo.toLocaleDateString('es-CO')}</small>
+                    <small class="d-block">${fechaUltimo.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}</small>
+                `;
+
+                data.forEach(backup => {
+                    const fecha = new Date(backup.fechaCreacion);
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>#${backup.id}</strong></td>
+                        <td>${fecha.toLocaleString('es-CO', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}</td>
+                        <td><code class="text-info">${backup.nombreArchivo}</code></td>
+                        <td><span class="badge badge-secondary">${backup.tamanioMB} MB</span></td>
+                        <td><i class="fas fa-user mr-1"></i>${backup.usuarioCreador}</td>
+                        <td><span class="badge badge-success">${backup.estado}</span></td>
+                        <td class="text-nowrap">
+                            <button class="btn btn-sm btn-info" onclick="descargarBackup(${backup.id})" title="Descargar">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning" onclick="restaurarBackup(${backup.id})" title="Restaurar">
+                                <i class="fas fa-undo-alt"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarBackup(${backup.id})" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const tbody = document.getElementById('backupsTableBody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-danger py-4">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <p>Error al cargar los backups</p>
+                        </td>
+                    </tr>`;
+            });
+    }
+
+    function cargarEspacioDisponible() {
+        fetch('/api/backup/espacio-disponible')
+            .then(response => response.json())
+            .then(data => {
+                const espacioGB = (data.espacioDisponibleMB / 1024).toFixed(2);
+                document.getElementById('espacioDisponible').textContent = `${espacioGB} GB`;
+            })
+            .catch(() => {
+                document.getElementById('espacioDisponible').textContent = 'N/A';
+            });
+    }
+
+    function crearBackup() {
+        Swal.fire({
+            title: 'Crear Backup',
+            text: '¿Desea crear una copia de seguridad completa de la base de datos?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-check mr-1"></i> Sí, crear',
+            cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancelar',
+            showLoaderOnConfirm: true,
+            preConfirm: () => {
+                return fetch('/api/backup/crear', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombreEmpleado: nombreEmpleado })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        throw new Error(data.message);
+                    }
+                    return data;
+                })
+                .catch(error => {
+                    Swal.showValidationMessage(`Error: ${error.message}`);
+                });
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Backup Creado',
+                    text: result.value.message,
+                    confirmButtonColor: '#28a745'
+                });
+                cargarBackups();
+                cargarEspacioDisponible();
+            }
+        });
+    }
+
+    function restaurarBackup(backupId) {
+        Swal.fire({
+            title: '¿Restaurar Backup?',
+            html: `
+                <p class="mb-3">Esta acción restaurará la base de datos a este punto.</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Advertencia:</strong> Todos los cambios posteriores se perderán.
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ffc107',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-undo mr-1"></i> Sí, restaurar',
+            cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Restaurando...',
+                    html: `
+                        <i class="fas fa-spinner fa-spin fa-3x text-warning mb-3"></i>
+                        <p>Este proceso puede tardar varios minutos...</p>
+                        <div class="progress mt-3">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%"></div>
+                        </div>
+                    `,
+                    allowOutsideClick: false,
+                    showConfirmButton: false
+                });
+
+                fetch('/api/backup/restaurar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        backupId: backupId,
+                        nombreEmpleado: nombreEmpleado
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.close();
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Restauración Exitosa',
+                            html: `
+                                <p>${data.message}</p>
+                                <p class="text-warning mt-3">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    La aplicación se reiniciará automáticamente en 3 segundos...
+                                </p>
+                            `,
+                            confirmButtonColor: '#28a745',
+                            timer: 3000,
+                            timerProgressBar: true,
+                            showConfirmButton: false,
+                            allowOutsideClick: false
+                        }).then(() => {
+                            window.location.href = '/Login';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de Conexión',
+                        text: 'No se pudo completar la restauración.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                });
+            }
+        });
+    }
+
+    function eliminarBackup(backupId) {
+        Swal.fire({
+            title: '¿Eliminar Backup?',
+            text: 'Esta acción no se puede deshacer',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trash mr-1"></i> Sí, eliminar',
+            cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/api/backup/eliminar/${backupId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Eliminado',
+                            text: data.message,
+                            confirmButtonColor: '#28a745'
+                        });
+                        cargarBackups();
+                        cargarEspacioDisponible();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message,
+                            confirmButtonColor: '#dc3545'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    function descargarBackup(backupId) {
+        window.location.href = `/api/backup/descargar/${backupId}`;
+    }
+</script>

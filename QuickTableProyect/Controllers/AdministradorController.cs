@@ -909,7 +909,7 @@ namespace QuickTableProyect.Controllers
 
 
 
-        // ============= MÉTODOS NUEVOS PARA GESTIÓN DE TARJETAS NFC =============
+        // GESTIÓN DE TARJETAS NFC
 
         [HttpGet]
         public IActionResult GestionarTarjetas()
@@ -923,7 +923,7 @@ namespace QuickTableProyect.Controllers
             try
             {
                 var empleados = ctx.Empleados
-                    .Where(e => e.Rol != "Admin") // Solo empleados normales (Mesero, Cocina, Cajero)
+                    .Where(e => e.Rol != "Admin") 
                     .OrderBy(e => e.Nombre)
                     .ToList();
 
