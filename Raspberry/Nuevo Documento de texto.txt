@@ -1,5 +1,0 @@
-# Crear la carpeta de destino
-mkdir -p ~/Desktop/Windows
-
-# Montar la carpeta (reemplaza IP_WINDOWS con tu IP real)
-sudo mount -t cifs //IP_WINDOWS/QuicTableIT ~/Desktop/Windows -o username=Felip,password="",iocharset=utf8,file_mode=0777,dir_mode=0777

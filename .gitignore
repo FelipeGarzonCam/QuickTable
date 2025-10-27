@@ -66,3 +66,13 @@ artifacts/
 **/Properties/PublishProfiles/
 
 .vscode/
+
+# Certificados TDE - NO subir al repositorio
+*.cer
+*.pvk
+**/QuickTableSecurity/
+**/Certificados/
+passwords.txt
+contraseñas.txt
+secrets.txt
+Instrucciones_TDE.txt

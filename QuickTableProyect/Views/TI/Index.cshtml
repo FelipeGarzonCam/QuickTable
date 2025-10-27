@@ -1,340 +1,194 @@
-﻿@model IEnumerable<QuickTableProyect.Dominio.TarjetaRC>
-@{
-    ViewBag.Title = "Gestión de Tarjetas";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+﻿@{
+    ViewData["Title"] = "Panel de TI";
 }
-<!--puta vida -->
-<link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css">
-<link rel="stylesheet" href="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.css">
 
-<div class="content-wrapper">
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>@ViewBag.Title</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
-                        <li class="breadcrumb-item active">Gestión de Tarjetas</li>
-                    </ol>
-                </div>
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>Panel de TI</h1>
             </div>
-        </div>
-    </section>
-
-    <section class="content">
-        <div class="container-fluid">
-            <div class="row mb-3">
-                <div class="col-12">
-                    <a asp-action="CrearAdministrador" class="btn btn-success btn-lg">
-                        <i class="fas fa-user-plus"></i> Crear Administrador
-                    </a>
-                </div>
-            </div>
-
-            <div class="row">
-                @foreach (var t in Model)
-                {
-                    <div class="col-12 col-md-6 col-lg-4 mb-3">
-                        <div class="card @(t.Activa ? "card-success" : "card-warning") card-outline">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas @(t.Activa ? "fa-check-circle" : "fa-clock")"></i>
-                                    @t.Empleado?.Nombre
-                                </h3>
-                                <div class="card-tools">
-                                    @if (t.Activa)
-                                    {
-                                        <span class="badge badge-success">Activa</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-warning">Pendiente</span>
-                                    }
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <dl class="row mb-0">
-                                    <dt class="col-sm-4">ID:</dt>
-                                    <dd class="col-sm-8">@t.Id</dd>
-
-                                    <dt class="col-sm-4">UID:</dt>
-                                    <dd class="col-sm-8"><code>***PROTEGIDO***</code></dd>
-
-                                    <dt class="col-sm-4">Fecha:</dt>
-                                    <dd class="col-sm-8">@(t.FechaAsignacion?.ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
-                                </dl>
-                            </div>
-                            <div class="card-footer">
-                                <div class="row">
-                                    <div class="col-12 col-sm-4 mb-2 mb-sm-0">
-                                        <button class="btn btn-warning btn-block btn-sm" onclick="mostrarModalCambiarClave(@t.EmpleadoId, '@t.Empleado.Nombre')" title="Cambiar Contraseña">
-                                            <i class="fas fa-key"></i>
-                                        </button>
-                                    </div>
-
-                                    <div class="col-12 col-sm-4 mb-2 mb-sm-0">
-                                        @if (!t.Activa)
-                                        {
-                                            <button type="button" class="btn btn-primary btn-block btn-sm" onclick="mostrarCodigoSesion('@t.Uid', '@t.Empleado.Nombre')" title="Crear Tarjeta">
-                                                <i class="fas fa-sd-card"></i>
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-info btn-block btn-sm" onclick="regenerarTarjeta(@t.EmpleadoId)" title="Regenerar Tarjeta">
-                                                <i class="fas fa-redo"></i>
-                                            </button>
-                                        }
-                                    </div>
-
-                                    <div class="col-12 col-sm-4">
-                                        <button class="btn btn-danger btn-block btn-sm" onclick="eliminarAdministrador(@t.EmpleadoId, '@t.Empleado.Nombre')" title="Eliminar Administrador">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </section>
-</div>
-
-<!-- Modal Cambiar Contraseña -->
-<div class="modal fade" id="modalCambiarClave" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-warning">
-                <h5 class="modal-title">Cambiar Contraseña</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form id="formCambiarClave">
-                <div class="modal-body">
-                    <p>Administrador: <strong id="nombreAdmin"></strong></p>
-                    <input type="hidden" id="adminIdCambio">
-                    <div class="form-group">
-                        <label class="form-label">Nueva Contraseña</label>
-                        <input type="password" id="nuevaClave" class="form-control" required minlength="4">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Confirmar Contraseña</label>
-                        <input type="password" id="confirmarClave" class="form-control" required minlength="4">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-warning">Cambiar Contraseña</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para mostrar código de sesión -->
-<div class="modal fade" id="codigoSesionModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Código de Sesión para Raspberry Pi</h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body text-center">
-                <p>Administrador: <strong id="adminNombreModal"></strong></p>
-                <p>UID: <strong id="uidModal"></strong></p>
-                <h2 class="text-primary my-4" id="codigoSesionDisplay"></h2>
-                <p class="text-muted">Ingrese este código en la Raspberry Pi para grabar la tarjeta</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Inicio</a></li>
+                    <li class="breadcrumb-item active">Panel TI</li>
+                </ol>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-@section Scripts {
-    <script src="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            @if (TempData["Ok"] != null)
-            {
-                        <text>
-                        toastr.success('@TempData["Ok"]');
-                        </text>
-            }
-
-            @if (TempData["Error"] != null)
-            {
-                        <text>
-                        toastr.error('@TempData["Error"]');
-                        </text>
-            }
-        });
-
-        function mostrarCodigoSesion(uid, adminNombre) {
-            const codigo = Math.floor(Math.random() * 900000 + 100000);
-            fetch('@Url.Action("AsociarCodigoSesion", "TI")', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uid: uid, codigoSesion: codigo.toString() })
-            })
-            .then(r => r.json())
-            .then(d => {
-                if (!d.success) {
-                    toastr.error(d.message);
-                    return;
-                }
-                document.getElementById('adminNombreModal').textContent = adminNombre;
-                document.getElementById('uidModal').textContent = uid;
-                document.getElementById('codigoSesionDisplay').textContent = codigo;
-                $('#codigoSesionModal').modal('show');
-            })
-            .catch(error => {
-                toastr.error('Error de conexión');
-                console.error('Error:', error);
-            });
+<section class="content">
+    <style>
+        .admin-dashboard {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        function mostrarModalCambiarClave(id, nombre) {
-            document.getElementById('adminIdCambio').value = id;
-            document.getElementById('nombreAdmin').textContent = nombre;
-            document.getElementById('nuevaClave').value = '';
-            document.getElementById('confirmarClave').value = '';
-            $('#modalCambiarClave').modal('show');
+        .dashboard-title {
+            text-align: center;
+            margin-bottom: 3rem;
         }
 
-        document.getElementById('formCambiarClave').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const nueva = document.getElementById('nuevaClave').value;
-            const confirmar = document.getElementById('confirmarClave').value;
-            const adminId = document.getElementById('adminIdCambio').value;
-
-            if (nueva !== confirmar) {
-                toastr.error('Las contraseñas no coinciden');
-                return;
+            .dashboard-title h1 {
+                font-size: 2.5rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
             }
 
-            if (nueva.length < 4) {
-                toastr.error('La contraseña debe tener al menos 4 caracteres');
-                return;
+            .dashboard-title p {
+                font-size: 1.1rem;
+                color: #6c757d;
+                margin: 0;
             }
 
-            fetch('@Url.Action("CambiarClaveAdmin", "TI")', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ adminId: parseInt(adminId), nuevaClave: nueva })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    toastr.success('Contraseña actualizada correctamente');
-                    $('#modalCambiarClave').modal('hide');
-                } else {
-                    toastr.error(data.message || 'Error al cambiar contraseña');
-                }
-            })
-            .catch(error => {
-                toastr.error('Error de conexión');
-                console.error('Error:', error);
-            });
-        });
-
-        function eliminarAdministrador(adminId, nombre) {
-            Swal.fire({
-                title: 'Eliminar Administrador',
-                text: "¿Está seguro que desea eliminar al administrador " + nombre + "? Esta acción no se puede deshacer.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('@Url.Action("EliminarAdmin", "TI")', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ adminId: adminId })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire(
-                                'Eliminado',
-                                'Administrador eliminado correctamente',
-                                'success'
-                            ).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            toastr.error(data.message || 'Error al eliminar administrador');
-                        }
-                    })
-                    .catch(error => {
-                        toastr.error('Error de conexión');
-                        console.error('Error:', error);
-                    });
-                }
-            });
+        .dark-mode .dashboard-title p {
+            color: #adb5bd;
         }
 
-        function regenerarTarjeta(adminId) {
-            Swal.fire({
-                title: '¿Regenerar tarjeta?',
-                text: "Se invalidará la tarjeta anterior y deberá grabarla nuevamente",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Sí, regenerar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('@Url.Action("RegenerarTarjeta", "TI")', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ adminId: adminId })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire(
-                                'Regenerada',
-                                'Tarjeta regenerada. Nuevo UID: ' + data.uid,
-                                'success'
-                            ).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            toastr.error(data.message || 'Error al regenerar tarjeta');
-                        }
-                    })
-                    .catch(error => {
-                        toastr.error('Error de conexión');
-                        console.error('Error:', error);
-                    });
-                }
-            });
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            width: 100%;
         }
-    </script>
-}
 
-<style>
-    .card {
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
+        .dashboard-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 2.5rem;
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+        }
 
-        .card:hover {
+        .dark-mode .dashboard-card {
+            background: #343a40;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .dashboard-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            text-decoration: none;
+            border-color: #17a2b8;
         }
-</style>
+
+        .dark-mode .dashboard-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+
+        .dashboard-card-icon {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            font-size: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover .dashboard-card-icon {
+            transform: scale(1.1);
+        }
+
+        .card-tarjetas .dashboard-card-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .card-backups .dashboard-card-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .dashboard-card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .dark-mode .dashboard-card-title {
+            color: #f8f9fa;
+        }
+
+        .dashboard-card-description {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .dark-mode .dashboard-card-description {
+            color: #adb5bd;
+        }
+
+        @@media (max-width: 768px) {
+            .dashboard-title h1
+
+        {
+            font-size: 2rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            max-width: 400px;
+        }
+
+        .dashboard-card {
+            padding: 2rem;
+            min-height: 200px;
+        }
+
+        .dashboard-card-icon {
+            width: 70px;
+            height: 70px;
+            font-size: 2.5rem;
+        }
+
+        }
+    </style>
+
+    <div class="admin-dashboard">
+        <div class="dashboard-title">
+            <h1><i class="fas fa-tools mr-2"></i>Panel de Tecnología</h1>
+            <p>Gestiona tarjetas NFC y backups del sistema</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Tarjeta 1: Gestión de Tarjetas NFC -->
+            <a href="@Url.Action("GestionTarjetas", "TI")" class="dashboard-card card-tarjetas">
+                <div class="dashboard-card-icon">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <div class="dashboard-card-title">Gestión de Tarjetas NFC</div>
+                <p class="dashboard-card-description">Administra tarjetas de acceso para administradores</p>
+            </a>
+
+            <!-- Tarjeta 2: Gestión de Backups -->
+            <a href="@Url.Action("GestionBackups", "TI")" class="dashboard-card card-backups">
+                <div class="dashboard-card-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="dashboard-card-title">Gestión de Backups</div>
+                <p class="dashboard-card-description">Crea, restaura y gestiona copias de seguridad del sistema</p>
+            </a>
+        </div>
+    </div>
+</section>

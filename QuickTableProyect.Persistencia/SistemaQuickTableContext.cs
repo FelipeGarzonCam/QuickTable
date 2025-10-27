@@ -1,6 +1,7 @@
-﻿using System.Data.Entity;
+﻿using QuickTableProyect.Dominio;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
-using QuickTableProyect.Dominio;
 
 namespace QuickTableProyect.Persistencia.Datos
 {
@@ -28,6 +29,8 @@ namespace QuickTableProyect.Persistencia.Datos
 
         public DbSet<TarjetaRC> TarjetasRC { get; set; }
         public DbSet<Codigo2FA> Codigos2FA { get; set; }
+        public DbSet<HistorialBackup> HistorialBackups { get; set; }
+
 
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
@@ -53,6 +56,27 @@ namespace QuickTableProyect.Persistencia.Datos
             // Eliminar pluralización automática de nombres de tablas
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             base.OnModelCreating(modelBuilder);
+
+            // Configuración para HistorialBackup
+            modelBuilder.Entity<HistorialBackup>()
+                .Property(h => h.NombreArchivo)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            modelBuilder.Entity<HistorialBackup>()
+                .Property(h => h.RutaArchivo)
+                .HasMaxLength(500)
+                .IsRequired();
+
+            modelBuilder.Entity<HistorialBackup>()
+                .Property(h => h.TipoBackup)
+                .HasMaxLength(50)
+                .IsRequired();
+
+            modelBuilder.Entity<HistorialBackup>()
+                .Property(h => h.Estado)
+                .HasMaxLength(50)
+                .IsRequired();
         }
     }
 } 
