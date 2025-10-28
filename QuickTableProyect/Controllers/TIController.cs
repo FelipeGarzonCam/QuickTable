@@ -95,7 +95,7 @@ namespace QuickTableProyect.Interface
 
                 TempData["Ok"] = $"Administrador {nombre} creado correctamente. Recuerde Asignar Una Tarjeta";
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("GestionTarjetas");
             }
             catch (Exception ex)
             {
@@ -104,7 +104,6 @@ namespace QuickTableProyect.Interface
             }
         }
 
-        /* ---------- MÉTODOS JSON PARA MODALES (CORREGIDOS) ---------- */
         [HttpPost]
         public JsonResult CambiarClaveAdmin([FromBody] AdminRequest data)
         {
