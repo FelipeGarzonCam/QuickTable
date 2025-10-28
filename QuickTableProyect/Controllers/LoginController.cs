@@ -76,19 +76,42 @@ namespace QuickTableProyect.Interface
         }
 
         // ----------- POST /Login/Autenticar --------------
+        // ----------- POST Login/Autenticar --------------
         [HttpPost]
         public JsonResult Autenticar(string nombre, string contrasena)
         {
             LimpiarCodigosVencidos();
+
             var emp = _empleadoService.ObtenerEmpleadoPorNombre(nombre);
+
             if (emp == null || !passwordService.VerifyPassword(contrasena, emp.Contrasena))
+            {
                 return Json(new { success = false, message = "Nombre o contraseña incorrectos." });
+            }
+
+            // ----- VALIDACIÓN CRÍTICA PARA ADMINISTRADORES -----
+            if (emp.Rol == "Admin")
+            {
+                // Verificar si el admin tiene una tarjeta NFC asignada
+                var tieneTarjeta = _ctx.TarjetasRC.Any(t =>
+                    t.EmpleadoId == emp.Id &&
+                    t.Activa == true);
+
+                if (!tieneTarjeta)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "No tienes una tarjeta NFC asignada. Contacta a TI para obtener una tarjeta antes de iniciar sesión."
+                    });
+                }
+            }
 
             // 1) marca sesión anterior como error
-            _sesionService.MarcarErroresPendientes(emp.Id);
+            sesionService.MarcarErroresPendientes(emp.Id);
 
             // 2) registra nueva conexión
-            int regId = _sesionService.RegistrarConexion(emp.Id);
+            int regId = sesionService.RegistrarConexion(emp.Id);
 
             // 3) guarda datos en la sesión de ASP.NET Core
             HttpContext.Session.SetString("Rol", emp.Rol);
@@ -105,7 +128,7 @@ namespace QuickTableProyect.Interface
                     .ToList();
                 _ctx.Codigos2FA.RemoveRange(codigosAnteriores);
 
-                string code = new Random().Next(100_000, 999_999).ToString();
+                string code = new Random().Next(100000, 999999).ToString();
                 Guid navId = Guid.NewGuid();
 
                 _ctx.Codigos2FA.Add(new Codigo2FA
@@ -115,8 +138,9 @@ namespace QuickTableProyect.Interface
                     EmpleadoId = emp.Id,
                     Expiracion = DateTime.Now.AddMinutes(10),
                     Confirmado = false,
-                    Usado = false  // Agregar campo para mejor control
+                    Usado = false // Agregar campo para mejor control
                 });
+
                 _ctx.SaveChanges();
 
                 return Json(new
@@ -124,7 +148,7 @@ namespace QuickTableProyect.Interface
                     success = true,
                     requiere2FA = true,
                     code,
-                    nav = navId     // usado por el modal en JS
+                    nav = navId // usado por el modal en JS
                 });
             }
 
@@ -138,8 +162,10 @@ namespace QuickTableProyect.Interface
                 "TI" => Url.Action("Index", "Ti"),
                 _ => Url.Action("Index", "Login")
             };
+
             return Json(new { success = true, redirectUrl = url });
         }
+
 
         // ----------- POST /Login/Confirmar2FA (CORREGIDO) --------------
         // ----------- POST /Login/Confirmar2FA (CON DEBUG) --------------

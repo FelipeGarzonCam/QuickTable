@@ -23,12 +23,11 @@ namespace QuickTableProyect.Api
         {
             var session = _httpContextAccessor.HttpContext.Session;
 
-            var empleadoIdStr = session.GetString("EmpleadoId");
-            var nombreEmpleado = session.GetString("NombreCompleto");
+            var empleadoIdStr = session.GetString("Id");
+            var nombreEmpleado = session.GetString("Nombre");
 
             if (string.IsNullOrEmpty(empleadoIdStr) || string.IsNullOrEmpty(nombreEmpleado))
             {
-                // Si no hay sesión válida, usar datos por defecto de TI
                 return (1, "Usuario TI");
             }
 
@@ -47,7 +46,11 @@ namespace QuickTableProyect.Api
             {
                 var (empleadoId, nombreEmpleado) = ObtenerDatosEmpleado();
 
-                var resultado = _backupService.CrearBackupCompleto(empleadoId, nombreEmpleado);
+                var observaciones = string.IsNullOrWhiteSpace(request.Observaciones)
+                    ? "Backup creado correctamente"
+                    : request.Observaciones;
+
+                var resultado = _backupService.CrearBackupCompleto(empleadoId, nombreEmpleado, observaciones);
 
                 if (resultado.Exito)
                 {
@@ -174,6 +177,7 @@ namespace QuickTableProyect.Api
     public class CrearBackupRequest
     {
         public string NombreEmpleado { get; set; }
+        public string Observaciones { get; set; }
     }
 
     public class RestaurarBackupRequest

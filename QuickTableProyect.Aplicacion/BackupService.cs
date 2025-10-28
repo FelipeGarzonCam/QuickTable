@@ -29,7 +29,8 @@ namespace QuickTableProyect.Aplicacion
             }
         }
 
-        public (bool Exito, string Mensaje, int? BackupId) CrearBackupCompleto(int empleadoId, string nombreEmpleado)
+        public (bool Exito, string Mensaje, int? BackupId) CrearBackupCompleto(int empleadoId, string nombreEmpleado, string observaciones = null)
+
         {
             string connectionString = null;
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -155,10 +156,13 @@ namespace QuickTableProyect.Aplicacion
                     UsuarioCreador = nombreEmpleado,
                     TipoBackup = "Completo",
                     Estado = "Exitoso",
-                    Observaciones = "Backup creado correctamente",
+                    Observaciones = string.IsNullOrWhiteSpace(observaciones)
+                         ? "Backup creado correctamente"
+                         : observaciones,
                     RutaCertificado = rutaCertificado,
                     RutaClavePrivada = rutaClavePrivada
                 };
+
 
                 _context.HistorialBackups.Add(historial);
                 _context.SaveChanges();

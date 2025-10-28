@@ -1,10 +1,9 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=QuickTable Control Acceso
+Name=QuickTable NFC
 Comment=Sistema de control de acceso con NFC
 Exec=/home/pi/quicktable-launcher.sh
 Icon=/usr/share/pixmaps/python3.xpm
 Terminal=true
 Categories=Utility;Application;
-

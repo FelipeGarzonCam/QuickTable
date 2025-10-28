@@ -98,7 +98,8 @@
                                 <th>Fecha</th>
                                 <th>Nombre Archivo</th>
                                 <th>Tamaño</th>
-                                <th>Usuario</th>
+                                <th>Usuario TI</th>
+                                <th>Observaciones</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
@@ -280,18 +281,18 @@
                 data.forEach(backup => {
                     const fecha = new Date(backup.fechaCreacion);
                     const tr = document.createElement('tr');
+
+                    const observaciones = backup.observaciones && backup.observaciones.trim() !== ''
+                        ? backup.observaciones
+                        : '<em class="text-muted">Sin observaciones</em>';
+
                     tr.innerHTML = `
-                        <td><strong>#${backup.id}</strong></td>
-                        <td>${fecha.toLocaleString('es-CO', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })}</td>
+                        <td><strong>${backup.id}</strong></td>
+                        <td>${fecha.toLocaleString('es-CO', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</td>
                         <td><code class="text-info">${backup.nombreArchivo}</code></td>
                         <td><span class="badge badge-secondary">${backup.tamanioMB} MB</span></td>
                         <td><i class="fas fa-user mr-1"></i>${backup.usuarioCreador}</td>
+                        <td><small>${observaciones}</small></td>
                         <td><span class="badge badge-success">${backup.estado}</span></td>
                         <td class="text-nowrap">
                             <button class="btn btn-sm btn-info" onclick="descargarBackup(${backup.id})" title="Descargar">
@@ -305,8 +306,11 @@
                             </button>
                         </td>
                     `;
+
                     tbody.appendChild(tr);
                 });
+
+
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -333,22 +337,42 @@
             });
     }
 
-    function crearBackup() {
+        function crearBackup() {
         Swal.fire({
             title: 'Crear Backup',
-            text: '¿Desea crear una copia de seguridad completa de la base de datos?',
+            html: `
+                <p class="mb-3">Crear una copia de seguridad completa de la base de datos</p>
+                <div class="form-group text-left">
+                    <label for="observacionesBackup" class="font-weight-bold">
+                        <i class="fas fa-comment mr-1"></i> Observaciones (opcional)
+                    </label>
+                    <textarea
+                        id="observacionesBackup"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Ej: Backup antes de actualización del sistema, backup semanal, etc."
+                        maxlength="500"
+                    ></textarea>
+                    <small class="form-text text-muted">Máximo 500 caracteres</small>
+                </div>
+            `,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#28a745',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-check mr-1"></i> Sí, crear',
+            confirmButtonText: '<i class="fas fa-check mr-1"></i> Crear Backup',
             cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancelar',
             showLoaderOnConfirm: true,
             preConfirm: () => {
-                return fetch('/api/backup/crear', {
+                const observaciones = document.getElementById('observacionesBackup').value.trim();
+
+                return fetch(`/api/backup/crear`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombreEmpleado: nombreEmpleado })
+                    body: JSON.stringify({
+                        nombreEmpleado: nombreEmpleado,
+                        observaciones: observaciones
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -375,6 +399,7 @@
             }
         });
     }
+
 
     function restaurarBackup(backupId) {
         Swal.fire({
