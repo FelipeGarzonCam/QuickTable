@@ -18,6 +18,127 @@
 
         @RenderSection("Styles", required: false)
         <style>
+                /* Ajuste para cuando no hay sidebar */
+                body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper.no-sidebar,
+                body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer.no-sidebar,
+                body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-header.no-sidebar {
+                    margin-left: 0 !important;
+                }
+               /*boton modo claro*/
+            .theme-switch-wrapper {
+                display: flex;
+                align-items: center;
+                margin: 0 15px;
+            }
+
+            .theme-switch {
+                display: inline-block;
+                height: 34px;
+                position: relative;
+                width: 70px;
+                cursor: pointer;
+                margin: 0;
+            }
+
+                .theme-switch input {
+                    display: none;
+                }
+
+            .slider {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                bottom: 0;
+                cursor: pointer;
+                left: 0;
+                position: absolute;
+                right: 0;
+                top: 0;
+                transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                border-radius: 34px;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+                .slider:before {
+                    background-color: #fff;
+                    bottom: 4px;
+                    content: "";
+                    height: 26px;
+                    left: 4px;
+                    position: absolute;
+                    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                    width: 26px;
+                    border-radius: 50%;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                }
+
+            input:checked + .slider {
+                background: linear-gradient(135deg, #ffa500 0%, #ff6347 100%);
+            }
+
+                input:checked + .slider:before {
+                    transform: translateX(36px);
+                }
+
+            .sun-icon,
+            .moon-icon {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: 16px;
+                transition: all 0.4s ease;
+                pointer-events: none;
+            }
+
+            .sun-icon {
+                left: 8px;
+                color: #fff;
+                opacity: 0;
+            }
+
+            .moon-icon {
+                right: 8px;
+                color: #fff;
+                opacity: 1;
+            }
+
+            input:checked + .slider .sun-icon {
+                opacity: 1;
+            }
+
+            input:checked + .slider .moon-icon {
+                opacity: 0;
+            }
+
+            .slider:hover {
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                transform: scale(1.05);
+            }
+
+            .theme-switch-wrapper:hover .slider {
+                animation: pulse 0.8s ease-in-out;
+            }
+
+            @@keyframes pulse {
+                0%
+
+            {
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            }
+        </style>
+    </head>
+
+    <body class="hold-transition sidebar-mini layout-fixed dark-mode sidebar-collapse">
+        <div class="wrapper">
+
             /* Ajuste para cuando no hay sidebar */
             body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .content-wrapper.no-sidebar,
             body:not(.sidebar-mini-md):not(.sidebar-mini-xs):not(.layout-top-nav) .main-footer.no-sidebar,
@@ -29,6 +150,7 @@
 
     <body class="hold-transition sidebar-mini layout-fixed dark-mode sidebar-collapse">
         <div class="wrapper">
+
 
             <!-- Navbar (barra superior) -->
             @if (HttpContextAccessor.HttpContext.Session.GetString("Rol") != null)
@@ -48,6 +170,22 @@
 
                     <ul class="navbar-nav ml-auto">
                         <!-- Botón de Tema Oscuro/Claro -->
+
+                        <li class="nav-item d-flex align-items-center">
+                            <div class="theme-switch-wrapper">
+                                <label class="theme-switch" for="checkbox">
+                                    <input type="checkbox" id="checkbox" class="toggle-theme-checkbox">
+                                    <div class="slider">
+                                        <i class="fas fa-sun sun-icon"></i>
+                                        <i class="fas fa-moon moon-icon"></i>
+                                    </div>
+                                </label>
+                            </div>
+                        </li>
+
+                        <!-- Botón Regresar -->
+                        <li class="nav-item">
+
                         <li class="nav-item">
                             <a href="#" class="nav-link toggle-theme" style="color: #FFF">
                                 <i class="fas fa-moon"></i> Modo Claro
@@ -55,6 +193,7 @@
                         </li>
                         <!-- Botón Regresar -->
                         <li class="nav-item">
+
                             <a href="#" class="nav-link" style="color: #FFF" onclick="handleBackButton()">
                                 <i class="fas fa-arrow-left"></i> Regresar
                             </a>
@@ -177,7 +316,11 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
+
+                const themeToggle = document.querySelector('.toggle-theme-checkbox');
+
                 const themeToggle = document.querySelector('.toggle-theme');
+
                 const body = document.querySelector('body');
 
                 // Cargar tema guardado
@@ -189,7 +332,11 @@
                 // Actualizar ícono y texto inicial
                 updateThemeButton(savedTheme);
 
+
+                 themeToggle.addEventListener('change', function(e) {
+
                 themeToggle.addEventListener('click', function (e) {
+
                     e.preventDefault();
 
                     if (body.classList.contains('dark-mode')) {
@@ -204,6 +351,14 @@
                 });
 
                 function updateThemeButton(theme) {
+
+                    if (theme === 'dark') {
+                        themeToggle.checked = false;
+                    } else {
+                        themeToggle.checked = true;
+                    }
+                }
+
                     const icon = themeToggle.querySelector('i');
                     if (theme === 'dark') {
                         icon.classList.remove('fa-sun');
@@ -215,6 +370,7 @@
                         themeToggle.innerHTML = '<i class="fas fa-sun"></i> Modo Oscuro';
                     }
                 }
+
             });
 
             // Función para redirección segura
