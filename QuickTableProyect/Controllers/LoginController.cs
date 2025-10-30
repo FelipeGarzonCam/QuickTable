@@ -118,6 +118,8 @@ namespace QuickTableProyect.Interface
             HttpContext.Session.SetString("Id", emp.Id.ToString());
             HttpContext.Session.SetString("Nombre", emp.Nombre);
             HttpContext.Session.SetInt32("RegistroSesionId", regId);
+            // FORZAR LA CREACION DE LA COOKIE DE SESION INMEDIATAMENTE
+            var sessionId = HttpContext.Session.Id;
 
             // ----- segundo factor SOLO para administradores -----
             if (emp.Rol == "Admin")
