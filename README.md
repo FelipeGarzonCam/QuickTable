@@ -11,7 +11,7 @@
 - **ORM**: Entity Framework 6  
 - **Base de datos**: SQL Server  
 - **Frontend**: Plantillas AdminLTE  
-- **Autenticación**: Soporte para roles (Mesero, Cocina, Caja, Administrador, SuperAdmin) y dos factores vía NFC  
+- **Autenticación**: Soporte para roles (Mesero, Cocina, Caja, Administrador, TI) y 2FA para Admin
 - **Deployment**: Diseñado para funcionar en intranet sin conexión a Internet  
 
 ---
