@@ -1,0 +1,23 @@
+﻿body {
+}
+
+.right {
+    text-align: right;
+    margin: 10px;
+}
+
+.Block {
+    display: block;
+    margin: 10px;
+}
+
+.pedido-item {
+    margin-top: 5px;   
+    padding: 10px;
+    margin: 10px;
+  
+}
+
+.Complete {
+    margin-right: 5px;
+}

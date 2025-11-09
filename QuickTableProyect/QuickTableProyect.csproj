@@ -10,6 +10,7 @@
   <ItemGroup>
     <Compile Remove="JornadaDiariaDto.cs" />
   </ItemGroup>
+	
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />

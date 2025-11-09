@@ -1,14 +1,25 @@
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using QuickTableProyect.Persistencia.Datos;
+using Microsoft.Extensions.Hosting;
 using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
-using System.Net;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using QuickTableProyect.Infrastructure;
+using QuickTableProyect.Persistencia.Datos;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
+
+// Configurar Data Protection
+services.AddDataProtection()
+    .SetApplicationName("QuickTable")
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "QuickTable",
+        "DataProtection-Keys"
+    )))
+    .ProtectKeysWithDpapi(); // Encripta las claves en Windows
 
 // Registro de servicios
 services.AddScoped<IPedidoService, PedidoService>();
@@ -68,6 +79,30 @@ var app = builder.Build();
 // Inicializar la base de datos
 DatabaseInitializer.InicializarDatos();
 
+// AGREGAR AQUI: Abrir navegador automaticamente
+Task.Run(async () =>
+{
+    // Esperar 2 segundos para que el servidor inicie completamente
+    await Task.Delay(2000);
+
+    string localIp = GetLocalIPAddress();
+    string url = $"http://{localIp}:5000";
+
+    try
+    {
+        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
+    }
+    catch
+    {
+        // Si ocurre un error al abrir el navegador, simplemente continúa
+        // El usuario puede abrir manualmente si es necesario
+    }
+});
+
 // Configuracion de la aplicacion
 if (!app.Environment.IsDevelopment())
 {
@@ -75,11 +110,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Solo usar HTTPS en producción
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+    app.UseHsts();
+}
+
 app.UseStaticFiles();
 app.UseRouting();
 
-// IMPORTANTE: UseSession debe estar DESPUES de UseRouting y ANTES de UseAuthorization
 app.UseSession();
 
 app.UseAuthorization();

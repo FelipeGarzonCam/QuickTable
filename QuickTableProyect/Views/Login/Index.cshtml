@@ -2,19 +2,650 @@
     Layout = "_Layout";
 }
 
-<div class="d-flex justify-content-center align-items-center vh-100">
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+            pointer-events: none;
+        }
+
+    @@keyframes moveBackground {
+        0% {
+            transform: translate(0, 0);
+        }
+
+        100% {
+            transform: translate(50px, 50px);
+        }
+    }
+
+    /* Switch de tema en el login */
+    .login-theme-switch {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        animation: fadeIn 1s ease-out;
+    }
+
+        .login-theme-switch .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+            .login-theme-switch .theme-switch-wrapper:hover {
+                background: rgba(255, 255, 255, 0.2);
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            }
+
+        .login-theme-switch .theme-label {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            user-select: none;
+        }
+
+        .login-theme-switch .theme-switch {
+            display: inline-block;
+            height: 28px;
+            position: relative;
+            width: 56px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+            .login-theme-switch .theme-switch input {
+                display: none;
+            }
+
+        .login-theme-switch .slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-radius: 34px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+            .login-theme-switch .slider:before {
+                background-color: #fff;
+                bottom: 3px;
+                content: "";
+                height: 22px;
+                left: 3px;
+                position: absolute;
+                transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                width: 22px;
+                border-radius: 50%;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            }
+
+        .login-theme-switch input:checked + .slider {
+            background: linear-gradient(135deg, #ffa500 0%, #ff6347 100%);
+        }
+
+            .login-theme-switch input:checked + .slider:before {
+                transform: translateX(28px);
+            }
+
+        .login-theme-switch .sun-icon,
+        .login-theme-switch .moon-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .login-theme-switch .sun-icon {
+            left: 6px;
+            color: #fff;
+            opacity: 0;
+        }
+
+        .login-theme-switch .moon-icon {
+            right: 6px;
+            color: #fff;
+            opacity: 1;
+        }
+
+        .login-theme-switch input:checked + .slider .sun-icon {
+            opacity: 1;
+        }
+
+        .login-theme-switch input:checked + .slider .moon-icon {
+            opacity: 0;
+        }
+
+    .login-page-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    .login-logo {
+        text-align: center;
+        margin-bottom: 2rem;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+        .login-logo a {
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+            .login-logo a:hover {
+                transform: scale(1.05);
+                text-shadow: 0 4px 20px rgba(255,255,255,0.4);
+            }
+
+        .login-logo i {
+            font-size: 2rem;
+            animation: rotateIcon 3s ease-in-out infinite;
+        }
+
+    @@keyframes rotateIcon {
+        0%, 100% {
+            transform: rotate(0deg);
+        }
+
+        50% {
+            transform: rotate(10deg);
+        }
+    }
+
+    .card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+        animation: fadeInUp 0.8s ease-out;
+        overflow: hidden;
+        position: relative;
+        backdrop-filter: blur(10px);
+    }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+    @@keyframes shimmer {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+
+        100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+    }
+
+    .dark-mode .card {
+        background: #343a40;
+    }
+
+    .login-card-body {
+        padding: 2.5rem 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-box-msg {
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #495057;
+        position: relative;
+    }
+
+        .login-box-msg::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+    .dark-mode .login-box-msg {
+        color: #f8f9fa;
+    }
+
+    .input-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+        .input-group::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.4s ease;
+            z-index: 10;
+            border-radius: 2px;
+        }
+
+        .input-group:focus-within::before {
+            width: 100%;
+        }
+
+    .form-control {
+        height: 50px;
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding-left: 1rem;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: #fff;
+    }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+            transform: translateY(-2px);
+        }
+
+    .dark-mode .form-control {
+        background: #495057;
+        border-color: #6c757d;
+        color: #fff;
+    }
+
+        .dark-mode .form-control:focus {
+            background: #495057;
+            border-color: #667eea;
+        }
+
+    .input-group-append .input-group-text {
+        border-radius: 0 10px 10px 0;
+        border: 2px solid #e9ecef;
+        border-left: none;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus + .input-group-append .input-group-text {
+        border-color: #667eea;
+        background: #f0f2ff;
+        color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    .dark-mode .input-group-append .input-group-text {
+        background: #495057;
+        border-color: #6c757d;
+        color: #adb5bd;
+    }
+
+    .dark-mode .form-control:focus + .input-group-append .input-group-text {
+        background: #495057;
+        border-color: #667eea;
+        color: #8b9aff;
+    }
+
+    .btn-primary {
+        height: 50px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+            .btn-primary.loading::after {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                top: 50%;
+                left: 50%;
+                margin-left: -8px;
+                margin-top: -8px;
+                border: 2px solid #fff;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+            }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .qr-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e9ecef;
+        position: relative;
+    }
+
+    .dark-mode .qr-section {
+        border-top-color: #495057;
+    }
+
+    .qr-title {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .dark-mode .qr-title {
+        color: #adb5bd;
+    }
+
+    #qrContainer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 170px;
+        background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        padding: 20px;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+        #qrContainer:hover {
+            transform: scale(1.02);
+            box-shadow: inset 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+    .dark-mode #qrContainer {
+        background: linear-gradient(145deg, #495057, #3a3f44);
+    }
+
+    #qrContainer img {
+        max-width: 145px;
+        border-radius: 10px;
+        animation: fadeIn 0.5s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    #urlDisplay {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-top: 0.75rem;
+        word-break: break-all;
+        font-family: 'Courier New', monospace;
+        background: rgba(0,0,0,0.03);
+        padding: 8px;
+        border-radius: 6px;
+    }
+
+    .dark-mode #urlDisplay {
+        color: #adb5bd;
+        background: rgba(255,255,255,0.05);
+    }
+
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        overflow: hidden;
+    }
+
+    .dark-mode .modal-content {
+        background: #343a40;
+        color: #f8f9fa;
+    }
+
+    .modal-header {
+        border-bottom: 2px solid #e9ecef;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    }
+
+    .dark-mode .modal-header {
+        border-bottom-color: #495057;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    }
+
+    .modal-body {
+        padding: 2.5rem 2rem;
+    }
+
+    #lblCode {
+        font-size: 3.2rem;
+        font-weight: 700;
+        color: #667eea;
+        text-align: center;
+        margin: 1.5rem 0;
+        letter-spacing: 10px;
+        text-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        animation: pulseCode 2s ease-in-out infinite;
+    }
+
+    @@keyframes pulseCode {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .dark-mode #lblCode {
+        color: #8b9aff;
+    }
+
+    #tiempoRestante {
+        color: #667eea;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .btn-outline-danger {
+        border-radius: 10px;
+        padding: 0.6rem 1.8rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+    @@keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .login-box {
+            max-width: 100%;
+        }
+
+        .login-card-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .login-logo a {
+            font-size: 2rem;
+        }
+
+        #lblCode {
+            font-size: 2.5rem;
+            letter-spacing: 6px;
+        }
+
+        #qrContainer {
+            min-height: 150px;
+        }
+
+        .login-theme-switch {
+            top: 10px;
+            right: 10px;
+        }
+
+            .login-theme-switch .theme-label {
+                display: none;
+            }
+
+            .login-theme-switch .theme-switch-wrapper {
+                padding: 8px 10px;
+            }
+    }
+</style>
+
+<!-- Switch de tema flotante -->
+<div class="login-theme-switch">
+    <div class="theme-switch-wrapper">
+        <span class="theme-label">Tema</span>
+        <label class="theme-switch" for="loginThemeCheckbox">
+            <input type="checkbox" id="loginThemeCheckbox" class="login-toggle-theme-checkbox">
+            <div class="slider">
+                <i class="fas fa-sun sun-icon"></i>
+                <i class="fas fa-moon moon-icon"></i>
+            </div>
+        </label>
+    </div>
+</div>
+
+<div class="login-page-wrapper">
     <div class="login-box">
         <div class="login-logo">
-            <a href="#"><b>QuickTable</b></a>
+            <a href="#"><i class="fas fa-utensils"></i><b>QuickTable</b></a>
         </div>
 
         <div class="card">
             <div class="card-body login-card-body">
-                <p class="login-box-msg">LOGIN</p>
+                <p class="login-box-msg">Inicia sesión para continuar</p>
 
                 <form id="loginForm" method="post" action="@Url.Action("Autenticar", "Login")">
-                    <div class="input-group mb-3">
-                        <input type="text" name="nombre" class="form-control" placeholder="Usuario" required />
+                    <div class="input-group">
+                        <input type="text" name="nombre" class="form-control" placeholder="Usuario" required autocomplete="username" />
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-user"></span>
@@ -22,8 +653,8 @@
                         </div>
                     </div>
 
-                    <div class="input-group mb-3">
-                        <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required />
+                    <div class="input-group">
+                        <input type="password" name="contrasena" class="form-control" placeholder="Contraseña" required autocomplete="current-password" />
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
@@ -38,43 +669,41 @@
                     </div>
                 </form>
 
-                <!-- Seccion del QR -->
-                <div class="mt-4 text-center">
-                    <hr />
-                    <p class="text-muted mb-2">Escanea para acceder desde otro dispositivo</p>
-                    <div id="qrContainer" class="d-flex justify-content-center align-items-center">
+                <div class="qr-section">
+                    <p class="qr-title"><i class="fas fa-qrcode"></i>Acceso desde otro dispositivo</p>
+                    <div id="qrContainer">
                         <div class="spinner-border text-primary" role="status">
                             <span class="sr-only">Generando QR...</span>
                         </div>
                     </div>
-                    <p id="urlDisplay" class="text-muted small mt-2"></p>
+                    <p id="urlDisplay"></p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal de 2FA mejorado -->
+<!-- Modal de 2FA -->
 <div class="modal fade" id="modal2FA" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Segundo Paso de Autenticación</h5>
+                <h5 class="modal-title"><i class="fas fa-shield-alt mr-2"></i>Autenticación de Dos Factores</h5>
                 <button type="button" class="btn-close" id="btnCerrar2FA" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
-                <p>Introduce en la Raspberry el siguiente código y luego acerca tu tarjeta NFC</p>
-                <h1 id="lblCode" class="display-5 text-center fw-bold text-primary"></h1>
+                <p class="mb-3">Introduce este código en la Raspberry y acerca tu tarjeta NFC</p>
+                <h1 id="lblCode" class="display-5 text-center fw-bold"></h1>
                 <div class="mt-3" id="statusContainer">
                     <div class="spinner-border spinner-border-sm text-info" role="status"></div>
                     <span class="text-muted ms-2">Esperando autenticación con tarjeta...</span>
                 </div>
                 <p class="text-center text-muted mb-3 mt-3">
-                    Tiempo restante: <span id="tiempoRestante" class="fw-bold text-warning">10:00</span>
+                    <i class="fas fa-clock mr-2"></i>Tiempo restante: <span id="tiempoRestante" class="fw-bold">10:00</span>
                 </p>
                 <div class="mt-3">
                     <button type="button" id="btnCancelar2FA" class="btn btn-outline-danger btn-sm">
-                        Cancelar Autenticación
+                        <i class="fas fa-times mr-1"></i>Cancelar Autenticación
                     </button>
                 </div>
             </div>
@@ -87,7 +716,6 @@
 <link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css" />
 
 <script>
-    // Variables globales para controlar el estado 2FA
     let timer2FA = null;
     let timeoutTimer = null;
     let currentNavId = null;
@@ -95,16 +723,11 @@
     let countdownTimer = null;
 
     $(document).ready(function() {
-        // Generar QR al cargar la página
         generarQR();
-
-        // Inicializar el modal
         modal2FA = new bootstrap.Modal(document.getElementById('modal2FA'));
-
-        // Manejadores de eventos del modal 2FA
         setupModal2FAEvents();
+        setupThemeSwitch();
 
-        // Manejador del formulario de login
         $('#loginForm').on('submit', function(e) {
             e.preventDefault();
 
@@ -116,7 +739,9 @@
                 return;
             }
 
-            // Limpiar cualquier proceso 2FA anterior
+            const $btn = $(this).find('button[type="submit"]');
+            $btn.addClass('loading').text('');
+
             limpiar2FAState();
 
             $.ajax({
@@ -124,6 +749,8 @@
                 type: 'POST',
                 data: { nombre: nombre, contrasena: contrasena },
                 success: function(response) {
+                    $btn.removeClass('loading').text('Iniciar Sesión');
+
                     if (response.success) {
                         if (response.requiere2FA) {
                             iniciar2FA(response);
@@ -138,57 +765,87 @@
                     }
                 },
                 error: function() {
+                    $btn.removeClass('loading').text('Iniciar Sesión');
                     toastr.error('Error de conexión', 'Error');
                 }
             });
         });
+
+        $('input').on('focus', function() {
+            $(this).closest('.input-group').addClass('input-focused');
+        });
+
+        $('input').on('blur', function() {
+            $(this).closest('.input-group').removeClass('input-focused');
+        });
     });
 
-    // Configurar eventos del modal 2FA
+    function setupThemeSwitch() {
+        const themeToggle = document.querySelector('.login-toggle-theme-checkbox');
+        const body = document.querySelector('body');
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            body.classList.remove('dark-mode');
+        }
+
+        updateThemeButton(savedTheme);
+
+        themeToggle.addEventListener('change', function() {
+            let currentTheme;
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                currentTheme = 'light';
+            } else {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                currentTheme = 'dark';
+            }
+            updateThemeButton(currentTheme);
+        });
+
+        function updateThemeButton(theme) {
+            if (theme === 'dark') {
+                themeToggle.checked = false;
+            } else {
+                themeToggle.checked = true;
+            }
+        }
+    }
+
     function setupModal2FAEvents() {
-        // Botón cancelar
         $('#btnCancelar2FA').on('click', function() {
             cancelar2FA();
         });
 
-        // Botón cerrar (X)
         $('#btnCerrar2FA').on('click', function() {
             cancelar2FA();
         });
 
-        // Evento cuando se cierra el modal (por cualquier método)
         document.getElementById('modal2FA').addEventListener('hidden.bs.modal', function() {
             if (currentNavId) {
-                // Si se cierra el modal y aún hay proceso activo, cancelar
                 cancelar2FA();
             }
         });
     }
 
-    // Iniciar el proceso 2FA
     function iniciar2FA(response) {
         currentNavId = response.nav;
         $('#lblCode').text(response.code);
 
-        // Mostrar modal
         modal2FA.show();
-
-        // Iniciar contador regresivo visual
-        iniciarCountdown(600); // 10 minutos
-
-        // Polling para verificar confirmación
+        iniciarCountdown(600);
         iniciarPolling2FA();
 
-        // Timeout de seguridad que limpia en base de datos
         timeoutTimer = setTimeout(function() {
             cancelar2FA("Tiempo agotado para autenticación 2FA");
-        }, 600000); // 10 minutos
+        }, 600000);
     }
 
-    // Iniciar polling para verificar 2FA
     function iniciarPolling2FA() {
         let pollCount = 0;
-        const maxPolls = 200; // 10 minutos / 3 segundos = ~200 intentos
+        const maxPolls = 200;
 
         timer2FA = setInterval(function() {
             pollCount++;
@@ -196,7 +853,6 @@
             $.get('@Url.Action("Check2FA", "Login")', { navId: currentNavId })
                 .done(function(ok) {
                     if (ok) {
-                        // 2FA confirmado exitosamente
                         limpiar2FAState();
                         modal2FA.hide();
                         toastr.success('Autenticación 2FA exitosa.', 'Éxito');
@@ -204,7 +860,6 @@
                             window.location.href = '@Url.Action("Index", "Administrador")';
                         }, 1000);
                     } else if (pollCount >= maxPolls) {
-                        // Tiempo agotado
                         cancelar2FA("Tiempo de espera agotado");
                     }
                 })
@@ -214,10 +869,9 @@
                         cancelar2FA("Error de conexión durante la verificación");
                     }
                 });
-        }, 3000); // Verificar cada 3 segundos
+        }, 3000);
     }
 
-    // Iniciar contador regresivo visual
     function iniciarCountdown(segundos) {
         let tiempoRestante = segundos;
 
@@ -227,7 +881,6 @@
 
             $('#tiempoRestante').text(`${minutos}:${segs.toString().padStart(2, '0')}`);
 
-            // Cambiar color según tiempo restante
             if (tiempoRestante <= 60) {
                 $('#tiempoRestante').removeClass('text-warning').addClass('text-danger');
             }
@@ -240,23 +893,16 @@
         }, 1000);
     }
 
-    // Cancelar proceso 2FA
     function cancelar2FA(mensaje = "Autenticación 2FA cancelada") {
-        // Llamar al backend para limpiar códigos 2FA
         $.post('@Url.Action("CancelarTodo2FA", "Login")')
             .always(function() {
-                // Limpiar estado local
                 limpiar2FAState();
-
-                // Cerrar modal y mostrar mensaje
                 modal2FA.hide();
                 toastr.warning(mensaje, 'Cancelado');
             });
     }
 
-    // Limpiar todo el estado 2FA
     function limpiar2FAState() {
-        // Limpiar timers
         if (timer2FA) {
             clearInterval(timer2FA);
             timer2FA = null;
@@ -272,10 +918,8 @@
             countdownTimer = null;
         }
 
-        // Limpiar variables
         currentNavId = null;
 
-        // Resetear UI del modal
         $('#tiempoRestante').removeClass('text-danger').addClass('text-warning');
         $('#statusContainer').html(`
             <div class="spinner-border spinner-border-sm text-info" role="status"></div>
@@ -283,14 +927,13 @@
         `);
     }
 
-    // Función para generar y mostrar el QR
     function generarQR() {
         $.ajax({
             url: '@Url.Action("GenerarQR", "Login")',
             type: 'GET',
             success: function(response) {
                 if (response.success) {
-                    $('#qrContainer').html('<img src="' + response.qrImage + '" alt="QR Code" class="img-fluid" style="max-width: 150px;" />');
+                    $('#qrContainer').html('<img src="' + response.qrImage + '" alt="QR Code" class="img-fluid" />');
                     $('#urlDisplay').text(response.url);
                 } else {
                     $('#qrContainer').html('<p class="text-danger">Error al generar QR</p>');
@@ -302,10 +945,8 @@
         });
     }
 
-    // Limpiar estado al recargar o cerrar página
     $(window).on('beforeunload', function() {
         if (currentNavId) {
-            // Intento de limpieza síncrona (puede no completarse)
             navigator.sendBeacon('@Url.Action("CancelarTodo2FA", "Login")', new FormData());
         }
     });

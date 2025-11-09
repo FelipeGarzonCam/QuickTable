@@ -7,6 +7,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - QuickTableProyect</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="~/img/icono.png">
+
+    <link href="~/AdminLTE/dist/css/adminlte.min.css" rel="stylesheet" />
 
     <link href="~/AdminLTE/dist/css/adminlte.min.css" rel="stylesheet" />
     <link href="~/AdminLTE/plugins/fontawesome-free/css/all.min.css" rel="stylesheet" />
@@ -194,9 +198,10 @@
         {
             <aside class="main-sidebar sidebar-dark-primary elevation-4">
                 <a href="@Url.Action("Index", rol == "Admin" ? "Administrador" : "TI")" class="brand-link">
-                    <img src="~/img/Logo.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+                    <img id="sidebar-logo" src="~/img/LogoLight.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
                     <span class="brand-text font-weight-light">QuickTable</span>
                 </a>
+
 
                 <div class="sidebar mt-2">
                     <nav>
@@ -273,7 +278,7 @@
 
         <footer class="main-footer @((rol == "Admin" || rol == "TI") ? "" : "no-sidebar")">
             <div class="float-right d-none d-sm-block">
-                <b>Version</b> 1.0.5
+                <b>By</b> Felipe Garzon
             </div>
             <strong>Copyright &copy; 2025 <a href="#">QuickTable</a>.</strong> Todos los derechos reservados.
         </footer>
@@ -295,6 +300,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const themeToggle = document.querySelector('.toggle-theme-checkbox');
             const body = document.querySelector('body');
+            const sidebarLogo = document.getElementById('sidebar-logo');
 
             // Cargar tema guardado
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -302,20 +308,25 @@
                 body.classList.remove('dark-mode');
             }
 
-            // Actualizar switch inicial
+            // Actualizar switch inicial y logo
             updateThemeButton(savedTheme);
+            updateLogo(savedTheme);
 
             // Evento change del checkbox
             themeToggle.addEventListener('change', function (e) {
+                let currentTheme;
                 if (body.classList.contains('dark-mode')) {
                     body.classList.remove('dark-mode');
                     localStorage.setItem('theme', 'light');
+                    currentTheme = 'light';
                 } else {
                     body.classList.add('dark-mode');
                     localStorage.setItem('theme', 'dark');
+                    currentTheme = 'dark';
                 }
 
-                updateThemeButton(body.classList.contains('dark-mode') ? 'dark' : 'light');
+                updateThemeButton(currentTheme);
+                updateLogo(currentTheme);
             });
 
             function updateThemeButton(theme) {
@@ -323,6 +334,18 @@
                     themeToggle.checked = false;
                 } else {
                     themeToggle.checked = true;
+                }
+            }
+
+            function updateLogo(theme) {
+                if (sidebarLogo) {
+                    if (theme === 'dark') {
+                        // En modo oscuro, usar logo claro
+                        sidebarLogo.src = '@Url.Content("~/img/LogoLight.png")';
+                    } else {
+                        // En modo claro, usar logo oscuro
+                        sidebarLogo.src = '@Url.Content("~/img/LogoDark.png")';
+                    }
                 }
             }
         });
@@ -411,5 +434,7 @@
             }
         };
     </script>
+
+
 </body>
 </html>
