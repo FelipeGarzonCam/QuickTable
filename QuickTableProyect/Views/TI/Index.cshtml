@@ -21,17 +21,16 @@
 <section class="content">
     <style>
         .admin-dashboard {
-            min-height: calc(100vh - 120px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 20px 20px 40px 20px;
         }
 
         .dashboard-title {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 2rem;
         }
 
             .dashboard-title h1 {
@@ -61,7 +60,7 @@
         .dashboard-card {
             background: #fff;
             border-radius: 15px;
-            padding: 2.5rem;
+            padding: 2rem;
             text-align: center;
             text-decoration: none;
             color: inherit;
@@ -72,7 +71,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 220px;
+            min-height: 200px;
         }
 
         .dark-mode .dashboard-card {
@@ -92,14 +91,14 @@
         }
 
         .dashboard-card-icon {
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 3rem;
+            margin-bottom: 1.2rem;
+            font-size: 2.5rem;
             transition: all 0.3s ease;
         }
 
@@ -118,7 +117,7 @@
         }
 
         .dashboard-card-title {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 0.5rem;
             color: #2c3e50;
@@ -129,7 +128,7 @@
         }
 
         .dashboard-card-description {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #6c757d;
             margin: 0;
         }
@@ -152,14 +151,14 @@
         }
 
         .dashboard-card {
-            padding: 2rem;
-            min-height: 200px;
+            padding: 1.8rem;
+            min-height: 180px;
         }
 
         .dashboard-card-icon {
             width: 70px;
             height: 70px;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
         }
 
         }
@@ -172,7 +171,6 @@
         </div>
 
         <div class="dashboard-grid">
-            <!-- Tarjeta 1: Gestión de Tarjetas NFC -->
             <a href="@Url.Action("GestionTarjetas", "TI")" class="dashboard-card card-tarjetas">
                 <div class="dashboard-card-icon">
                     <i class="fas fa-id-card"></i>
@@ -181,7 +179,6 @@
                 <p class="dashboard-card-description">Administra tarjetas de acceso para administradores</p>
             </a>
 
-            <!-- Tarjeta 2: Gestión de Backups -->
             <a href="@Url.Action("GestionBackups", "TI")" class="dashboard-card card-backups">
                 <div class="dashboard-card-icon">
                     <i class="fas fa-database"></i>
