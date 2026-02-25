@@ -16,73 +16,149 @@
 
 ---
 
-<!--## 🚀 Características Principales
 
-1. **Gestión de Comandas en Tiempo Real**: Actualizaciones dinámicas mediante AJAX para reflejar cambios sin recargar la página.  
-2. **Seguridad Avanzada**:  
-   - Cifrado de datos críticos en SQL Server.  
-   - Autenticación de dos factores con tarjetas NFC utilizando Raspberry Pi 3.  
-   - Control de sesión activa y registro de cierres.  
-3. **Interfaz Intuitiva**:  
-   - Dashboard responsive con AdminLTE.  
-   - Vistas adaptadas a diferentes roles con permisos granulares.  
-4. **Escalabilidad y Mantenimiento**:  
-   - Estructura limpia en capas (Interface, Aplicación, Dominio, Persistencia).  
-   - Migraciones y seed de datos automatizadas.  
+# Guia Completa: Raspberry Pi + Lector NFC QuickTable
 
----
+## Hardware necesario
 
-## ⚙️ Instalación
+- Raspberry Pi 3 o 4
+- Modulo RFID-RC522
+- Pantalla tactil LCD 5"
+- Tarjetas NFC Mifare
+- La Raspberry y el servidor QuickTable deben estar en la **misma red local**
 
-1. Clona este repositorio:  
-   ```bash
-   git clone https://github.com/tu-usuario/QuickTable.git
-   cd QuickTable
-   ```  
-2. Configura la conexión a SQL Server en `appsettings.json`:  
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Server=TU_SERVIDOR;Database=QuickTableDB;Trusted_Connection=True;"
-   }
-   ```  
-3. Aplica migraciones y seed de datos:  
-   ```bash
-   dotnet ef database update
-   ```  
-4. Ejecuta la aplicación:  
-   ```bash
-   dotnet run --project QuickTable.Interface
-   ```  
-5. Accede en tu navegador a `http://quicktable.local:5000` (o la URL configurada).
+***
 
----
+## 1. Conexion del MFRC522
 
-## 🎯 Uso
+| MFRC522 | GPIO Raspberry | Pin fisico |
+| :-- | :-- | :-- |
+| SDA | GPIO 8 (CE0) | 24 |
+| SCK | GPIO 11 | 23 |
+| MOSI | GPIO 10 | 19 |
+| MISO | GPIO 9 | 21 |
+| RST | GPIO 25 | 22 |
+| GND | GND | 6 |
+| VCC | **3.3V** | 1 |
 
-- **Registrar Usuarios**: Crea cuentas con roles y gestiona permisos.  
-- **Crear Comandas**: Selecciona mesero, añade productos y envía a cocina.  
-- **Rastrear Estados**: Monitorea el avance de cada plato.  
-- **Cerrar Sesiones**: Registra automáticamente los cierres y detecta errores si exceden 15 horas.
+> Nunca conectar VCC a 5V, dana el modulo.
 
----
+***
 
-## 🤝 Contribuciones
+## 2. Preparar el sistema
 
-¡Las contribuciones son bienvenidas! Sigue estos pasos:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
 
-1. Haz fork del repositorio.  
-2. Crea una rama nueva: `git checkout -b feature/nueva-funcionalidad`.  
-3. Realiza tus cambios y haz commit: `git commit -m "Añade nueva funcionalidad"`.  
-4. Sube tu rama: `git push origin feature/nueva-funcionalidad`.  
-5. Abre un Pull Request describiendo tus mejoras.
 
----
+***
 
-## 📄 Licencia
+## 3. Habilitar SPI
 
-Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+```bash
+sudo raspi-config
+# Interface Options > SPI > Yes
+sudo reboot
+```
 
----
+Verificar que quedo activo:
 
-*¡Gracias por usar QuickTable! Si tienes dudas, abre un issue o contáctanos.*
-``` -->
+```bash
+ls /dev/spi*
+# Debe mostrar: /dev/spidev0.0  /dev/spidev0.1
+```
+
+
+***
+
+## 4. Instalar dependencias del sistema
+
+```bash
+sudo apt install python3 python3-pip python3-tk python3-venv git -y
+```
+
+
+***
+
+## 5. El codigo Esta en el repositorio
+
+cd QuickTableTI/Raspberry
+
+***
+
+## 6. Crear el entorno virtual e instalar librerias
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install mfrc522 requests
+```
+
+
+***
+
+## 7. Configurar la IP del servidor QuickTable
+
+En el archivo de configuracion del script, reemplazar con la IP real del PC donde corre la app .NET:
+
+```bash
+# En el PC servidor (Windows), ejecutar:
+ipconfig
+# Buscar la IP bajo "Adaptador Wi-Fi" o "Ethernet"
+```
+
+Luego editar el script con esa IP:
+
+```bash
+nano ~/QuickTableTI/Raspberry/lectorNFC.py
+# Cambiar la linea: SERVIDOR_URL = "http://192.168.X.X:5000"
+```
+
+
+***
+
+## 8. Verificar que todo funciona
+
+```bash
+source ~/QuickTableTI/Raspberry/venv/bin/activate
+python3 -c "import mfrc522; import requests; import tkinter; print('OK')"
+```
+
+Si imprime `OK`, el entorno esta listo.
+
+***
+
+## 9. Autoarranque al encender la Raspberry
+
+```bash
+mkdir -p ~/.config/autostart
+nano ~/.config/autostart/quicktable.desktop
+```
+
+Pegar este contenido:
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=QuickTable NFC
+Exec=/home/pi/QuickTableTI/Raspberry/venv/bin/python3 /home/pi/QuickTableTI/Raspberry/lectorNFC.py
+X-GNOME-Autostart-enabled=true
+```
+
+
+***
+
+## 10. Ejecutar manualmente (para pruebas)
+
+```bash
+source ~/QuickTableTI/Raspberry/venv/bin/activate
+python3 ~/QuickTableTI/Raspberry/lectorNFC.py
+```
+
+
+***
+
+> Asegurarse de que el servidor QuickTable (.NET) este corriendo antes de encender la Raspberry, de lo contrario el script no podra conectarse a la API en `http://{IP}:5000/api/asistencia/marcar-salida`.
+
+
