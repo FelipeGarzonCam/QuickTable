@@ -72,7 +72,7 @@ namespace QuickTableProyect.Aplicacion
                 var primeraSesionDelDia = context.RegistroSesiones
                     .Where(r => r.EmpleadoId == empleado.Id)
                     .Where(r => DbFunctions.TruncateTime(r.FechaHoraConexion) == hoy)
-                    .OrderBy(r => r.FechaHoraConexion)  // CORREGIDO: toma la primera
+                    .OrderBy(r => r.FechaHoraConexion)  // toma la primera
                     .FirstOrDefault();
 
                 var registroActivo = context.RegistroSesiones

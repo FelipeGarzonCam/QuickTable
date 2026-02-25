@@ -40,16 +40,14 @@ namespace QuickTableProyect.Interface
             public string codigoSesion { get; set; }
         }
 
-        /* ---------- LISTADO ---------- */      
-
-        // Nuevo Index - Dashboard con 2 tarjetas
+        
         public IActionResult Index()
         {
             ViewBag.NombreEmpleado = HttpContext.Session.GetString("Nombre");
             return View();
         }
 
-        // Nuevo método para gestión de tarjetas (el código que antes estaba en Index)
+        
         public IActionResult GestionTarjetas()
         {
             var tarjetas = _ctx.TarjetasRC.Include(t => t.Empleado)
@@ -59,7 +57,7 @@ namespace QuickTableProyect.Interface
         }
 
 
-        /* ---------- NUEVO ADMIN + TARJETA ---------- */
+       
         [HttpGet]
         public IActionResult CrearAdministrador() => View();
 
@@ -210,7 +208,7 @@ namespace QuickTableProyect.Interface
             }
         }
 
-        /* ---------- MÉTODO PARA OBTENER ESTADÍSTICAS (OPCIONAL) ---------- */
+        // MÉTODO PARA OBTENER ESTADÍSTICAS (OPCIONAL) 
         [HttpGet]
         public JsonResult EstadisticasTarjetas()
         {

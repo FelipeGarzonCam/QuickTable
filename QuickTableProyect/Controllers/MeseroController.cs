@@ -145,12 +145,12 @@ namespace QuickTableProyect.Interface
                 return Json(new { success = false, message = "Pedido no encontrado." });
             }
 
-            // ✅ MANTENER EL MESERO ORIGINAL - NO CAMBIAR OWNERSHIP
+           
             var pedidoActualizado = new PedidosActivos
             {
                 Id = pedidoId,
-                MeseroId = pedidoExistente.MeseroId, // ✅ MANTENER EL MESERO ORIGINAL
-                EmpleadoNombre = pedidoExistente.EmpleadoNombre, // ✅ MANTENER EL NOMBRE ORIGINAL
+                MeseroId = pedidoExistente.MeseroId,
+                EmpleadoNombre = pedidoExistente.EmpleadoNombre, 
                 NumeroMesa = pedidoExistente.NumeroMesa,
                 Detalles = detalles
             };

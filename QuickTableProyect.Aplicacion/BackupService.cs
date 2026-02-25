@@ -259,7 +259,7 @@ namespace QuickTableProyect.Aplicacion
                     return (false, "El archivo de backup no existe en el disco");
                 }
 
-                // ===== PASO 1: GUARDAR TODOS LOS BACKUPS EN MEMORIA =====
+                //  PASO 1: GUARDAR TODOS LOS BACKUPS EN MEMORIA 
                 backupsGuardados = _context.HistorialBackups.OrderBy(b => b.Id).ToList();
 
                 if (backupsGuardados == null || backupsGuardados.Count == 0)
@@ -272,7 +272,7 @@ namespace QuickTableProyect.Aplicacion
                 var connectionString = _configuration.GetConnectionString("DefaultConnection");
                 var rutaBackup = backup.RutaArchivo.Replace("\\", "\\\\");
 
-                // ===== PASO 2: CERRAR ENTITY FRAMEWORK =====
+                //  PASO 2: CERRAR ENTITY FRAMEWORK 
                 try
                 {
                     if (_context.Database.Connection.State == System.Data.ConnectionState.Open)
@@ -284,11 +284,11 @@ namespace QuickTableProyect.Aplicacion
 
                 System.Threading.Thread.Sleep(1000);
 
-                // ===== PASO 3: CREAR NUEVA CONEXIÓN =====
+                //  PASO 3: CREAR NUEVA CONEXIÓN 
                 connectionPrincipal = new SqlConnection(connectionString);
                 connectionPrincipal.Open();
 
-                // ===== PASO 4: RESTAURAR BASE DE DATOS =====
+                //  PASO 4: RESTAURAR BASE DE DATOS 
                 var restaurarDB = $@"
             USE master;
             
@@ -319,7 +319,7 @@ namespace QuickTableProyect.Aplicacion
 
                 System.Diagnostics.Debug.WriteLine("Restore ejecutado, esperando...");
 
-                // ===== PASO 5: ESPERAR Y VERIFICAR QUE LA RESTAURACIÓN TERMINÓ =====
+                //  PASO 5: ESPERAR Y VERIFICAR QUE LA RESTAURACIÓN TERMINÓ 
                 bool restauracionCompleta = false;
                 int intentos = 0;
                 int maxIntentos = 10;
@@ -366,7 +366,7 @@ namespace QuickTableProyect.Aplicacion
                 // Espera adicional de seguridad
                 System.Threading.Thread.Sleep(2000);
 
-                // ===== PASO 6: ELIMINAR Y RECREAR TABLA =====
+                //  PASO 6: ELIMINAR Y RECREAR TABLA 
                 System.Diagnostics.Debug.WriteLine("Recreando tabla HistorialBackup...");
 
                 var recrearTabla = @"
@@ -398,7 +398,7 @@ namespace QuickTableProyect.Aplicacion
 
                 System.Diagnostics.Debug.WriteLine("Tabla recreada");
 
-                // ===== PASO 7: RE-INSERTAR DESDE MEMORIA =====
+                //  PASO 7: RE-INSERTAR DESDE MEMORIA 
                 System.Diagnostics.Debug.WriteLine("Insertando backups desde memoria...");
 
                 using (var cmdIdentityOn = new SqlCommand("USE QuickTableProyectDB; SET IDENTITY_INSERT HistorialBackup ON;", connectionPrincipal))
@@ -457,7 +457,7 @@ namespace QuickTableProyect.Aplicacion
 
                 System.Diagnostics.Debug.WriteLine($"Total insertados: {insertados}");
 
-                // ===== PASO 8: CERRAR CONEXIÓN =====
+                //  PASO 8: CERRAR CONEXIÓN 
                 if (connectionPrincipal != null && connectionPrincipal.State == System.Data.ConnectionState.Open)
                 {
                     connectionPrincipal.Close();

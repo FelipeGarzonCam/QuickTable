@@ -76,3 +76,24 @@ passwords.txt
 contraseñas.txt
 secrets.txt
 Instrucciones_TDE.txt
+
+# Carpetas específicas del proyecto
+QuickTable/QuickTableProyect/PublicacionPortable/
+
+# .NET Core / .NET 8 
+[Bb]in/
+[Oo]bj/
+# Archivos de configuración de usuario (específicos de cada PC)
+*.user
+*.userosscache
+*.suo
+
+# SQL Server archivos locales
+*.mdf
+*.ldf
+*.ndf
+
+# EF6 Migration caches
+obj/Debug/*/edmxResources/*.res
+obj/Debug/*/edmxResources/*.msl
+obj/Debug/*/edmxResources/*.csdl

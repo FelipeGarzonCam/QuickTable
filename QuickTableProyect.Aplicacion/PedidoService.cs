@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Data.Entity; 
 using System.Linq;
 using QuickTableProyect.Aplicacion;
-//puto git
+
+
 namespace QuickTableProyect.Aplicacion
 {
     public class PedidoService : IPedidoService

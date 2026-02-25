@@ -159,7 +159,7 @@ namespace QuickTableProyect.Interface.Api
             }
         }
 
-        // 6. Obtener información de sesión activa (simplificado)
+        // 6. Obtener información de sesión activa 
         [HttpGet("sesion-activa")]
         public IActionResult SesionActiva(string sessionCode)
         {
@@ -193,7 +193,7 @@ namespace QuickTableProyect.Interface.Api
             }
         }
 
-        // 7. NUEVO: Endpoint para Admin 2FA
+        // 7. Endpoint para Admin 2FA
         [HttpPost("validar-sesion-admin")]
         public IActionResult ValidarSesionAdmin([FromForm] string sessionCode)
         {
@@ -228,7 +228,7 @@ namespace QuickTableProyect.Interface.Api
             }
         }
 
-        // 8. NUEVO: Test de conectividad
+        // 8. Test de conectividad
         [HttpGet("test")]
         public IActionResult Test()
         {
@@ -240,7 +240,7 @@ namespace QuickTableProyect.Interface.Api
             });
         }
 
-        // 9. CORREGIDO: Asignar tarjeta a empleado
+        // 9. Asignar tarjeta a empleado
         [HttpPost("asignar-empleado")]
         public IActionResult AsignarTarjetaEmpleado([FromBody] AsignarEmpleadoRequest request)
         {
@@ -257,7 +257,7 @@ namespace QuickTableProyect.Interface.Api
                     return BadRequest(new { success = false, message = "Empleado no encontrado" });
                 }
 
-                // CORREGIDO: Usar el UID tal como viene (ya está procesado por el Python)
+                //  Usar el UID tal como viene 
                 var uidParaGuardar = request.Uid;
 
                 // Verificar que la tarjeta no esté ya asignada a otro empleado
@@ -287,7 +287,7 @@ namespace QuickTableProyect.Interface.Api
             }
         }
 
-        // 10. CORREGIDO: Validar código de sesión para empleados
+        // 10.  Validar código de sesión para empleados
         [HttpPost("validar-sesion-empleado")]
         public IActionResult ValidarSesionEmpleado([FromForm] string sessionCode)
         {
@@ -298,7 +298,7 @@ namespace QuickTableProyect.Interface.Api
                     return Ok(new { valid = false, message = "Código inválido" });
                 }
 
-                // BUSCAR código de sesión en Codigos2FA (como funciona para TI y Admin)
+                // BUSCAR código de sesión en Codigos2FA
                 var codigoSesion = ctx.Codigos2FA
                     .Include(c => c.Empleado)
                     .FirstOrDefault(c => c.Codigo == sessionCode &&
@@ -384,7 +384,7 @@ namespace QuickTableProyect.Interface.Api
                 if (empleado == null)
                     return BadRequest(new { message = "Tarjeta no autorizada" });
 
-                // Resto igual que el sistema existente de salida...
+               
                 var sesionActiva = ctx.RegistroSesiones
                     .Where(r => r.EmpleadoId == empleado.Id && r.FechaHoraDesconexion == null)
                     .OrderByDescending(r => r.FechaHoraConexion)

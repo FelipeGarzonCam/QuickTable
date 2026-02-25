@@ -1,5 +1,4 @@
-﻿// En una nueva carpeta, por ejemplo, QuickTableProyect.Dominio.ViewModels
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace QuickTableProyect.Dominio.ViewModels
 {

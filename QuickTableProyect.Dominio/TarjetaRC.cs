@@ -23,4 +23,3 @@ namespace QuickTableProyect.Dominio
 
 }
 
-//puto git

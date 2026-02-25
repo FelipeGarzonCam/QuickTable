@@ -22,4 +22,3 @@ namespace QuickTableProyect.Dominio
         public bool Usado { get; set; }
     }
 }
-//puto git

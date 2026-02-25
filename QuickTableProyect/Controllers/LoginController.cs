@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Data.Entity;                                // EF 6 → Include()
+using System.Data.Entity;                               
 using QuickTableProyect.Aplicacion;
 using QuickTableProyect.Dominio;
 using QuickTableProyect.Persistencia.Datos;
@@ -34,13 +34,13 @@ namespace QuickTableProyect.Interface
 
         }
 
-        // ----------- GET /Login --------------
+        // GET /Login 
         public IActionResult Index()
         {
             string rol = HttpContext.Session.GetString("Rol");
             if (!string.IsNullOrEmpty(rol))
             {
-                // CRÍTICO: Verificar si es Admin y requiere 2FA
+                // Verificar si es Admin y requiere 2FA
                 if (rol == "Admin")
                 {
                     string empIdString = HttpContext.Session.GetString("Id");
@@ -75,8 +75,7 @@ namespace QuickTableProyect.Interface
             return View();
         }
 
-        // ----------- POST /Login/Autenticar --------------
-        // ----------- POST Login/Autenticar --------------
+        //Login/Autenticar 
         [HttpPost]
         public JsonResult Autenticar(string nombre, string contrasena)
         {
@@ -121,7 +120,7 @@ namespace QuickTableProyect.Interface
             // FORZAR LA CREACION DE LA COOKIE DE SESION INMEDIATAMENTE
             var sessionId = HttpContext.Session.Id;
 
-            // ----- segundo factor SOLO para administradores -----
+            //  segundo factor SOLO para administradores 
             if (emp.Rol == "Admin")
             {
                 // Limpiar códigos 2FA previos del empleado antes de crear uno nuevo
@@ -167,10 +166,8 @@ namespace QuickTableProyect.Interface
 
             return Json(new { success = true, redirectUrl = url });
         }
-
-
-        // ----------- POST /Login/Confirmar2FA (CORREGIDO) --------------
-        // ----------- POST /Login/Confirmar2FA (CON DEBUG) --------------
+              
+      
         [HttpPost]
         public IActionResult Confirmar2FA(string navId, string uidFisico, string textoEscrito)
         {
@@ -205,7 +202,7 @@ namespace QuickTableProyect.Interface
                     .Where(t => t.Activa &&
                                t.Empleado.Rol == "Admin" &&
                                t.UidFisico == uidFisico &&         // UID del chip
-                               t.Uid == textoEscrito.Trim())        // UID que escribimos
+                               t.Uid == textoEscrito.Trim())        // UID que escrito
                     .ToList();
 
                 
@@ -246,7 +243,6 @@ namespace QuickTableProyect.Interface
         }
 
 
-        // ----------- GET /Login/Check2FA --------------
         [HttpGet]
         public JsonResult Check2FA(Guid navId)
         {
@@ -254,7 +250,6 @@ namespace QuickTableProyect.Interface
             return Json(ok);
         }
 
-        // ----------- POST /Login/CancelarTodo2FA (NUEVO) --------------
         [HttpPost]
         public JsonResult CancelarTodo2FA()
         {
@@ -286,14 +281,14 @@ namespace QuickTableProyect.Interface
             }
         }
 
-        // ----------- utilitario: ¿tiene 2FA pendiente? --------------
+        // utilitario: ¿tiene 2FA pendiente?
         private bool Requiere2FA(int empId) =>
             _ctx.Codigos2FA.Any(c => c.EmpleadoId == empId &&
                                      !c.Confirmado &&
                                      !c.Usado &&
                                      c.Expiracion > DateTime.Now);
 
-        // ----------- GET /Login/Logout --------------
+       
         public IActionResult Logout()
         {
             int? regId = HttpContext.Session.GetInt32("RegistroSesionId");
@@ -318,7 +313,7 @@ namespace QuickTableProyect.Interface
             return RedirectToAction("Index");
         }
 
-        // ----------- Limpieza mejorada de códigos vencidos --------------
+        //  Limpieza mejorada de códigos vencidos
         private void LimpiarCodigosVencidos()
         {
             // Eliminar códigos vencidos por tiempo
@@ -336,7 +331,7 @@ namespace QuickTableProyect.Interface
             _ctx.SaveChanges();
         }
 
-        // ----------- JSON FinalizarDia --------------
+        //  JSON FinalizarDia
         [HttpPost]
         public JsonResult FinalizarDia()
         {
@@ -354,7 +349,7 @@ namespace QuickTableProyect.Interface
                     return Json(new { success = false, message = "ID de empleado inválido" });
                 }
 
-                // Finalizar día laboral usando sesionService (NO registroSesionService)
+                // Finalizar día laboral usando sesionService 
                 sesionService.FinalizarDiaLaboral(empleadoId);
 
                 // Limpiar la sesión
@@ -368,7 +363,7 @@ namespace QuickTableProyect.Interface
             }
         }
 
-        // ----------- QR Generator --------------
+        //  QR Generator
         [HttpGet]
         public IActionResult GenerarQR()
         {

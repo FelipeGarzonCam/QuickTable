@@ -5,7 +5,7 @@ using System.Linq;
 using System;
 using System.Data.Entity;
 
-//puto git
+
 
 namespace QuickTableProyect.Interface
 {
@@ -57,7 +57,6 @@ namespace QuickTableProyect.Interface
             return View();
         }
 
-        [HttpGet]
         [HttpGet]
         public IActionResult ObtenerHistorialPedidos(int pageNumber = 1, int pageSize = 10, string fecha = null, int? pedidoId = null, int? meseroId = null)
         {

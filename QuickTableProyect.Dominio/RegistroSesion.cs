@@ -9,4 +9,4 @@
         public Empleado Empleado { get; set; } // Relación con Empleado
         public bool MarcoTarjetaSalida { get; set; }
     }
-}//puto git
+}

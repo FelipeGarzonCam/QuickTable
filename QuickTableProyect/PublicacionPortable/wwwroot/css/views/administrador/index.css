@@ -1,0 +1,10 @@
+﻿.btn {
+    font-size: 1.2em;
+    width: 200px;
+    height: 200px;
+    transition: transform 0.1s ease; /* Transición suave */
+}
+
+.btn:hover {
+    transform: translateY(4px); /* Desplaza el botón hacia abajo */
+}

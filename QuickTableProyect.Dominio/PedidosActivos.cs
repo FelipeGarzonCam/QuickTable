@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-//puto git
+
 namespace QuickTableProyect.Dominio
 {
     public class PedidosActivos
@@ -14,13 +14,11 @@ namespace QuickTableProyect.Dominio
         public decimal IVA { get; set; }
         public decimal Total { get; set; }
         public string Estado { get; set; }
-
-        // NUEVO: timestamp cuando cocina marca listo
+       
         public DateTime? CocinaListoAt { get; set; }
-
-        // NUEVO: timestamp cuando mesero acepta
+       
         public DateTime? MeseroAceptadoAt { get; set; }
-        public DateTime FechaCreacion { get; set; }    // Nuevo
+        public DateTime FechaCreacion { get; set; }    
         public string MedioPago { get; set; }
 
     }
