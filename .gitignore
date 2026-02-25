@@ -79,6 +79,7 @@ Instrucciones_TDE.txt
 
 # Carpetas específicas del proyecto
 QuickTable/QuickTableProyect/PublicacionPortable/
+QuickTableProyect/PublicacionPortable/
 
 # .NET Core / .NET 8 
 [Bb]in/
