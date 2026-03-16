@@ -34,7 +34,7 @@ namespace QuickTableProyect.Controllers
         {
             if (HttpContext.Session.IsAvailable)
             {
-                // Tocar la sesión para renovar el timeout
+                // Tocar la sesiï¿½n para renovar el timeout
                 HttpContext.Session.SetString("KeepAlive", DateTime.Now.ToString("o"));
 
                 var rol = HttpContext.Session.GetString("Rol");

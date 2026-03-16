@@ -15,7 +15,7 @@ namespace QuickTableProyect.Aplicacion
             _context = context;
         }
 
-        public List<string> ObtenerCategorias()//machtazo esto no sirvio
+        public List<string> ObtenerCategorias()
         {
             // Obtiene las categorías únicas de los MenuItems
             var categoriasQuery = _context.MenuItems.Select(m => m.Categoria);

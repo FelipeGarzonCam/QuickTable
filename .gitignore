@@ -78,8 +78,7 @@ secrets.txt
 Instrucciones_TDE.txt
 
 # Carpetas específicas del proyecto
-QuickTable/QuickTableProyect/PublicacionPortable/
-QuickTableProyect/PublicacionPortable/
+**/PublicacionPortable/
 
 # .NET Core / .NET 8 
 [Bb]in/
@@ -98,3 +97,18 @@ QuickTableProyect/PublicacionPortable/
 obj/Debug/*/edmxResources/*.res
 obj/Debug/*/edmxResources/*.msl
 obj/Debug/*/edmxResources/*.csdl
+
+# Paquetes de NuGet
+**/packages/
+!**/packages/build/
+*.nupkg
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# SQL Server y copias
+*.bak
+*.sqlproj.user
