@@ -77,6 +77,7 @@ namespace QuickTableProyect.Interface
 
         //Login/Autenticar 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult Autenticar(string nombre, string contrasena)
         {
             LimpiarCodigosVencidos();

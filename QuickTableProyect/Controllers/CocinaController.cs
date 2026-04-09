@@ -36,6 +36,7 @@ namespace QuickTableProyect.Interface
                 {
                     id = p.Id,
                     numeroMesa = p.NumeroMesa,
+                    fechaCreacion = p.FechaCreacion,   
                     detalles = p.Detalles
                         .Where(d => d.Cantidad > d.CantidadPreparada)
                         .Select(d => new

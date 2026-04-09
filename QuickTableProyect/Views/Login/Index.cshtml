@@ -644,6 +644,7 @@
                 <p class="login-box-msg">Inicia sesión para continuar</p>
 
                 <form id="loginForm" method="post" action="@Url.Action("Autenticar", "Login")">
+                    @Html.AntiForgeryToken()
                     <div class="input-group">
                         <input type="text" name="nombre" class="form-control" placeholder="Usuario" required autocomplete="username" />
                         <div class="input-group-append">
@@ -747,7 +748,10 @@
             $.ajax({
                 url: '@Url.Action("Autenticar", "Login")',
                 type: 'POST',
-                data: { nombre: nombre, contrasena: contrasena },
+                data: { nombre: nombre, 
+                    contrasena: contrasena,
+                   __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
                 success: function(response) {
                     $btn.removeClass('loading').text('Iniciar Sesión');
 
