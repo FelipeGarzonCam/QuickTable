@@ -717,19 +717,21 @@
 <link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css" />
 
 <script>
+    // --- Variables globales de estado 2FA ---
     let timer2FA = null;
     let timeoutTimer = null;
     let currentNavId = null;
     let modal2FA = null;
     let countdownTimer = null;
+    let polling2FAInterval = null;
 
-    $(document).ready(function() {
+    $(document).ready(function () {
         generarQR();
         modal2FA = new bootstrap.Modal(document.getElementById('modal2FA'));
         setupModal2FAEvents();
         setupThemeSwitch();
 
-        $('#loginForm').on('submit', function(e) {
+        $('#loginForm').on('submit', function (e) {
             e.preventDefault();
 
             var nombre = $('input[name="nombre"]').val().trim();
@@ -748,19 +750,20 @@
             $.ajax({
                 url: '@Url.Action("Autenticar", "Login")',
                 type: 'POST',
-                data: { nombre: nombre, 
+                data: {
+                    nombre: nombre,
                     contrasena: contrasena,
-                   __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
-                    },
-                success: function(response) {
-                    $btn.removeClass('loading').text('Iniciar Sesión');
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function (response) {
+                    $btn.removeClass('loading').text('Iniciar Sesion');
 
                     if (response.success) {
                         if (response.requiere2FA) {
                             iniciar2FA(response);
                         } else {
-                            toastr.success('Inicio de sesión exitoso', 'Éxito');
-                            setTimeout(function() {
+                            toastr.success('Inicio de sesion exitoso', 'Exito');
+                            setTimeout(function () {
                                 window.location.href = response.redirectUrl;
                             }, 1000);
                         }
@@ -768,18 +771,18 @@
                         toastr.error(response.message, 'Error');
                     }
                 },
-                error: function() {
-                    $btn.removeClass('loading').text('Iniciar Sesión');
-                    toastr.error('Error de conexión', 'Error');
+                error: function () {
+                    $btn.removeClass('loading').text('Iniciar Sesion');
+                    toastr.error('Error de conexion', 'Error');
                 }
             });
         });
 
-        $('input').on('focus', function() {
+        $('input').on('focus', function () {
             $(this).closest('.input-group').addClass('input-focused');
         });
 
-        $('input').on('blur', function() {
+        $('input').on('blur', function () {
             $(this).closest('.input-group').removeClass('input-focused');
         });
     });
@@ -795,7 +798,7 @@
 
         updateThemeButton(savedTheme);
 
-        themeToggle.addEventListener('change', function() {
+        themeToggle.addEventListener('change', function () {
             let currentTheme;
             if (body.classList.contains('dark-mode')) {
                 body.classList.remove('dark-mode');
@@ -818,16 +821,17 @@
         }
     }
 
-    function setupModal2FAEvents() {
-        $('#btnCancelar2FA').on('click', function() {
+        function setupModal2FAEvents() {
+        $('#btnCancelar2FA').on('click', function () {
             cancelar2FA();
         });
 
-        $('#btnCerrar2FA').on('click', function() {
+        $('#btnCerrar2FA').on('click', function () {
             cancelar2FA();
         });
 
-        document.getElementById('modal2FA').addEventListener('hidden.bs.modal', function() {
+        // CAMBIO: jQuery en lugar de addEventListener (evita crash si el elemento no esta listo)
+        $('#modal2FA').on('hidden.bs.modal', function () {
             if (currentNavId) {
                 cancelar2FA();
             }
@@ -840,46 +844,71 @@
 
         modal2FA.show();
         iniciarCountdown(600);
-        iniciarPolling2FA();
+        iniciarPolling2FA(); // SIN parametro: usa currentNavId del scope global
 
-        timeoutTimer = setTimeout(function() {
-            cancelar2FA("Tiempo agotado para autenticación 2FA");
+        timeoutTimer = setTimeout(function () {
+            cancelar2FA("Tiempo agotado para autenticacion 2FA");
         }, 600000);
     }
 
     function iniciarPolling2FA() {
-        let pollCount = 0;
-        const maxPolls = 200;
+        // Sin parametro: lee currentNavId directamente del scope global
+        if (polling2FAInterval) {
+            clearInterval(polling2FAInterval);
+            polling2FAInterval = null;
+        }
 
-        timer2FA = setInterval(function() {
-            pollCount++;
-
-            $.get('@Url.Action("Check2FA", "Login")', { navId: currentNavId })
-                .done(function(ok) {
-                    if (ok) {
+        polling2FAInterval = setInterval(function () {
+            $.ajax({
+                url: '@Url.Action("EstadoCodigo2FA", "Login")',
+                type: 'GET',
+                data: { navId: currentNavId },
+                success: function (respuesta) {
+                    if (respuesta.estado === 'confirmado') {
+                        // Limpiar todo y redirigir
                         limpiar2FAState();
+                        window.location.href = '@Url.Action("Index", "Administrador")';
+                    }
+                    else if (respuesta.estado === 'invalido') {
+                        // 1. Limpiar estado ANTES de cerrar el modal
+                        //    para que el listener hidden.bs.modal no dispare cancelar2FA
+                        limpiar2FAState(); // pone currentNavId = null
+
+                        // 2. Cerrar modal con la instancia Bootstrap 5
                         modal2FA.hide();
-                        toastr.success('Autenticación 2FA exitosa.', 'Éxito');
-                        setTimeout(function() {
-                            window.location.href = '@Url.Action("Index", "Administrador")';
-                        }, 1000);
-                    } else if (pollCount >= maxPolls) {
-                        cancelar2FA("Tiempo de espera agotado");
+
+                        // 3. Mostrar aviso al usuario
+                        toastr.error(
+                            'Tarjeta incorrecta. Haga clic en Iniciar Sesion para intentar de nuevo.',
+                            'Acceso denegado',
+                            {
+                                timeOut: 8000,
+                                closeButton: true,
+                                progressBar: true,
+                                positionClass: 'toast-top-right'
+                            }
+                        );
                     }
-                })
-                .fail(function(xhr, status, error) {
-                    console.log('Error verificando 2FA:', error);
-                    if (pollCount >= maxPolls) {
-                        cancelar2FA("Error de conexión durante la verificación");
-                    }
-                });
-        }, 3000);
+                    // 'pendiente': no hacer nada, seguir esperando
+                },
+                error: function () {
+                    // Error de red: limpiar y cerrar
+                    limpiar2FAState();
+                    modal2FA.hide();
+                    toastr.warning(
+                        'Error de conexion durante la verificacion. Intente de nuevo.',
+                        'Advertencia',
+                        { timeOut: 6000, closeButton: true }
+                    );
+                }
+            });
+        }, 2000);
     }
 
     function iniciarCountdown(segundos) {
         let tiempoRestante = segundos;
 
-        countdownTimer = setInterval(function() {
+        countdownTimer = setInterval(function () {
             const minutos = Math.floor(tiempoRestante / 60);
             const segs = tiempoRestante % 60;
 
@@ -897,9 +926,9 @@
         }, 1000);
     }
 
-    function cancelar2FA(mensaje = "Autenticación 2FA cancelada") {
+    function cancelar2FA(mensaje = "Autenticacion 2FA cancelada") {
         $.post('@Url.Action("CancelarTodo2FA", "Login")')
-            .always(function() {
+            .always(function () {
                 limpiar2FAState();
                 modal2FA.hide();
                 toastr.warning(mensaje, 'Cancelado');
@@ -911,15 +940,18 @@
             clearInterval(timer2FA);
             timer2FA = null;
         }
-
         if (timeoutTimer) {
             clearTimeout(timeoutTimer);
             timeoutTimer = null;
         }
-
         if (countdownTimer) {
             clearInterval(countdownTimer);
             countdownTimer = null;
+        }
+        // CORRECTO: tambien limpiar el polling del nuevo sistema
+        if (polling2FAInterval) {
+            clearInterval(polling2FAInterval);
+            polling2FAInterval = null;
         }
 
         currentNavId = null;
@@ -927,7 +959,7 @@
         $('#tiempoRestante').removeClass('text-danger').addClass('text-warning');
         $('#statusContainer').html(`
             <div class="spinner-border spinner-border-sm text-info" role="status"></div>
-            <span class="text-muted ms-2">Esperando autenticación con tarjeta...</span>
+            <span class="text-muted ms-2">Esperando autenticacion con tarjeta...</span>
         `);
     }
 
@@ -935,7 +967,7 @@
         $.ajax({
             url: '@Url.Action("GenerarQR", "Login")',
             type: 'GET',
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     $('#qrContainer').html('<img src="' + response.qrImage + '" alt="QR Code" class="img-fluid" />');
                     $('#urlDisplay').text(response.url);
@@ -943,13 +975,13 @@
                     $('#qrContainer').html('<p class="text-danger">Error al generar QR</p>');
                 }
             },
-            error: function() {
-                $('#qrContainer').html('<p class="text-danger">Error de conexión</p>');
+            error: function () {
+                $('#qrContainer').html('<p class="text-danger">Error de conexion</p>');
             }
         });
     }
 
-    $(window).on('beforeunload', function() {
+    $(window).on('beforeunload', function () {
         if (currentNavId) {
             navigator.sendBeacon('@Url.Action("CancelarTodo2FA", "Login")', new FormData());
         }

@@ -82,12 +82,15 @@ namespace QuickTableProyect.Interface
         {
             LimpiarCodigosVencidos();
 
-            var emp = _empleadoService.ObtenerEmpleadoPorNombre(nombre);
+            var emp = _empleadoService.ObtenerEmpleadoPorNombre(nombre);          
+            
 
             if (emp == null || !passwordService.VerifyPassword(contrasena, emp.Contrasena))
             {
                 return Json(new { success = false, message = "Nombre o contraseña incorrectos." });
+
             }
+            HttpContext.Session.Remove("2FACompletado");
 
             // ----- VALIDACIÓN CRÍTICA PARA ADMINISTRADORES -----
             if (emp.Rol == "Admin")
@@ -233,7 +236,8 @@ namespace QuickTableProyect.Interface
                 codigo2FA.Usado = true;
                 _ctx.SaveChanges();
 
-                System.Console.WriteLine($"[DEBUG] 2FA confirmado exitosamente para {tarjetaCorrecta.Empleado?.Nombre}");
+                //System.Console.WriteLine($"[DEBUG] 2FA confirmado exitosamente para {tarjetaCorrecta.Empleado?.Nombre}");
+                //HttpContext.Session.SetString("2FACompletado", "true");
                 return Ok("2FA confirmado exitosamente");
             }
             catch (Exception ex)
@@ -248,7 +252,41 @@ namespace QuickTableProyect.Interface
         public JsonResult Check2FA(Guid navId)
         {
             bool ok = _ctx.Codigos2FA.Any(c => c.NavegadorId == navId && c.Confirmado);
+            // Aqui si estamos en la sesion del NAVEGADOR del admin
+            if (ok)
+            {
+                HttpContext.Session.SetString("2FACompletado", "true");
+            }
             return Json(ok);
+        }
+
+
+        [HttpGet]
+        public JsonResult EstadoCodigo2FA(Guid navId)
+        {
+            try
+            {
+                using (var db = new SistemaQuickTableContext())
+                {
+                    var codigo = db.Codigos2FA.FirstOrDefault(c => c.NavegadorId == navId);
+
+                    if (codigo == null)
+                        return Json(new { estado = "invalido" });
+
+                    // Tarjeta incorrecta o cancelado: Usado=true pero no Confirmado
+                    if (codigo.Usado && !codigo.Confirmado)
+                        return Json(new { estado = "invalido" });
+
+                    if (codigo.Confirmado)
+                        return Json(new { estado = "confirmado" });
+
+                    return Json(new { estado = "pendiente" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { estado = "error", mensaje = ex.Message });
+            }
         }
 
         [HttpPost]

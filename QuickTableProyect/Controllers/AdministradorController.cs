@@ -46,9 +46,24 @@ namespace QuickTableProyect.Controllers
 
         public IActionResult Index()
         {
+            // Verificar sesión básica
+            var idStr = HttpContext.Session.GetString("Id");
+            if (string.IsNullOrEmpty(idStr))
+                return RedirectToAction("Index", "Login");
             var rol = HttpContext.Session.GetString("Rol");
             if (rol != "Admin")
             {
+                return RedirectToAction("Index", "Login");
+            }
+            
+            var dosFaCompletado = HttpContext.Session.GetString("2FACompletado");
+            if (dosFaCompletado != "true")
+            {
+                // La cookie existe pero el 2FA no se completó en este login
+                // Redirigir al login para que complete el flujo
+                HttpContext.Session.Remove("Id");
+                HttpContext.Session.Remove("Nombre");
+                HttpContext.Session.Remove("Rol");
                 return RedirectToAction("Index", "Login");
             }
             return View();
