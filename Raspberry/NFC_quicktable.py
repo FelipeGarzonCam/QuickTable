@@ -208,40 +208,29 @@ class AdminLTEKeyboard:
         self.create_keyboard()
     
     def create_keyboard(self):
-        keyboard_frame = tk.Frame(self.parent, bg='#343a40')
-        keyboard_frame.pack(pady=20)
-        
-        buttons = [
-            ['1', '2', '3'],
-            ['4', '5', '6'],
-            ['7', '8', '9'],
-            ['Borrar', '0', 'Entrar']
-        ]
-        
-        for row in buttons:
-            row_frame = tk.Frame(keyboard_frame, bg='#343a40')
-            row_frame.pack(pady=3)
+            # Le damos un tamaño exacto de 300x250 pixeles y evitamos que se expanda
+            keyboard_frame = tk.Frame(self.parent, bg='#343a40', width=300, height=250)
+            keyboard_frame.pack(pady=20)
+            keyboard_frame.pack_propagate(False) 
             
-            for btn_text in row:
-                if btn_text == 'Entrar':
-                    bg_color = '#007bff'
-                elif btn_text == 'Borrar':
-                    bg_color = '#dc3545'
-                else:
-                    bg_color = '#6c757d'
-                
-                btn = tk.Button(
-                    row_frame,
-                    text=btn_text,
-                    font=('Arial', 12, 'bold'),
-                    width=6,
-                    height=2,
-                    bg=bg_color,
-                    fg='white',
-                    border=0,
-                    command=lambda x=btn_text: self.on_key_press(x)
-                )
-                btn.pack(side='left', padx=3)
+            buttons = [
+                ['1', '2', '3'],
+                ['4', '5', '6'],
+                ['7', '8', '9'],
+                ['Borrar', '0', 'Entrar']
+            ]
+            
+            for i, row in enumerate(buttons):
+                for j, btn_text in enumerate(row):
+                    if btn_text == 'Entrar': bg_color = '#007bff'
+                    elif btn_text == 'Borrar': bg_color = '#dc3545'
+                    else: bg_color = '#6c757d'
+                    
+                    btn = tk.Button(keyboard_frame, text=btn_text, font=('Arial', 14, 'bold'), 
+                                    bg=bg_color, fg='white', border=0,
+                                    command=lambda x=btn_text: self.on_key_press(x))
+                    # Dibujamos cada boton matematicamente (90x50 pixeles)
+                    btn.place(x=j*95 + 10, y=i*60 + 5, width=90, height=50)
     
     def on_key_press(self, key):
         current = self.entry.get()
@@ -266,7 +255,7 @@ class QuickTableControlAcceso:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("QuickTable - Control de Acceso")
-        self.root.geometry("800x600")
+        self.root.geometry("800x480")
         self.root.configure(bg='#212529')
         
         # Configurar pantalla completa
@@ -349,8 +338,9 @@ class QuickTableControlAcceso:
     # ========================================================================
     # PANTALLA DE CONFIGURACION DEL SERVIDOR
     # ========================================================================
+ 
     def mostrar_configuracion_servidor(self):
-        """Pantalla TACTIL para configurar servidor - IP y Puerto separados"""
+        """Pantalla TACTIL para configurar servidor - IP (Puerto fijo oculto)"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
@@ -362,7 +352,7 @@ class QuickTableControlAcceso:
         
         tk.Label(
             title_frame,
-            text="QuickTable - Configuracion",
+            text="QuickTable - Configuración IP",
             font=('Arial', 24, 'bold'),
             fg='#007bff',
             bg='#212529'
@@ -373,15 +363,8 @@ class QuickTableControlAcceso:
         
         # COLUMNA IZQUIERDA - FORMULARIOS
         left_frame = tk.Frame(content_frame, bg='#495057', relief='raised', bd=2)
-        left_frame.pack(side='left', fill='both', expand=True, padx=(0, 10))
-        
-        tk.Label(
-            left_frame,
-            text="Configuracion del Servidor",
-            font=('Arial', 16, 'bold'),
-            fg='white',
-            bg='#495057'
-        ).pack(pady=15)
+        left_frame.pack(side='left', fill='both', expand=True, padx=(0, 10))       
+       
         
         # Estado hardware
         if self.hardware_available and self.reader:
@@ -413,25 +396,21 @@ class QuickTableControlAcceso:
         self.server_ip_entry.pack(pady=(3, 10), ipady=4)
         self.server_ip_entry.bind('<FocusIn>', lambda e: self.set_active_entry('ip'))
         
-        # Campo Puerto
-        tk.Label(fields_frame, text="Puerto:", 
-                font=('Arial', 12, 'bold'), fg='#f8f9fa', bg='#495057').pack(anchor='w')
+        # PUERTO FIJO - Solo texto indicativo pequeño. 
+        tk.Label(fields_frame, text="Puerto: 5000 (Fijo)", 
+                font=('Arial', 10, 'bold'), fg='#adb5bd', bg='#495057').pack(anchor='w', pady=(0, 5))
         
-        self.server_port_entry = tk.Entry(fields_frame, font=('Arial', 14), width=20,
-                                        justify='center', bg='white', fg='#495057',
-                                        relief='solid', bd=1)
-        self.server_port_entry.pack(pady=(3, 15), ipady=4)
-        self.server_port_entry.bind('<FocusIn>', lambda e: self.set_active_entry('port'))
+        # Mantenemos el Entry internamente para que tu logica de prueba NO falle, pero NO lo dibujamos (.pack)
+        self.server_port_entry = tk.Entry(fields_frame)
+        self.server_port_entry.insert(0, "5000")
         
         # Cargar valores actuales
         try:
             import urllib.parse
             parsed = urllib.parse.urlparse(self.server_url)
             self.server_ip_entry.insert(0, parsed.hostname or "192.168.1.100")
-            self.server_port_entry.insert(0, str(parsed.port) if parsed.port else "5000")
         except:
             self.server_ip_entry.insert(0, "192.168.1.100")
-            self.server_port_entry.insert(0, "5000")
         
         # Estado conexion
         self.connection_status = tk.Label(left_frame, 
@@ -440,7 +419,7 @@ class QuickTableControlAcceso:
                                         wraplength=250)
         self.connection_status.pack(pady=10)
         
-        # Botones en linea horizontal
+        # Botones en linea horizontal (INTACTOS)
         button_frame = tk.Frame(left_frame, bg='#495057')
         button_frame.pack(pady=15)
         
@@ -483,66 +462,47 @@ class QuickTableControlAcceso:
     def create_shared_keyboard(self, parent):
         """Teclado tactil para configuracion de servidor"""
         keyboard_frame = tk.Frame(parent, bg='#212529')
-        keyboard_frame.pack(pady=20)
-        
-        tk.Label(keyboard_frame, text="Teclado Numerico", 
-                font=('Arial', 14, 'bold'), 
-                fg='white', bg='#212529').pack(pady=(0, 10))
-        
-        # Indicador de campo activo
-        self.active_indicator = tk.Label(keyboard_frame, 
-                                    text="Editando: IP", 
-                                    font=('Arial', 11, 'bold'), 
-                                    fg='#17a2b8', bg='#212529')
-        self.active_indicator.pack(pady=(0, 8))
-        
+        keyboard_frame.pack(pady=20)       
+            
+       
         buttons = [
             ['1', '2', '3'],
             ['4', '5', '6'], 
             ['7', '8', '9'],
-            ['Borrar', '0', 'Punto'],            
-            ['IP', 'Puerto', 'Limpiar']
+            ['Borrar', '0', '.']
         ]
         
         for row in buttons:
             row_frame = tk.Frame(keyboard_frame, bg='#212529')
-            row_frame.pack(pady=2)
+            row_frame.pack(pady=3)
             
             for btn_text in row:
-                if btn_text == 'IP':
-                    bg_color = '#17a2b8'
+                if btn_text == 'Borrar':
+                    bg_color = "#f73707"
                     width = 9
-                elif btn_text == 'Puerto':
-                    bg_color = '#6f42c1'  
-                    width = 9
-                elif btn_text == 'Limpiar':
-                    bg_color = '#dc3545'
-                    width = 9
-                elif btn_text == 'Borrar':
-                    bg_color = '#fd7e14'
-                    width = 9
-                elif btn_text == 'Punto':
+                elif btn_text == '.':
                     bg_color = '#20c997'
                     width = 9
                 else:
                     bg_color = '#6c757d'
                     width = 9
                 
+                # TECLAS MÁS ALTAS: height cambiado de 1 a 2
                 btn = tk.Button(
                     row_frame,
                     text=btn_text,
                     font=('Arial', 16, 'bold'),
                     width=width,
-                    height=1,
+                    height=2, 
                     bg=bg_color,
                     fg='white',
                     border=0,
                     command=lambda x=btn_text: self.on_config_key_press(x)
                 )
-                btn.pack(side='left', padx=2)
+                btn.pack(side='left', padx=3)
     
     def on_config_key_press(self, key):
-        """Manejo de teclas del teclado tactil"""
+        """Manejo de teclas del teclado tactil (INTACTO)"""
         # Obtener campo activo
         if self.active_entry_type == 'ip':
             current_entry = self.server_ip_entry
@@ -576,7 +536,7 @@ class QuickTableControlAcceso:
                 current_entry.insert(tk.END, key)
     
     def probar_conexion(self):
-        """Probar conexion con IP y Puerto separados"""
+        """Probar conexion con IP y Puerto separados (INTACTO)"""
         ip = self.server_ip_entry.get().strip()
         port = self.server_port_entry.get().strip() or "5000"
         
@@ -592,7 +552,7 @@ class QuickTableControlAcceso:
                         args=(test_url,), daemon=True).start()
     
     def _test_connection_thread(self, test_url):
-        """Hilo para probar conexion"""
+        """Hilo para probar conexion (INTACTO)"""
         try:
             print(f"Probando conexion a: {test_url}")
             response = requests.get(f"{test_url}/api/health", timeout=5)
@@ -618,7 +578,7 @@ class QuickTableControlAcceso:
             print(f"Error conexion: {e}")
     
     def conectar_servidor(self):
-        """Conectar con IP y Puerto separados"""
+        """Conectar con IP y Puerto separados (INTACTO)"""
         ip = self.server_ip_entry.get().strip()
         port = self.server_port_entry.get().strip() or "5000"
         
@@ -631,335 +591,215 @@ class QuickTableControlAcceso:
         self.guardar_configuracion()
         print(f"Conectado a servidor: {self.server_url}")
         self.mostrar_pantalla_principal()
-    
-    # ========================================================================
+
+        # FIRMA: By Felipe Garzon
+        tk.Label(self.root, 
+                 text="By Felipe Garzon", 
+                 font=("Arial", 11, "italic bold"), 
+                 fg='#555e66', 
+                 bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20)
+   
+   # ========================================================================
     # PANTALLA PRINCIPAL (MENU)
     # ========================================================================
     def mostrar_pantalla_principal(self):
-        """Pantalla principal con dos opciones grandes"""
+        """Pantalla principal compacta, botones centrados y sin cortes"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
+        # Al compactar el contenido interno, el anchor='center' funcionará perfecto
         main_frame = tk.Frame(self.root, bg='#212529')
         main_frame.place(relx=0.5, rely=0.5, anchor='center')
         
-        # Titulo principal
-        title_font = font.Font(family="Arial", size=28, weight="bold")
+        # --- TITULO PRINCIPAL ---
+        title_font = font.Font(family="Arial", size=24, weight="bold")
         tk.Label(main_frame, 
-                text="QuickTable Control de Acceso", 
+                text="QuickTable - Control de Acceso", 
                 font=title_font, 
                 fg='#ffffff', 
-                bg='#212529').pack(pady=30)
+                bg='#212529').pack(pady=(5, 10)) # Márgenes reducidos
         
         # Subtitulo con estado del hardware
-        subtitle_font = font.Font(family="Arial", size=14)
         if self.hardware_available and self.reader:
-            status_text = "Hardware RC522 Disponible"
+            status_text = "● Hardware RC522 Disponible"
             status_color = '#28a745'
         else:
-            status_text = "Hardware RC522 No disponible"
+            status_text = "● Hardware RC522 No disponible"
             status_color = '#dc3545'
         
         tk.Label(main_frame, 
                 text=status_text, 
-                font=subtitle_font, 
+                font=("Arial", 14), 
                 fg=status_color, 
-                bg='#212529').pack(pady=10)
+                bg='#212529').pack(pady=(0, 20))
         
-        # Frame para botones principales
+        # Frame contenedor de botones
         buttons_frame = tk.Frame(main_frame, bg='#212529')
-        buttons_frame.pack(pady=40)
+        buttons_frame.pack(pady=10)
+
+        # Dimensiones reducidas para que no empujen lo de abajo
+        ANCHO_BTN = 350
+        ALTO_BTN = 215 
+        font_grande = font.Font(family="Arial", size=22, weight="bold")
+        font_pequena = font.Font(family="Arial", size=13)
+
+        # --- BOTÓN 1: MARCAR SALIDA ---
+        btn1_container = tk.Frame(buttons_frame, bg='#007bff', width=ANCHO_BTN, height=ALTO_BTN, 
+                                 bd=3, relief='raised', cursor="hand2")
+        btn1_container.pack_propagate(False) 
+        # Un padx pequeño junta los botones en el centro
+        btn1_container.pack(side='left', padx=10)
         
-        # Boton 1: Marcar Salida
-        btn_font = font.Font(family="Arial", size=18, weight="bold")
-        btn_asistencia = tk.Button(buttons_frame,
-                                  text="MARCAR SALIDA\n\nAcerca tu tarjeta NFC\npara registrar tu salida",
-                                  font=btn_font,
-                                  bg='#007bff',
-                                  fg='white',
-                                  width=25,
-                                  height=8,
-                                  relief='raised',
-                                  bd=3,
-                                  command=self.mostrar_marcar_salida)
-        btn_asistencia.pack(side='left', padx=20)
+        lbl_t1 = tk.Label(btn1_container, text="MARCAR SALIDA", font=font_grande, 
+                          bg='#007bff', fg='white')
+        lbl_t1.pack(expand=True, pady=(20, 0)) 
         
-        # Boton 2: Modo Administracion
-        btn_admin = tk.Button(buttons_frame,
-                             text="MODO ADMINISTRACION\n\nAcceso completo al sistema\npara gestion y configuracion",
-                             font=btn_font,
-                             bg='#28a745',
-                             fg='white',
-                             width=25,
-                             height=8,
-                             relief='raised',
-                             bd=3,
-                             command=self.mostrar_pantalla_codigo)
-        btn_admin.pack(side='right', padx=20)
+        lbl_d1 = tk.Label(btn1_container, text="Acerca tu tarjeta NFC\npara registrar tu salida", 
+                          font=font_pequena, bg='#007bff', fg='white')
+        lbl_d1.pack(expand=True, pady=(0, 20))
+
+        for w in (btn1_container, lbl_t1, lbl_d1):
+            w.bind("<Button-1>", lambda e: self.mostrar_marcar_salida())
+
+        # --- BOTÓN 2: MODO ADMINISTRACIÓN ---
+        btn2_container = tk.Frame(buttons_frame, bg='#28a745', width=ANCHO_BTN, height=ALTO_BTN, 
+                                 bd=3, relief='raised', cursor="hand2")
+        btn2_container.pack_propagate(False)
+        btn2_container.pack(side='left', padx=10)
+
+        lbl_t2 = tk.Label(btn2_container, text="MODO\nADMINISTRACIÓN", font=font_grande, 
+                          bg='#28a745', fg='white', justify='center')
+        lbl_t2.pack(expand=True, pady=(20, 0))
         
-        # Frame para opciones adicionales
-        options_frame = tk.Frame(main_frame, bg='#212529')
-        options_frame.pack(pady=20)
+        lbl_d2 = tk.Label(btn2_container, text="Acceso completo al sistema\npara gestión y configuración", 
+                          font=font_pequena, bg='#28a745', fg='white')
+        lbl_d2.pack(expand=True, pady=(0, 20))
+
+        for w in (btn2_container, lbl_t2, lbl_d2):
+            w.bind("<Button-1>", lambda e: self.mostrar_pantalla_codigo())
         
-        # Boton configurar servidor
-        btn_config = tk.Button(options_frame,
-                              text="Configurar Servidor",
-                              font=("Arial", 14, "bold"),
-                              bg='#6c757d',
-                              fg='white',
-                              width=20,
-                              height=2,
-                              command=self.mostrar_configuracion_servidor)
-        btn_config.pack(side='left', padx=10)
+        # --- PARTE INFERIOR ---
+        # Se reduce drásticamente el pady para que no se vaya hasta el fondo
+        lower_frame = tk.Frame(main_frame, bg='#212529')
+        lower_frame.pack(pady=20) 
         
-        # Boton salir
-        btn_salir = tk.Button(options_frame,
-                             text="Salir",
-                             font=("Arial", 14, "bold"),
-                             bg='#dc3545',
-                             fg='white',
-                             width=20,
-                             height=2,
-                             command=self.salir_aplicacion)
-        btn_salir.pack(side='right', padx=10)
+        btn_style = {"font": ("Arial", 12, "bold"), "fg": "white", "width": 18, "height": 2}
         
-        # Informacion del servidor
-        info_font = font.Font(family="Arial", size=12)
-        tk.Label(main_frame,
-                text=f"Servidor: {self.server_url}",
-                font=info_font,
-                fg='#6c757d',
-                bg='#212529').pack(pady=10)
-    
+        tk.Button(lower_frame, text="Configurar Servidor", bg='#6c757d', 
+                  command=self.mostrar_configuracion_servidor, **btn_style).pack(side='left', padx=10)
+        
+        tk.Button(lower_frame, text="Salir del Sistema", bg='#dc3545', 
+                  command=self.salir_aplicacion, **btn_style).pack(side='left', padx=10)       
+
+        # FIRMA: By Felipe Garzon
+        tk.Label(self.root, 
+                 text="By Felipe Garzon", 
+                 font=("Arial", 11, "italic bold"), 
+                 fg='#555e66', 
+                 bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20)
     # ========================================================================
     # PANTALLA MARCAR SALIDA
     # ========================================================================
     def mostrar_marcar_salida(self):
-        """Pantalla para marcar salida con tarjeta NFC"""
+        """Pantalla para marcar salida con tarjeta NFC calculada para 800x480"""
         if not self.hardware_available or not self.reader:
             messagebox.showerror("Error", "Hardware RC522 no disponible")
             return
-        
+            
         for widget in self.root.winfo_children():
             widget.destroy()
-        
-        main_frame = tk.Frame(self.root, bg='#212529')
-        main_frame.place(relx=0.5, rely=0.5, anchor='center')
+            
+        main_frame = tk.Frame(self.root, bg='#212529', width=800, height=480)
+        main_frame.place(x=0, y=0)
         
         # Titulo
         title_font = font.Font(family="Arial", size=24, weight="bold")
-        tk.Label(main_frame,
-                text="Marcar Salida",
-                font=title_font,
-                fg='#ffffff',
-                bg='#212529').pack(pady=30)
+        tk.Label(main_frame, text="Marcar Salida", font=title_font, fg='#ffffff', bg='#212529').place(x=0, y=40, width=800, height=50)
         
         # Icono
         icon_font = font.Font(family="Arial", size=48)
-        tk.Label(main_frame,
-                text="[ NFC ]",
-                font=icon_font,
-                fg='#007bff',
-                bg='#212529').pack(pady=20)
+        tk.Label(main_frame, text="[ NFC ]", font=icon_font, fg='#007bff', bg='#212529').place(x=0, y=120, width=800, height=70)
         
         # Instrucciones
         instr_font = font.Font(family="Arial", size=18)
-        tk.Label(main_frame,
-                text="Acerca tu tarjeta NFC al lector",
-                font=instr_font,
-                fg='#ffffff',
-                bg='#212529').pack(pady=10)
+        tk.Label(main_frame, text="Acerca tu tarjeta NFC al lector", font=instr_font, fg='#ffffff', bg='#212529').place(x=0, y=210, width=800, height=40)
         
-        # Estado
-        self.status_label = tk.Label(main_frame,
-                                   text="Esperando tarjeta...",
-                                   font=("Arial", 16),
-                                   fg='#ffc107',
-                                   bg='#212529')
-        self.status_label.pack(pady=20)
+        # Estado (Guardado en self para el hilo)
+        self.status_label = tk.Label(main_frame, text="Esperando tarjeta...", font=("Arial", 16), fg='#ffc107', bg='#212529')
+        self.status_label.place(x=0, y=270, width=800, height=40)
         
         # Boton volver
-        tk.Button(main_frame,
-                 text="Volver al Inicio",
-                 font=("Arial", 18, "bold"),
-                 bg='#6c757d',
-                 fg='white',
-                 width=25,
-                 height=3,
-                 command=self.mostrar_pantalla_principal).pack(pady=30)
+        btn_volver = tk.Button(main_frame, text="Volver al Inicio", font=("Arial", 18, "bold"), bg='#6c757d', fg='white', command=self.mostrar_pantalla_principal)
+        btn_volver.place(x=250, y=360, width=300, height=60)
         
         # Iniciar proceso de lectura en hilo separado
         threading.Thread(target=self.proceso_marcar_salida, daemon=True).start()
+        # FIRMA: By Felipe Garzon
+        tk.Label(self.root, 
+                 text="By Felipe Garzon", 
+                 font=("Arial", 11, "italic bold"), 
+                 fg='#555e66', 
+                 bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20)
     
-    def proceso_marcar_salida(self):
-        """Proceso para leer tarjeta y marcar salida"""
-        if not self.hardware_available or not self.reader:
-            self.root.after(0, lambda: messagebox.showerror("Error", "Hardware RC522 no disponible"))
-            return
-        
-        try:
-            self.root.after(0, lambda: self.status_label.config(text="Acerca tu tarjeta...", fg='#28a745'))
-            
-            # Leer UID de la tarjeta
-            uid_fisico = self.reader.read_card_uid(timeout=30)
-            
-            if not uid_fisico:
-                self.root.after(0, lambda: self.status_label.config(text="No se detecto tarjeta", fg='#dc3545'))
-                return
-            
-            self.root.after(0, lambda: self.status_label.config(text="Procesando...", fg='#ffc107'))
-            
-            # Encriptar el UID
-            uid_encriptado = self.encriptar_uid(uid_fisico)
-            
-            # Enviar al servidor
-            response = requests.post(
-                f'{self.server_url}/api/asistencia/marcar-salida',
-                json={'uid': uid_encriptado},
-                timeout=10
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data['success']:
-                    mensaje = f"Salida Registrada\n\n"
-                    mensaje += f"Empleado: {data.get('nombre', 'N/A')}\n"
-                    mensaje += f"Rol: {data.get('rol', 'N/A')}\n"
-                    mensaje += f"Hora Ingreso: {data.get('horaIngreso', 'N/A')}\n"
-                    mensaje += f"Hora Salida: {data.get('horaSalida', 'N/A')}\n"
-                    mensaje += f"Tiempo Trabajado: {data.get('tiempoTrabajado', 'N/A')}"
-                    
-                    self.root.after(0, lambda: self.mostrar_resultado_exitoso(mensaje))
-                else:
-                    self.root.after(0, lambda: self.status_label.config(text=data.get('message', 'Error'), fg='#dc3545'))
-            else:
-                error_msg = f"Error del servidor: {response.status_code}"
-                self.root.after(0, lambda: self.status_label.config(text=error_msg, fg='#dc3545'))
-                
-        except Exception as e:
-            self.root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
-    
-    def encriptar_uid(self, uid):
-        """Encriptar UID usando el mismo metodo que el backend"""
-        try:
-            from crypto_helper import encrypt_uid
-            return encrypt_uid(uid)
-        except ImportError:
-            print("crypto_helper no disponible, usando Base64 basico")
-            import base64
-            return base64.b64encode(uid.encode()).decode()
-    
-    def mostrar_resultado_exitoso(self, mensaje):
-        """Mostrar resultado exitoso"""
-        for widget in self.root.winfo_children():
-            widget.destroy()
-        
-        main_frame = tk.Frame(self.root, bg='#212529')
-        main_frame.place(relx=0.5, rely=0.5, anchor='center')
-        
-        # Titulo exitoso
-        title_font = font.Font(family="Arial", size=24, weight="bold")
-        tk.Label(main_frame,
-                text="Salida Registrada Exitosamente",
-                font=title_font,
-                fg='#28a745',
-                bg='#212529').pack(pady=30)
-        
-        # Informacion detallada
-        info_font = font.Font(family="Arial", size=16)
-        tk.Label(main_frame,
-                text=mensaje,
-                font=info_font,
-                fg='#ffffff',
-                bg='#212529',
-                justify='center').pack(pady=20)
-        
-        # Boton para regresar
-        tk.Button(main_frame,
-                 text="Regresar al Inicio",
-                 font=("Arial", 20, "bold"),
-                 bg='#007bff',
-                 fg='white',
-                 width=25,
-                 height=3,
-                 command=self.mostrar_pantalla_principal).pack(pady=30)
-        
-        # Auto-retorno despues de 10 segundos
-        countdown_label = tk.Label(main_frame,
-                                  text="Regresando automaticamente en 10 segundos...",
-                                  font=("Arial", 14),
-                                  fg='#6c757d',
-                                  bg='#212529')
-        countdown_label.pack(pady=20)
-        
-        # Iniciar countdown
-        self.countdown_timer(countdown_label, 10)
-    
-    def countdown_timer(self, label, seconds):
-        """Timer para regresar automaticamente"""
-        if seconds > 0:
-            label.config(text=f"Regresando automaticamente en {seconds} segundos...")
-            self.root.after(1000, lambda: self.countdown_timer(label, seconds - 1))
-        else:
-            self.mostrar_pantalla_principal()
-    
-    # ========================================================================
+   # ========================================================================
     # PANTALLA DE CODIGO DE SESION (Modo Admin/TI/Empleado)
     # ========================================================================
     def mostrar_pantalla_codigo(self):
-        """Pantalla principal de codigo de sesion - LAYOUT HORIZONTAL"""
+        """Pantalla principal de codigo de sesion - LAYOUT HORIZONTAL 40/60"""
         for widget in self.root.winfo_children():
             widget.destroy()
         
-        # Contenedor principal con dos columnas
-        main_container = tk.Frame(self.root, bg='#212529')
-        main_container.pack(fill='both', expand=True, padx=40, pady=40)
+        # Contenedor principal fijo a 800x480
+        main_container = tk.Frame(self.root, bg='#212529', width=800, height=480)
+        main_container.place(x=0, y=0)
         
-        # ========== COLUMNA IZQUIERDA ==========
-        left_frame = tk.Frame(main_container, bg='#343a40')
-        left_frame.pack(side='left', fill='both', expand=True, padx=(0, 20))
+        # ========== COLUMNA IZQUIERDA (40% = 320px) ==========
+        left_frame = tk.Frame(main_container, bg='#343a40', width=320, height=480)
+        left_frame.place(x=0, y=0)
+        left_frame.pack_propagate(False) # Bloquea el tamaño para que no se expanda
         
         tk.Label(left_frame, text="Codigo de Sesion",
-                font=('Arial', 28, 'bold'),
-                fg='white', bg='#343a40').pack(pady=(20, 10))
+                font=('Arial', 24, 'bold'), # Ajustado para caber en 320px
+                fg='white', bg='#343a40').pack(pady=(40, 10))
         
         tk.Label(left_frame, text="Ingrese el codigo de 6 digitos",
-                font=('Arial', 14),
+                font=('Arial', 12),
                 fg='#adb5bd', bg='#343a40').pack(pady=10)
         
-        # Campo codigo - MAS GRANDE
+        # Campo codigo
         code_frame = tk.Frame(left_frame, bg='#343a40')
-        code_frame.pack(pady=30)
+        code_frame.pack(pady=20)
         
-        self.code_entry = tk.Entry(code_frame, font=('Arial', 32, 'bold'),
-                                width=12, justify='center',
+        self.code_entry = tk.Entry(code_frame, font=('Arial', 28, 'bold'),
+                                width=10, justify='center',
                                 bg='white', fg='#495057')
         vcmd = (self.root.register(self.validate_code), '%P')
         self.code_entry.config(validate='key', validatecommand=vcmd)
-        self.code_entry.pack(pady=10, ipady=10)
+        self.code_entry.pack(pady=10, ipady=8)
         self.code_entry.focus()
         self.code_entry.bind('<Return>', lambda e: self.validar_codigo_sesion())
         
         # Info servidor
         info_frame = tk.Frame(left_frame, bg='#343a40')
-        info_frame.pack(pady=30)
+        info_frame.pack(pady=20)
         
         tk.Label(info_frame, text=f"Servidor: {self.server_url}",
-                font=('Arial', 11), fg='#6c757d', bg='#343a40').pack(pady=10)
+                font=('Arial', 10), fg='#6c757d', bg='#343a40').pack(pady=10)
         
         # Boton regreso
         tk.Button(info_frame, text="Regresar al Menu Principal",
-                font=('Arial', 16, 'bold'), bg='#17a2b8', fg='white',
-                activebackground='#138496', width=28, height=2,
-                border=0, command=self.mostrar_pantalla_principal).pack(pady=20)
+                font=('Arial', 12, 'bold'), bg='#17a2b8', fg='white',
+                activebackground='#138496', width=26, height=2,
+                border=0, command=self.mostrar_pantalla_principal).pack(pady=10)
         
-        # ========== COLUMNA DERECHA - TECLADO ==========
-        right_frame = tk.Frame(main_container, bg='#212529')
-        right_frame.pack(side='right', fill='both', expand=True)
+        # ========== COLUMNA DERECHA - TECLADO (60% = 480px) ==========
+        right_frame = tk.Frame(main_container, bg='#212529', width=480, height=480)
+        right_frame.place(x=320, y=0)
+        right_frame.pack_propagate(False)
         
-        # Teclado numerico GRANDE
+        # Teclado numerico centrado
         keyboard_frame = tk.Frame(right_frame, bg='#212529')
-        keyboard_frame.pack(expand=True, pady=5)
+        keyboard_frame.pack(expand=True)
         
         buttons = [
             ['1', '2', '3'],
@@ -970,7 +810,7 @@ class QuickTableControlAcceso:
         
         for row in buttons:
             row_frame = tk.Frame(keyboard_frame, bg='#212529')
-            row_frame.pack(pady=8)
+            row_frame.pack(pady=6)
             
             for btn_text in row:
                 if btn_text == 'Entrar':
@@ -983,15 +823,15 @@ class QuickTableControlAcceso:
                 btn = tk.Button(
                     row_frame,
                     text=btn_text,
-                    font=('Arial', 22, 'bold'),
-                    width=8,
-                    height=3,
+                    font=('Arial', 20, 'bold'),
+                    width=6,   # Reducido proporcionalmente para no desbordar los 480px
+                    height=2,  # Reducido proporcionalmente
                     bg=bg_color,
                     fg='white',
                     border=0,
                     command=lambda x=btn_text: self.on_session_key_press(x)
                 )
-                btn.pack(side='left', padx=8)
+                btn.pack(side='left', padx=6)
 
     def on_session_key_press(self, key):
         """Manejo de teclas para pantalla de codigo de sesion"""
@@ -1078,7 +918,14 @@ class QuickTableControlAcceso:
             print(f"Error validando sesion: {e}")
             self.root.after(0, lambda: messagebox.showerror(
                 "Error", f"Error de conexion: {str(e)}"))
-    
+            
+            # FIRMA: By Felipe Garzon
+        tk.Label(self.root, 
+                 text="By Felipe Garzon", 
+                 font=("Arial", 11, "italic bold"), 
+                 fg='#555e66', 
+                 bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20)
+            
     # ========================================================================
     # MODO EMPLEADO (Asignar tarjeta a empleado)
     # ========================================================================
@@ -1188,6 +1035,13 @@ class QuickTableControlAcceso:
         except Exception as e:
             print(f"Error asignando tarjeta empleado: {e}")
             self.root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
+
+            # FIRMA: By Felipe Garzon
+        tk.Label(self.root, 
+                 text="By Felipe Garzon", 
+                 font=("Arial", 11, "italic bold"), 
+                 fg='#555e66', 
+                 bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20)
     
     # ========================================================================
     # MODO TI (Escribir tarjetas admin)
@@ -1340,6 +1194,12 @@ class QuickTableControlAcceso:
         finally:
             self.root.after(0, lambda: self.verify_button.config(
                 state='normal', text='Verificar y Confirmar'))
+            # FIRMA: By Felipe Garzon
+        tk.Label(self.root, 
+                 text="By Felipe Garzon", 
+                 font=("Arial", 11, "italic bold"), 
+                 fg='#555e66', 
+                 bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20)
     
     # ========================================================================
     # MODO ADMIN (Autenticacion 2FA)
@@ -1347,6 +1207,9 @@ class QuickTableControlAcceso:
     def mostrar_modo_admin(self):
         for widget in self.root.winfo_children():
             widget.destroy()
+        
+        # Variable para controlar el bucle de lectura
+        self.leyendo_2fa = True
         
         main_frame = tk.Frame(self.root, bg='#343a40')
         main_frame.place(relx=0.5, rely=0.5, anchor='center')
@@ -1364,53 +1227,101 @@ class QuickTableControlAcceso:
         tk.Label(main_frame, text=f"NavID: {str(nav_id)[:8]}...", 
                 font=('Arial', 10), fg='#adb5bd', bg='#343a40').pack(pady=5)
         
+        # Etiqueta dinamica para reemplazar los Messagebox
         self.admin_status_label = tk.Label(main_frame, 
                                          text="Acerca su tarjeta de administrador...", 
                                          font=('Arial', 14), fg='#28a745', bg='#343a40')
         self.admin_status_label.pack(pady=30)
         
+        # Funcion interna para detener la lectura si se presiona el boton
+        def regresar():
+            self.leyendo_2fa = False
+            self.mostrar_pantalla_principal()
+
         tk.Button(main_frame, text="Regresar", 
                  font=('Arial', 11), bg='#17a2b8', fg='white', 
                  width=15, height=2, 
-                 command=self.mostrar_pantalla_principal).pack(pady=20)
+                 command=regresar).pack(pady=20)
         
         threading.Thread(target=self.proceso_admin, daemon=True).start()
     
     def proceso_admin(self):
         if not HARDWARE_AVAILABLE or not self.reader:
-            self.root.after(0, lambda: messagebox.showerror(
-                "Error", "Hardware RC522 no disponible"))
+            self.root.after(0, lambda: self.admin_status_label.config(
+                text="Error: Hardware RC522 no disponible", fg='#dc3545'))
             return
         
         try:
-            uid_fisico, texto_leido = self.reader.read_text_from_card(timeout=25)
-            
-            if not uid_fisico or not texto_leido:
-                self.root.after(0, lambda: messagebox.showerror("Error", 
-                    "No se pudo leer la tarjeta"))
-                return
-            
-            self.root.after(0, lambda: self.admin_status_label.config(
-                text=f"Verificando tarjeta...", fg='#ffc107'))
-            
-            response = requests.post(f"{self.server_url}/Login/Confirmar2FA", 
-                                data={
-                                    'navId': self.session_data.get('navId', ''),
-                                    'uidFisico': uid_fisico,
-                                    'textoEscrito': texto_leido
-                                }, timeout=10)
-            
-            if response.status_code == 200:
+            while self.leyendo_2fa:
+                # 1. LIMPIAR VARIABLES DE MEMORIA EN CADA CICLO
+                uid_fisico = None
+                texto_leido = None
+                
                 self.root.after(0, lambda: self.admin_status_label.config(
-                    text="Autenticacion 2FA exitosa", fg='#28a745'))
-                self.root.after(3000, self.mostrar_pantalla_principal)
-            else:
-                self.root.after(0, lambda: messagebox.showerror("Error", 
-                    f"Tarjeta no autorizada: {response.text}"))
+                    text="Acerca su tarjeta de administrador...", fg='#28a745'))
+
+                uid_fisico, texto_leido = self.reader.read_text_from_card(timeout=25)
+                
+                if not self.leyendo_2fa:
+                    break
+
+                if not uid_fisico or not texto_leido:
+                    continue
+                
+                self.root.after(0, lambda: self.admin_status_label.config(
+                    text=f"Verificando tarjeta...", fg='#ffc107'))
+                
+                response = requests.post(f"{self.server_url}/Login/Confirmar2FA", 
+                                    data={
+                                        'navId': self.session_data.get('navId', ''),
+                                        'uidFisico': uid_fisico,
+                                        'textoEscrito': texto_leido
+                                    }, timeout=10)
+                
+                if response.status_code == 200:
+                    self.root.after(0, lambda: self.admin_status_label.config(
+                        text="Autenticacion 2FA exitosa", fg='#28a745'))
+                    self.leyendo_2fa = False 
+                    self.root.after(3000, self.mostrar_pantalla_principal)
+                    break
+                else:
+                    # 1. Capturamos el error
+                    error_msg = response.text.strip()
+                    print(f"Rechazo del servidor. Codigo: {response.status_code} - Motivo: {error_msg}")
+                    
+                    if len(error_msg) > 35:
+                        error_msg = error_msg[:35] + "..." 
+                        
+                    # 2. Mostramos el error en rojo en la pantalla
+                    self.root.after(0, lambda msg=error_msg: self.admin_status_label.config(
+                        text=f"Error: {msg}", fg='#dc3545'))
+                    
+                    # 3. Esperamos 3 segundos para leer el error
+                    time.sleep(3)
+                    
+                    # 4. MATAMOS LA SESIÓN Y REGRESAMOS AL MENÚ PRINCIPAL
+                    self.leyendo_2fa = False 
+                    self.root.after(0, self.mostrar_pantalla_principal)
+                    break
                 
         except Exception as e:
-            self.root.after(0, lambda: messagebox.showerror("Error", f"Error: {str(e)}"))
-    
+            if self.leyendo_2fa:
+                self.root.after(0, lambda err=str(e): self.admin_status_label.config(
+                    text=f"Excepción: {err[:30]}", fg='#dc3545'))
+                print(f"Excepción 2FA: {e}")
+                time.sleep(3)
+                
+                # También regresamos al menú si hay una excepción (ej. se cae la red)
+                self.leyendo_2fa = False
+                self.root.after(0, self.mostrar_pantalla_principal)
+
+        # FIRMA: By Felipe Garzon
+        self.root.after(0, lambda: tk.Label(self.root, 
+                 text="By Felipe Garzon", 
+                 font=("Arial", 11, "italic bold"), 
+                 fg='#555e66', 
+                 bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20))
+            
     # ========================================================================
     # FUNCIONES DE CONTROL
     # ========================================================================
@@ -1440,7 +1351,6 @@ class QuickTableControlAcceso:
                 self.reader.cleanup()
             print("Aplicacion cerrada")
 
-
 # ============================================================================
 # SECCION 5: PUNTO DE ENTRADA
 # ============================================================================
@@ -1453,4 +1363,5 @@ if __name__ == "__main__":
         sys.exit(0)
     except Exception as e:
         print(f"Error fatal: {e}")
-        sys.exit(1)
+        sys.exit(1)   
+        
