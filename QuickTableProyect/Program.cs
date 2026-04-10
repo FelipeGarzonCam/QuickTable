@@ -37,6 +37,7 @@ services.AddScoped<CryptoService>();
 
 // Agregar MVC
 services.AddControllersWithViews();
+services.AddResponseCompression();
 
 // CONFIGURACION DE SESION PARA 8 HORAS
 services.AddDistributedMemoryCache(); // IMPORTANTE: Requerido para sesiones
@@ -72,6 +73,7 @@ builder.WebHost.ConfigureKestrel(options =>
     string localIp = GetLocalIPAddress();
     int port = 5000; // Puerto 
     options.Listen(IPAddress.Parse(localIp), port);
+    
 });
 
 var app = builder.Build();
@@ -131,8 +133,14 @@ app.Use(async (context, next) =>
     );
     await next();
 });
-
-app.UseStaticFiles();
+app.UseResponseCompression();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers["Cache-Control"] = "public,max-age=604800"; // 7 dias
+    }
+});
 app.UseRouting();
 
 app.UseSession();

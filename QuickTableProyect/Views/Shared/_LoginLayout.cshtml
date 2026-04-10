@@ -1,0 +1,25 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuickTable - Login</title>
+
+    <!-- CSS local - sin internet -->
+    <link rel="stylesheet" href="~/AdminLTE/plugins/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="~/AdminLTE/plugins/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/AdminLTE/plugins/toastr/toastr.min.css" />
+    <link rel="stylesheet" href="~/AdminLTE/dist/css/adminlte.min.css" />
+</head>
+<body>
+
+    @RenderBody()
+
+    <!-- Scripts locales - sin internet -->
+    <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
+    <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="~/AdminLTE/plugins/toastr/toastr.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

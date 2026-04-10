@@ -329,11 +329,16 @@
                 updateLogo(currentTheme);
             });
 
+                   
             function updateThemeButton(theme) {
+                // Agregar esta línea al inicio:
+                var toggle = document.getElementById('themeToggle');
+                if (!toggle) return; // <-- esto soluciona el error en Login
+
                 if (theme === 'dark') {
-                    themeToggle.checked = false;
+                    toggle.checked = false;
                 } else {
-                    themeToggle.checked = true;
+                    toggle.checked = true;
                 }
             }
 
