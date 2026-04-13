@@ -31,6 +31,20 @@
         margin-left: 1% !important;
         margin-right: 1% !important;
     }
+    /* Selector visual de metodo de pago */
+    .metodo-btn {
+        color: #6c757d;
+        background: #fff;
+        border-color: #dee2e6 !important;
+        user-select: none;
+    }
+
+    input[type="radio"]:checked + .metodo-btn {
+        background: #d4edda;
+        border-color: #28a745 !important;
+        color: #155724;
+        font-weight: 800 !important;
+    }
 </style>
 <div class="content-wrapper">
     <section class="content-header">
@@ -68,57 +82,170 @@
 
 <!-- Modal Finalizar Pedido -->
 <div class="modal fade" id="finalizarPedidoModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Finalizar Pedido</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius:14px;overflow:hidden;border:none;box-shadow:0 20px 60px rgba(0,0,0,.22);">
+
+            <!-- CABECERA -->
+            <div class="modal-header" style="background:linear-gradient(135deg,#155724,#28a745);border-bottom:none;padding:16px 24px;">
+                <div class="d-flex align-items-center" style="gap:10px;">
+                    <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-cash-register" style="color:#fff;font-size:1rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title mb-0" style="color:#fff;font-weight:800;font-size:1rem;">Finalizar Pedido</h5>
+                        <small id="pedidoInfo" style="color:rgba(255,255,255,.75);font-size:.78rem;"></small>
+                    </div>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" style="color:#fff;opacity:.8;font-size:1.4rem;margin-top:-4px;">
                     <span>&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <input type="hidden" id="pedidoId">
-                <p id="pedidoInfo"></p>
 
-                <div class="form-group">
-                    <label>Total Original</label>
-                    <h4 class="text-primary" id="totalOriginal"></h4>
-                </div>
+            <input type="hidden" id="pedidoId">
 
-                <div class="form-group">
-                    <label>Propina (%)</label>
-                    <input type="number" class="form-control" id="propinaPorcentaje" value="5" min="0" max="100">
-                </div>
+            <!-- CUERPO EN DOS COLUMNAS -->
+            <div class="modal-body p-0">
+                <div class="row no-gutters">
 
-                <div class="form-group">
-                    <label>Total con Propina</label>
-                    <h3 class="text-success" id="totalConPropina"></h3>
-                </div>
+                    <!-- COLUMNA IZQUIERDA: resumen de importes -->
+                    <div class="col-md-5" style="background:#f8f9fa;padding:20px 22px;border-right:1px solid #e9ecef;">
 
-                <div class="form-group">
-                    <label>Método de Pago</label>
-                    <select class="form-control" id="metodoPago">
-                        <option value="QR">QR</option>
-                        <option value="Tarjeta">Tarjeta</option>
-                        <option value="Efectivo">Efectivo</option>
-                    </select>
-                </div>
+                        <p class="text-uppercase font-weight-bold mb-3"
+                           style="font-size:.7rem;letter-spacing:.08em;color:#6c757d;">
+                            <i class="fas fa-receipt mr-1"></i> Resumen
+                        </p>
 
-                <div id="efectivoGroup" style="display:none;">
-                    <div class="form-group">
-                        <label>Efectivo Recibido</label>
-                        <input type="number" class="form-control" id="efectivoRecibido" min="0">
+                        <!-- Total original -->
+                        <div style="background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+                            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6c757d;margin-bottom:4px;">
+                                Total Sin Propina
+                            </div>
+                            <div id="totalOriginal" style="font-size:1.5rem;font-weight:900;color:#2c5fba;line-height:1;"></div>
+                        </div>
+
+                        <!-- Propina -->
+                        <div style="background:#fff;border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+                            <label for="propinaPorcentaje"
+                                   style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6c757d;margin-bottom:6px;display:block;">
+                                <i class="fas fa-percentage mr-1"></i> Propina (%)
+                            </label>
+                            <input type="number"
+                                   class="form-control"
+                                   id="propinaPorcentaje"
+                                   value="5" min="0" max="100"
+                                   style="border-radius:8px;font-size:1.1rem;font-weight:800;text-align:center;border:2px solid #dee2e6;">
+                        </div>
+
+                        <!-- Total a cobrar -->
+                        <div style="background:linear-gradient(135deg,#e9f5ee,#d4edda);border-radius:10px;padding:16px;border:1px solid #a3d9b1;">
+                            <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#155724;margin-bottom:4px;">
+                                <i class="fas fa-check-circle mr-1"></i> Total a cobrar
+                            </div>
+                            <div id="totalConPropina" style="font-size:1.75rem;font-weight:900;color:#155724;line-height:1;"></div>
+                        </div>
+
                     </div>
-                    <div class="form-group">
-                        <label>Cambio</label>
-                        <h4 class="text-info" id="cambioCalculado">0</h4>
+
+                    <!-- COLUMNA DERECHA: metodo de pago + efectivo -->
+                    <div class="col-md-7" style="background:#fff;padding:20px 22px;">
+
+                        <p class="text-uppercase font-weight-bold mb-3"
+                           style="font-size:.7rem;letter-spacing:.08em;color:#6c757d;">
+                            <i class="fas fa-credit-card mr-1"></i> Metodo de pago
+                        </p>
+
+                        <!-- Select oculto — la logica lo sigue usando sin cambios -->
+                        <select class="d-none" id="metodoPago">
+                            <option value="QR">QR</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="Efectivo">Efectivo</option>
+                        </select>
+
+                        <!-- Selector visual horizontal -->
+                        <div class="d-flex mb-4" style="gap:10px;">
+                            <label class="flex-fill mb-0" style="cursor:pointer;">
+                                <input type="radio" name="metodoPagoRad" value="QR" checked style="display:none;">
+                                <div class="metodo-btn text-center border rounded p-2"
+                                     style="transition:.18s;font-size:.82rem;font-weight:700;">
+                                    <i class="fas fa-qrcode d-block mb-1" style="font-size:1.4rem;"></i> QR
+                                </div>
+                            </label>
+                            <label class="flex-fill mb-0" style="cursor:pointer;">
+                                <input type="radio" name="metodoPagoRad" value="Tarjeta" style="display:none;">
+                                <div class="metodo-btn text-center border rounded p-2"
+                                     style="transition:.18s;font-size:.82rem;font-weight:700;">
+                                    <i class="fas fa-credit-card d-block mb-1" style="font-size:1.4rem;"></i> Tarjeta
+                                </div>
+                            </label>
+                            <label class="flex-fill mb-0" style="cursor:pointer;">
+                                <input type="radio" name="metodoPagoRad" value="Efectivo" style="display:none;">
+                                <div class="metodo-btn text-center border rounded p-2"
+                                     style="transition:.18s;font-size:.82rem;font-weight:700;">
+                                    <i class="fas fa-money-bill-wave d-block mb-1" style="font-size:1.4rem;"></i> Efectivo
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Seccion efectivo -->
+                        <div id="efectivoGroup" style="display:none;">
+
+                            <div style="background:#f8f9fa;border-radius:10px;padding:14px 16px;border:1px solid #e2e8f0;margin-bottom:12px;">
+                                <label for="efectivoRecibido"
+                                       style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6c757d;margin-bottom:8px;display:block;">
+                                    <i class="fas fa-hand-holding-usd mr-1"></i> Efectivo recibido
+                                </label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"
+                                              style="background:#e9ecef;border-radius:8px 0 0 8px;font-weight:800;font-size:1rem;border-color:#dee2e6;">
+                                            $
+                                        </span>
+                                    </div>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="efectivoRecibido"
+                                           placeholder="0"
+                                           autocomplete="off"
+                                           inputmode="numeric"
+                                           style="border-radius:0 8px 8px 0;font-size:1.2rem;font-weight:800;border-color:#dee2e6;text-align:right;">
+                                </div>
+                            </div>
+
+                            <!-- Cambio -->
+                            <div style="background:linear-gradient(135deg,#d1ecf1,#bee5eb);border-radius:10px;padding:14px 16px;border:1px solid #a8d8e0;">
+                                <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#0c5460;margin-bottom:4px;">
+                                    <i class="fas fa-exchange-alt mr-1"></i> Cambio
+                                </div>
+                                <div id="cambioCalculado"
+                                     style="font-size:1.5rem;font-weight:900;color:#0c5460;line-height:1;">
+                                    $0
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Placeholder cuando no es efectivo -->
+                        <div id="pagoDigitalMsg" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:130px;color:#adb5bd;">
+                            <i class="fas fa-shield-alt" style="font-size:2.2rem;margin-bottom:10px;"></i>
+                            <span style="font-size:.85rem;font-weight:600;">Pago digital — sin vuelto</span>
+                        </div>
+
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" onclick="confirmarFinalizacion()">Finalizar</button>
+
+            <!-- PIE -->
+            <div class="modal-footer" style="background:#f0f0f0;border-top:1px solid #e0e0e0;padding:14px 24px;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        style="border-radius:8px;font-weight:600;min-width:100px;">
+                    <i class="fas fa-times mr-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" onclick="confirmarFinalizacion()"
+                        style="border-radius:8px;font-weight:800;min-width:140px;background:linear-gradient(135deg,#155724,#28a745);border:none;">
+                    <i class="fas fa-check mr-1"></i> Finalizar
+                </button>
             </div>
+
         </div>
     </div>
 </div>
@@ -127,23 +254,41 @@
     <script src="~/AdminLTE/plugins/sweetalert2/sweetalert2.min.js"></script>
     <script>
         let pedidoSeleccionado = null;
-        let estadosExpandidos = {}; // Guardar qué cards están expandidas
+        let estadosExpandidos = {};
 
         $(document).ready(function() {
             loadPedidos();
-            setInterval(loadPedidos, 5000); // Cambiar a 5 segundos para dar más tiempo
+            setInterval(loadPedidos, 5000);
+
+            // Sincronizar selector visual con el select oculto
+            $('input[name="metodoPagoRad"]').on('change', function() {
+                $('#metodoPago').val($(this).val()).trigger('change');
+            });
 
             $('#metodoPago').change(function() {
                 if ($(this).val() === 'Efectivo') {
                     $('#efectivoGroup').show();
+                    $('#pagoDigitalMsg').hide();
                 } else {
                     $('#efectivoGroup').hide();
+                     $('#pagoDigitalMsg').show();
                     $('#efectivoRecibido').val('');
-                    $('#cambioCalculado').text('0');
+                    $('#cambioCalculado').text('$0');
                 }
             });
 
-            $('#propinaPorcentaje, #efectivoRecibido').on('input', calcularTotales);
+            // Formato de miles colombiano en el campo de efectivo
+            $('#efectivoRecibido').on('input', function() {
+                let raw = $(this).val().replace(/\D/g, '');
+                if (raw === '') {
+                    $(this).val('');
+                } else {
+                    $(this).val(parseInt(raw, 10).toLocaleString('es-CO'));
+                }
+                calcularTotales();
+            });
+
+            $('#propinaPorcentaje').on('input', calcularTotales);
         });
 
         function loadPedidos() {
@@ -204,7 +349,7 @@
                                     <dd class="col-7">${item.meseroNombre}</dd>
 
                                     <dt class="col-5">Total:</dt>
-                                    <dd class="col-7"><strong class="text-lg">$${item.total.toLocaleString()}</strong></dd>
+                                    <dd class="col-7"><strong class="text-lg">$${item.total.toLocaleString('es-CO')}</strong></dd>
                                 </dl>
                             </div>
                             <div id="${collapseId}" class="collapse ${isExpanded ? 'show' : ''}">
@@ -224,7 +369,7 @@
                                                 <tr>
                                                     <td>${d.nombre}</td>
                                                     <td class="text-center">${d.cantidad}</td>
-                                                    <td class="text-right">$${d.subtotal.toLocaleString()}</td>
+                                                    <td class="text-right">$${d.subtotal.toLocaleString('es-CO')}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -232,16 +377,16 @@
                                     <div class="totales">
                                         <div class="row">
                                             <div class="col-6">Subtotal:</div>
-                                            <div class="col-6 text-right">$${item.subtotal.toLocaleString()}</div>
+                                            <div class="col-6 text-right">$${item.subtotal.toLocaleString('es-CO')}</div>
                                         </div>
                                         <div class="row">
                                             <div class="col-6">IVA (19%):</div>
-                                            <div class="col-6 text-right">$${item.iva.toLocaleString()}</div>
+                                            <div class="col-6 text-right">$${item.iva.toLocaleString('es-CO')}</div>
                                         </div>
                                         <hr>
                                         <div class="row">
                                             <div class="col-6"><strong>Total:</strong></div>
-                                            <div class="col-6 text-right"><strong class="text-lg">$${item.total.toLocaleString()}</strong></div>
+                                            <div class="col-6 text-right"><strong class="text-lg">$${item.total.toLocaleString('es-CO')}</strong></div>
                                         </div>
                                     </div>
                                 </div>
@@ -277,15 +422,24 @@
         }
 
         function abrirModalFinalizar(event, pedido) {
-            event.stopPropagation(); // Evitar que se propague al card
+            event.stopPropagation();
             pedidoSeleccionado = pedido;
             $('#pedidoId').val(pedido.id);
             $('#pedidoInfo').text(`Pedido #${pedido.id} - Mesa ${pedido.numeroMesa}`);
-            $('#totalOriginal').text('$' + pedido.total.toLocaleString());
-            $('#totalConPropina').text('$' + pedido.total.toLocaleString());
+            $('#totalOriginal').text('$' + pedido.total.toLocaleString('es-CO'));
+            $('#totalConPropina').text('$' + pedido.total.toLocaleString('es-CO'));
             $('#propinaPorcentaje').val(0);
-            $('#metodoPago').val('QR');
+
+            // Resetear selector visual al primer metodo
+            $('input[name="metodoPagoRad"][value="QR"]').prop('checked', true);
+            // Disparar el change para actualizar los estilos del selector visual
+            $('input[name="metodoPagoRad"][value="QR"]').trigger('change');
+
             $('#efectivoGroup').hide();
+            $('#pagoDigitalMsg').show();
+            $('#efectivoRecibido').val('');
+            $('#cambioCalculado').text('$0');
+
             $('#finalizarPedidoModal').modal('show');
         }
 
@@ -296,12 +450,13 @@
             const propina = pedidoSeleccionado.total * (propinaPorcentaje / 100);
             const totalConPropina = pedidoSeleccionado.total + propina;
 
-            $('#totalConPropina').text('$' + totalConPropina.toLocaleString());
+            $('#totalConPropina').text('$' + totalConPropina.toLocaleString('es-CO'));
 
             if ($('#metodoPago').val() === 'Efectivo') {
-                const efectivoRecibido = parseFloat($('#efectivoRecibido').val()) || 0;
-                const cambio = efectivoRecibido - totalConPropina;
-                $('#cambioCalculado').text('$' + (cambio >= 0 ? cambio.toLocaleString() : '0'));
+                // Quitar puntos de formato antes de parsear
+                const efectivoRaw = parseFloat($('#efectivoRecibido').val().replace(/\./g, '').replace(',', '.')) || 0;
+                const cambio = efectivoRaw - totalConPropina;
+                $('#cambioCalculado').text('$' + (cambio >= 0 ? cambio.toLocaleString('es-CO') : '0'));
             }
         }
 
@@ -314,7 +469,8 @@
             let cambio = 0;
 
             if (metodoPago === 'Efectivo') {
-                efectivoRecibido = parseFloat($('#efectivoRecibido').val()) || 0;
+                // Quitar puntos de formato antes de parsear
+                efectivoRecibido = parseFloat($('#efectivoRecibido').val().replace(/\./g, '').replace(',', '.')) || 0;
                 if (efectivoRecibido < totalConPropina) {
                     toastr.error('El efectivo recibido es insuficiente');
                     return;
@@ -345,7 +501,7 @@
                     }
                 },
                 error: function() {
-                    toastr.error('Error de conexión');
+                    toastr.error('Error de conexion');
                 }
             });
         }

@@ -869,9 +869,7 @@
                         limpiar2FAState();
                         window.location.href = '@Url.Action("Index", "Administrador")';
                     }
-                    else if (respuesta.estado === 'invalido') {
-                        // 1. Limpiar estado ANTES de cerrar el modal
-                        //    para que el listener hidden.bs.modal no dispare cancelar2FA
+                    else if (respuesta.estado === 'invalido') {                 
                         limpiar2FAState(); // pone currentNavId = null
 
                         // 2. Cerrar modal con la instancia Bootstrap 5
