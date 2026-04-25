@@ -978,9 +978,7 @@ class QuickTableControlAcceso:
                     self.session_data = data
                     self.root.after(0, self.mostrar_modo_ti)
                     return
-            elif response.status_code == 404:
-                print("No hay tarjetas pendientes para TI")
-            
+
             print("Intentando validacion Admin...")
             response = requests.post(
                 f"{self.server_url}/api/tarjeta/validar-sesion-admin", 

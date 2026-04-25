@@ -103,6 +103,19 @@
     .dark-mode .border-top {
         border-color: rgba(255, 255, 255, 0.1) !important;
     }
+
+    /* Vista tabla */
+    #tablaContainer table { font-size: 0.88rem; }
+    #tablaContainer .detalle-fila td { padding: 0; }
+    #tablaContainer .detalle-fila .detalle-pedido { border-radius: 0; margin: 0; }
+    .btn-vista { min-width: 36px; }
+    .btn-vista.active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.25); }
+    #tablaContainer .fila-pedido { cursor: pointer; }
+    #tablaContainer .fila-pedido:hover { filter: brightness(0.96); }
+    .dark-mode #tablaContainer table { color: #c2c7d0; }
+    .dark-mode #tablaContainer thead th { border-color: rgba(255,255,255,0.1); }
+    .dark-mode #tablaContainer tbody td { border-color: rgba(255,255,255,0.08); }
+    .dark-mode #tablaContainer tbody tr:hover { background: rgba(255,255,255,0.04); }
 </style>
 
 <div class="content-header">
@@ -124,11 +137,19 @@
 <section class="content">
     <div class="container-fluid">
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">
+            <div class="card-header d-flex align-items-center">
+                <h3 class="card-title mb-0 mr-auto">
                     <i class="fas fa-history mr-2"></i>
                     Registro Completo de Pedidos
                 </h3>
+                <div class="btn-group ml-3" role="group" title="Cambiar vista">
+                    <button id="btnVistaCards" class="btn btn-sm btn-primary btn-vista active" onclick="cambiarVista('cards')" title="Vista tarjetas">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button id="btnVistaTabla" class="btn btn-sm btn-outline-primary btn-vista" onclick="cambiarVista('tabla')" title="Vista tabla">
+                        <i class="fas fa-table"></i>
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="row mb-3 align-items-end">
@@ -163,7 +184,28 @@
                     </div>
                 </div>
 
-                <div id="pedidosContainer" class="row">
+                <!-- Vista tarjetas -->
+                <div id="pedidosContainer" class="row"></div>
+
+                <!-- Vista tabla -->
+                <div id="tablaContainer" style="display:none; overflow-x:auto;">
+                    <table class="table table-bordered table-hover table-sm mb-0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Mesa</th>
+                                <th>Mesero</th>
+                                <th>Fecha</th>
+                                <th class="text-center">🔥 Cocina</th>
+                                <th class="text-center">🏃 Entrega</th>
+                                <th class="text-center">⏱ Total</th>
+                                <th>Pago</th>
+                                <th class="text-right">Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaBody"></tbody>
+                    </table>
                 </div>
 
                 <div class="row mt-3">
@@ -186,6 +228,23 @@
     <script>
         let currentPage = 1;
         let totalPages = 1;
+        let currentView = 'cards';
+
+        function cambiarVista(vista) {
+            currentView = vista;
+            if (vista === 'cards') {
+                $('#pedidosContainer').show();
+                $('#tablaContainer').hide();
+                $('#btnVistaCards').removeClass('btn-outline-primary').addClass('btn-primary active');
+                $('#btnVistaTabla').removeClass('btn-primary active').addClass('btn-outline-primary');
+            } else {
+                $('#pedidosContainer').hide();
+                $('#tablaContainer').show();
+                $('#btnVistaTabla').removeClass('btn-outline-primary').addClass('btn-primary active');
+                $('#btnVistaCards').removeClass('btn-primary active').addClass('btn-outline-primary');
+            }
+            cargarPedidos(currentPage);
+        }
 
         $(document).ready(function () {
             cargarPedidos();
@@ -239,18 +298,116 @@
         }
 
         function renderPedidos(pedidos) {
+            if (currentView === 'tabla') {
+                renderTabla(pedidos);
+            } else {
+                renderCards(pedidos);
+            }
+        }
+
+        function renderCards(pedidos) {
             const container = $('#pedidosContainer');
             container.empty();
-
             if (pedidos.length === 0) {
                 container.html('<div class="col-12"><div class="alert alert-info">No se encontraron pedidos con los filtros aplicados.</div></div>');
                 return;
             }
+            pedidos.forEach(pedido => container.append(crearCardPedido(pedido)));
+        }
 
+        function renderTabla(pedidos) {
+            const tbody = $('#tablaBody');
+            tbody.empty();
+            if (pedidos.length === 0) {
+                tbody.html('<tr><td colspan="10"><div class="alert alert-info mb-0">No se encontraron pedidos con los filtros aplicados.</div></td></tr>');
+                return;
+            }
             pedidos.forEach(pedido => {
-                const card = crearCardPedido(pedido);
-                container.append(card);
+                const fecha = new Date(pedido.fechaCreacion).toLocaleString('es-CO', {
+                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                });
+                const total = pedido.total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                tbody.append(`
+                    <tr class="fila-pedido" onclick="toggleDetalleTabla(${pedido.pedidoId}, this)">
+                        <td><strong>#${pedido.pedidoId}</strong></td>
+                        <td>Mesa ${pedido.mesa}</td>
+                        <td>${pedido.nombreMesero}</td>
+                        <td style="white-space:nowrap;">${fecha}</td>
+                        <td class="text-center">
+                            <span class="badge tiempo-badge ${getClaseTiempoCocina(pedido.tiempoCocinaAListo)}">${formatearTiempo(pedido.tiempoCocinaAListo)}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge tiempo-badge ${getClaseTiempoEntrega(pedido.tiempoListoAAceptado)}">${formatearTiempo(pedido.tiempoListoAAceptado)}</span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge tiempo-badge ${getClaseTiempoTotal(pedido.tiempoTotal)}">${formatearTiempo(pedido.tiempoTotal)}</span>
+                        </td>
+                        <td><span class="badge badge-info">${pedido.medioPago}</span></td>
+                        <td class="text-right text-success font-weight-bold">${total}</td>
+                        <td class="text-center"><i class="fas fa-chevron-down text-muted" id="ico-${pedido.pedidoId}"></i></td>
+                    </tr>
+                    <tr class="detalle-fila" id="detalle-tabla-${pedido.pedidoId}" style="display:none;">
+                        <td colspan="10">
+                            <div class="card-body detalle-pedido">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                                    <p>Cargando detalles...</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `);
             });
+        }
+
+        function toggleDetalleTabla(pedidoId, fila) {
+            const detalleRow = $(`#detalle-tabla-${pedidoId}`);
+            const ico = $(`#ico-${pedidoId}`);
+            if (detalleRow.is(':visible')) {
+                detalleRow.hide();
+                ico.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            } else {
+                if (detalleRow.find('.loading-spinner').length > 0) {
+                    $.ajax({
+                        url: '/Administrador/ObtenerDetallePedido',
+                        type: 'GET',
+                        data: { pedidoId: pedidoId },
+                        success: function(response) {
+                            renderDetallePedidoTabla(pedidoId, response);
+                        },
+                        error: function() {
+                            detalleRow.find('td').html('<div class="alert alert-danger mb-0">Error al cargar los detalles</div>');
+                        }
+                    });
+                }
+                detalleRow.show();
+                ico.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            }
+        }
+
+        function renderDetallePedidoTabla(pedidoId, datos) {
+            const container = $(`#detalle-tabla-${pedidoId} td`);
+            let html = '<div class="card-body detalle-pedido"><table class="table table-sm tabla-items table-striped mb-2">';
+            html += '<thead><tr><th>Plato</th><th class="text-center">Cant.</th><th class="text-right">P. Unit.</th><th class="text-right">Subtotal</th></tr></thead><tbody>';
+            datos.items.forEach(item => {
+                html += `<tr>
+                    <td>${item.nombreItem}</td>
+                    <td class="text-center">${item.cantidad}</td>
+                    <td class="text-right">${item.precioUnitario.toLocaleString('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0})}</td>
+                    <td class="text-right"><strong>${item.subtotal.toLocaleString('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0})}</strong></td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            const fmt = v => v.toLocaleString('es-CO',{style:'currency',currency:'COP',minimumFractionDigits:0});
+            html += `<div class="row justify-content-end" style="font-size:0.9rem;">
+                <div class="col-auto text-right">
+                    <div>Subtotal: <strong>${fmt(datos.subtotal)}</strong></div>
+                    <div>IVA: <strong>${fmt(datos.iva)}</strong></div>
+                    <div>Propina: <strong>${fmt(datos.propina)}</strong></div>
+                    <div class="mt-1 pt-1 border-top"><h6 class="mb-0 text-success">TOTAL: <strong>${fmt(datos.total)}</strong></h6></div>
+                </div>
+            </div></div>`;
+            container.html(html);
         }
 
         function crearCardPedido(pedido) {

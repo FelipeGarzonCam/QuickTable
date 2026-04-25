@@ -147,11 +147,16 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body text-center">
-                <p>Administrador: <strong id="adminNombreModal"></strong></p>
-                <p>UID: <strong id="uidModal"></strong></p>
-                <h2 class="text-primary my-4" id="codigoSesionDisplay"></h2>
-                <p class="text-muted">Ingrese este código en el modulo para grabar la tarjeta</p>
+            <div class="modal-body text-center py-4">
+                <p class="mb-1">Administrador: <strong id="adminNombreModal"></strong></p>
+                <p class="mb-3 text-muted">UID: <code id="uidModal"></code></p>
+                <p class="text-muted mb-2">Ingrese este código en el módulo para grabar la tarjeta:</p>
+                <div id="codigoSesionDisplay" style="font-size:2.8rem;font-weight:700;color:#007bff;letter-spacing:10px;font-family:monospace;"></div>
+                <div class="mt-4">
+                    <p class="mb-1 text-muted"><i class="fas fa-clock"></i> El código expira en:</p>
+                    <span id="tiCountdownDisplay" style="font-size:2rem;font-weight:700;color:#ffc107;">10:00</span>
+                </div>
+                <div id="tiPiStatus" class="mt-3" style="display:none;"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -180,6 +185,28 @@
             }
         });
 
+        let _tiCountdownInterval = null;
+        let _tiPollingInterval = null;
+
+        function _tiStopTimers() {
+            clearInterval(_tiCountdownInterval);
+            clearInterval(_tiPollingInterval);
+            _tiCountdownInterval = null;
+            _tiPollingInterval = null;
+        }
+
+        function _tiSetStatus(tipo, msg) {
+            const el = document.getElementById('tiPiStatus');
+            const map = {
+                success: { bg: '#d4edda', color: '#155724', border: '#c3e6cb' },
+                error:   { bg: '#f8d7da', color: '#721c24', border: '#f5c6cb' },
+                warning: { bg: '#fff3cd', color: '#856404', border: '#ffeeba' }
+            };
+            const s = map[tipo] || map.warning;
+            el.innerHTML = `<div style="padding:10px;border-radius:5px;background:${s.bg};color:${s.color};border:1px solid ${s.border};">${msg}</div>`;
+            el.style.display = 'block';
+        }
+
         function mostrarCodigoSesion(uid, adminNombre) {
             const codigo = Math.floor(Math.random() * 900000 + 100000);
             fetch('@Url.Action("AsociarCodigoSesion", "TI")', {
@@ -189,20 +216,67 @@
             })
             .then(r => r.json())
             .then(d => {
-                if (!d.success) {
-                    toastr.error(d.message);
-                    return;
-                }
+                if (!d.success) { toastr.error(d.message); return; }
+
                 document.getElementById('adminNombreModal').textContent = adminNombre;
                 document.getElementById('uidModal').textContent = uid;
                 document.getElementById('codigoSesionDisplay').textContent = codigo;
+                document.getElementById('tiPiStatus').style.display = 'none';
+                document.getElementById('tiPiStatus').innerHTML = '';
+
+                const countdownEl = document.getElementById('tiCountdownDisplay');
+                countdownEl.textContent = '10:00';
+                countdownEl.style.color = '#ffc107';
+
                 $('#codigoSesionModal').modal('show');
+
+                // Countdown 10 min (orientativo, el servidor no expira este código automáticamente)
+                let remaining = 10 * 60;
+                function tick() {
+                    const m = Math.floor(remaining / 60);
+                    const s = remaining % 60;
+                    countdownEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+                    if (remaining <= 60) countdownEl.style.color = '#dc3545';
+                    if (remaining <= 0) {
+                        _tiStopTimers();
+                        _tiSetStatus('warning', 'Tiempo agotado. Regenere la tarjeta si la Pi aún no la grabó.');
+                        setTimeout(() => $('#codigoSesionModal').modal('hide'), 3000);
+                        return;
+                    }
+                    remaining--;
+                }
+                tick();
+                _tiCountdownInterval = setInterval(tick, 1000);
+
+                // Polling: detectar cuando la Pi confirma la grabación
+                _tiPollingInterval = setInterval(() => {
+                    fetch('/api/tarjeta/estado?uid=' + encodeURIComponent(uid))
+                        .then(r => r.json())
+                        .then(activa => {
+                            if (activa === true) {
+                                _tiStopTimers();
+                                _tiSetStatus('success', '✓ Tarjeta grabada y activada correctamente por la Pi.');
+                                setTimeout(() => {
+                                    $('#codigoSesionModal').modal('hide');
+                                    location.reload();
+                                }, 2500);
+                            }
+                        })
+                        .catch(() => {});
+                }, 3000);
             })
             .catch(error => {
                 toastr.error('Error de conexión');
                 console.error('Error:', error);
             });
         }
+
+        $('#codigoSesionModal').on('hidden.bs.modal', function() {
+            _tiStopTimers();
+            document.getElementById('tiCountdownDisplay').textContent = '10:00';
+            document.getElementById('tiCountdownDisplay').style.color = '#ffc107';
+            document.getElementById('tiPiStatus').style.display = 'none';
+        });
 
         function mostrarModalCambiarClave(id, nombre) {
             document.getElementById('adminIdCambio').value = id;

@@ -554,6 +554,31 @@
     </section>
 
 
+<!-- Modal Bootstrap para código NFC -->
+<div class="modal fade" id="modalCodigoNFC" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background:linear-gradient(90deg,#007bff,#0056b3);color:white;">
+                <h5 class="modal-title"><i class="fas fa-id-card"></i> Asignar Tarjeta NFC</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <p class="mb-1"><strong id="nfcNombreEmpleado"></strong> &mdash; <span id="nfcRolEmpleado" class="text-muted"></span></p>
+                <p class="text-muted mb-3">Ingrese este código en la Raspberry Pi (Modo Administración):</p>
+                <div id="nfcCodigoDisplay" style="font-size:3rem;font-weight:700;color:#007bff;letter-spacing:10px;font-family:monospace;"></div>
+                <div class="mt-4">
+                    <p class="mb-1 text-muted"><i class="fas fa-clock"></i> Expira en:</p>
+                    <span id="nfcCountdownDisplay" style="font-size:2rem;font-weight:700;color:#ffc107;">10:00</span>
+                </div>
+                <div id="nfcPiStatus" class="mt-3" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         // Mini SweetAlert2 offline version - Solo funciones básicas
@@ -685,7 +710,6 @@
 
             employees.forEach(emp => {
                 const hasNfc = emp.dataset.hasNfc === 'true';
-                const card = emp.querySelector('.employee-card');
                 let show = false;
 
                 switch(filterType) {
@@ -703,14 +727,8 @@
                         break;
                 }
 
-                if (show) {
-                    card.classList.remove('filtered-out');
-                    card.classList.add('filtered-in');
-                    visibleCount++;
-                } else {
-                    card.classList.remove('filtered-in');
-                    card.classList.add('filtered-out');
-                }
+                emp.style.display = show ? '' : 'none';
+                if (show) visibleCount++;
             });
 
             // Mostrar indicador de filtro
@@ -768,17 +786,9 @@
             };
 
             employees.forEach(emp => {
-                const empRole = emp.dataset.role;
-                const card = emp.querySelector('.employee-card');
-
-                if (empRole === role) {
-                    card.classList.remove('filtered-out');
-                    card.classList.add('filtered-in');
-                    visibleCount++;
-                } else {
-                    card.classList.remove('filtered-in');
-                    card.classList.add('filtered-out');
-                }
+                const show = emp.dataset.role === role;
+                emp.style.display = show ? '' : 'none';
+                if (show) visibleCount++;
             });
 
             // Mostrar indicador
@@ -811,14 +821,87 @@
             });
         }
 
+        // ── NFC modal helpers ──
+        let _nfcCountdownInterval = null;
+        let _nfcPollingInterval   = null;
+        let _nfcEmpleadoId        = null;
+        let _nfcCodigo            = null;
+        const _nfcEstadoUrl       = '@Url.Action("EstadoAsignacionTarjeta", "Administrador")';
+
+        function _nfcStopTimers() {
+            clearInterval(_nfcCountdownInterval);
+            clearInterval(_nfcPollingInterval);
+            _nfcCountdownInterval = null;
+            _nfcPollingInterval   = null;
+        }
+
+        function _nfcSetStatus(tipo, msg) {
+            const el  = document.getElementById('nfcPiStatus');
+            const map = {
+                success: { bg:'#d4edda', color:'#155724', border:'#c3e6cb' },
+                error:   { bg:'#f8d7da', color:'#721c24', border:'#f5c6cb' },
+                warning: { bg:'#fff3cd', color:'#856404', border:'#ffeeba' }
+            };
+            const s = map[tipo] || map.warning;
+            el.innerHTML = `<div style="padding:10px;border-radius:5px;background:${s.bg};color:${s.color};border:1px solid ${s.border};">${msg}</div>`;
+            el.style.display = 'block';
+        }
+
+        function _nfcStartTimers() {
+            _nfcStopTimers();
+            const countdownEl = document.getElementById('nfcCountdownDisplay');
+            countdownEl.style.color = '#ffc107';
+            let remaining = 10 * 60;
+
+            function tick() {
+                const m = Math.floor(remaining / 60);
+                const s = remaining % 60;
+                countdownEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+                if (remaining <= 60) countdownEl.style.color = '#dc3545';
+                if (remaining <= 0) {
+                    _nfcStopTimers();
+                    _nfcSetStatus('warning', 'El código expiró sin ser utilizado.');
+                    setTimeout(() => $('#modalCodigoNFC').modal('hide'), 2500);
+                    return;
+                }
+                remaining--;
+            }
+            tick();
+            _nfcCountdownInterval = setInterval(tick, 1000);
+
+            _nfcPollingInterval = setInterval(() => {
+                if (!_nfcEmpleadoId || !_nfcCodigo) return;
+                fetch(`${_nfcEstadoUrl}?empleadoId=${_nfcEmpleadoId}&codigo=${encodeURIComponent(_nfcCodigo)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.estado === 'asignada') {
+                            _nfcStopTimers();
+                            _nfcSetStatus('success', '✓ Tarjeta asignada correctamente por la Pi.');
+                            setTimeout(() => {
+                                $('#modalCodigoNFC').modal('hide');
+                                location.reload();
+                            }, 2500);
+                        } else if (data.estado === 'expirado' || data.estado === 'error') {
+                            _nfcStopTimers();
+                            _nfcSetStatus('error', 'El código expiró o hubo un error. Vuelva a intentarlo.');
+                            setTimeout(() => $('#modalCodigoNFC').modal('hide'), 2500);
+                        }
+                    })
+                    .catch(() => {});
+            }, 3000);
+        }
+
+        $('#modalCodigoNFC').on('hidden.bs.modal', function() {
+            _nfcStopTimers();
+            _nfcEmpleadoId = null;
+            _nfcCodigo     = null;
+            document.getElementById('nfcCountdownDisplay').textContent = '10:00';
+            document.getElementById('nfcCountdownDisplay').style.color = '#ffc107';
+            document.getElementById('nfcPiStatus').style.display = 'none';
+        });
+
         // Función para asignar tarjeta NFC
         function asignarTarjeta(empleadoId, nombreEmpleado, rolEmpleado) {
-            Swal.fire({
-                title: 'Generando código...',
-                text: `Asignando tarjeta NFC para ${nombreEmpleado} (${rolEmpleado})`,
-                icon: 'info'
-            });
-
             $.ajax({
                 url: '@Url.Action("AsignarTarjetaEmpleado")',
                 type: 'POST',
@@ -826,41 +909,21 @@
                 data: JSON.stringify({ empleadoId: empleadoId }),
                 success: function(response) {
                     if (response.success) {
-                        Swal.fire({
-                            title: 'Código Generado',
-                            html: `
-                                <div style="text-align: center;">
-                                    <h2 style="color: #007bff; margin-bottom: 1rem;">${response.codigoSesion}</h2>
-                                    <p><strong>Empleado:</strong> ${response.nombreEmpleado}</p>
-                                    <p><strong>Rol:</strong> ${response.rolEmpleado}</p>
-                                    <hr>
-                                    <p style="color: #6c757d;">
-                                        <i class="fas fa-info-circle"></i>
-                                        Vaya a la Raspberry Pi e ingrese este código en el "modo Administracion" para asignar el carnet.
-                                    </p>
-                                    <p style="color: #ffc107;">
-                                        <i class="fas fa-clock"></i>
-                                        El código expira en 10 minutos.
-                                    </p>
-                                </div>
-                            `,
-                            icon: 'success',
-                            confirmButtonText: 'Entendido'
-                        });
+                        document.getElementById('nfcNombreEmpleado').textContent = response.nombreEmpleado;
+                        document.getElementById('nfcRolEmpleado').textContent    = response.rolEmpleado;
+                        document.getElementById('nfcCodigoDisplay').textContent  = response.codigoSesion;
+                        document.getElementById('nfcPiStatus').style.display     = 'none';
+                        document.getElementById('nfcPiStatus').innerHTML         = '';
+                        _nfcEmpleadoId = empleadoId;
+                        _nfcCodigo     = response.codigoSesion;
+                        $('#modalCodigoNFC').modal('show');
+                        _nfcStartTimers();
                     } else {
-                        Swal.fire({
-                            title: 'Error',
-                            text: response.message,
-                            icon: 'error'
-                        });
+                        Swal.fire({ title: 'Error', text: response.message, icon: 'error' });
                     }
                 },
                 error: function() {
-                    Swal.fire({
-                        title: 'Error',
-                        text: 'No se pudo generar el código de sesión',
-                        icon: 'error'
-                    });
+                    Swal.fire({ title: 'Error', text: 'No se pudo generar el código de sesión', icon: 'error' });
                 }
             });
         }

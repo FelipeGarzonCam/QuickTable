@@ -1,5 +1,5 @@
-﻿@{
-    ViewData["Title"] = "Pedidos Activos - Cocina";
+@{
+    ViewData["Title"] = "Cocina";
 }
 
 <!DOCTYPE html>
@@ -7,268 +7,460 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
+    <title>Cocina — Pedidos Activos</title>
     <link href="~/AdminLTE/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="~/AdminLTE/dist/css/adminlte.min.css" rel="stylesheet" />
 
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #fff;
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        #pedidosContainer {
+        /* ── HEADER ── */
+        #headerBar {
+            background: #161b22;
+            border-bottom: 3px solid #1f6feb;
+            padding: 12px 28px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            padding: 15px;
-            justify-content: flex-start;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 16px;
         }
 
-        .pedido {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            background-color: #434d57;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            min-width: 280px;
-            max-width: 320px;
-            flex-grow: 0;
+        .header-title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
+        .header-title i { color: #f85149; margin-right: 10px; }
+
+        #headerClock {
+            font-size: 2.1rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #7ee787;
+            letter-spacing: 2px;
+        }
+
+        #headerCount {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #21262d;
+            border: 1px solid #30363d;
+            padding: 8px 18px;
+            border-radius: 24px;
+            white-space: nowrap;
+        }
+
+        #headerCount .count-num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #f0883e;
+            line-height: 1;
+        }
+
+        #headerCount .count-label {
+            font-size: 1rem;
+            color: #8b949e;
+        }
+
+        #refreshDot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #3fb950;
             flex-shrink: 0;
-            transition: background-color 0.5s ease;
+            transition: opacity 0.3s;
         }
 
-        /* Amarillo: entre 10 y 20 minutos */
+        /* ── GRID ── */
+        #pedidosContainer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 20px;
+            padding: 22px;
+            align-items: start;
+        }
+
+        /* ── CARD NORMAL ── */
+        .pedido {
+            background: #1c2128;
+            border: 2px solid #30363d;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.6s ease, border-color 0.6s ease;
+            overflow: hidden;
+        }
+
+        /* ── CARD WARNING (>= 18 min) ── */
         .pedido.pedido-warning {
-            background-color: #7d6608;
-            border-color: #f1c40f;
-            color: white;
+            background: #2d1b00;
+            border-color: #e3b341;
         }
 
-        /* Rojo: mas de 20 minutos */
+        /* ── CARD ALERT (>= 60 min) ── */
         .pedido.pedido-alert {
-            background-color: #7b1a1a;
-            border-color: #e74c3c;
-            color: white;
+            background: #2d0000;
+            border-color: #f85149;
+            animation: pulse-alert 2.2s ease-in-out infinite;
         }
 
-        .pedido h3 {
-            font-size: 1.4em;
-            margin-bottom: 5px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
+        @@keyframes pulse-alert {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(248,81,73,0); }
+            50%       { box-shadow: 0 0 0 10px rgba(248,81,73,0.25); }
         }
 
-        .pedido h4 {
-            font-size: 1em;
-            color: #aaa;
-            margin-bottom: 5px;
+        /* ── CARD HEADER ── */
+        .pedido-header {
+            padding: 16px 18px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #30363d;
         }
 
-        /* Bloque del timer */
-        .pedido-timer {
-            font-size: 0.95em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            display: inline-block;
-            background-color: rgba(0,0,0,0.2);
-            letter-spacing: 0.5px;
+        .pedido-warning .pedido-header { border-color: rgba(227,179,65,0.25); }
+        .pedido-alert   .pedido-header { border-color: rgba(248,81,73,0.25); }
+
+        .pedido-mesa-block { line-height: 1.1; }
+
+        .pedido-mesa {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
         }
 
-        .pedido-warning .pedido-timer {
-            background-color: rgba(241, 196, 15, 0.25);
-            color: #f9e784;
+        .pedido-id {
+            font-size: 0.82rem;
+            color: #484f58;
+            margin-top: 3px;
         }
 
-        .pedido-alert .pedido-timer {
-            background-color: rgba(231, 76, 60, 0.25);
-            color: #ff9999;
+        /* Timer */
+        .pedido-timer { text-align: right; }
+
+        .timer-value {
+            font-size: 1.7rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #58a6ff;
+            line-height: 1;
         }
+
+        .pedido-warning .timer-value { color: #e3b341; }
+        .pedido-alert   .timer-value { color: #f85149; }
+
+        .timer-label {
+            font-size: 0.75rem;
+            color: #484f58;
+            margin-top: 3px;
+        }
+
+        /* ── ITEMS ── */
+        .pedido-items { flex: 1; padding: 10px 18px 6px; }
 
         .item-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #333;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #21262d;
         }
 
+        .item-row:last-child { border-bottom: none; }
+
+        .pedido-warning .item-row { border-color: rgba(227,179,65,0.15); }
+        .pedido-alert   .item-row { border-color: rgba(248,81,73,0.15); }
+
+        .item-qty {
+            min-width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            background: #1f6feb;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .pedido-warning .item-qty { background: #b08800; }
+        .pedido-alert   .item-qty { background: #b91c1c; }
+
+        .item-info { flex: 1; }
+
         .item-name {
-            flex: 1;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #e6edf3;
+            line-height: 1.35;
         }
 
         .item-comment {
+            font-size: 0.9rem;
+            color: #f0883e;
             font-style: italic;
-            color: #aaa;
-            margin-left: 10px;
-            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 4px;
+            padding: 2px 6px;
+            background: rgba(240,136,62,0.12);
+            border-left: 3px solid #f0883e;
+            border-radius: 0 4px 4px 0;
         }
 
-        .item-quantity {
-            min-width: 30px;
-            text-align: center;
-            font-weight: bold;
-            color: #ff6b6b;
-            margin-left: 10px;
-        }
-
+        /* ── BUTTON ── */
         .btn-listo {
-            width: 100%;
-            padding: 10px;
-            margin-top: 15px;
-            font-weight: bold;
-            border-radius: 4px;
-            background-color: #00b894;
-            border-color: #00b894;
+            margin: 14px 18px 18px;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-radius: 10px;
+            background: #238636;
+            color: #fff;
+            border: 2px solid #2ea043;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            width: calc(100% - 36px);
         }
 
-        .btn-listo:hover {
-            background-color: #00a383;
-            border-color: #00a383;
+        .btn-listo:hover  { background: #2ea043; transform: scale(1.02); }
+        .btn-listo:active { transform: scale(0.97); }
+
+        /* ── EMPTY STATE ── */
+        #emptyState {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 100px 20px;
         }
 
-        @@media (max-width: 768px) {
-            #pedidosContainer {
-                justify-content: center;
-            }
-            .pedido {
-                width: 100%;
-                max-width: 450px;
-            }
-        }
+        .empty-icon  { font-size: 5rem; color: #21262d; margin-bottom: 20px; }
+        .empty-title { font-size: 2rem; font-weight: 700; color: #30363d; }
+        .empty-sub   { font-size: 1.1rem; color: #21262d; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="container-fluid mt-4">
-        <h2 class="text-center mb-4">@ViewBag.Title</h2>
-        <div id="pedidosContainer">
-            <!-- Los pedidos se cargan aqui -->
+
+    <!-- ── HEADER ── -->
+    <div id="headerBar">
+        <div class="header-title">
+            <i class="fas fa-fire"></i> COCINA
+        </div>
+        <div id="headerClock">00:00:00</div>
+        <div id="headerCount">
+            <span class="count-num" id="countNum">0</span>
+            <span class="count-label">pendientes</span>
+            <div id="refreshDot" title="Actualización en vivo"></div>
         </div>
     </div>
 
+    <!-- ── GRID ── -->
+    <div id="pedidosContainer"></div>
+
     <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
     <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
 
     <script>
-        $(document).ready(function () {
+        // ── Tiempos de referencia: { pedidoId → timestamp ms } ──
+        var tiemposCreacion = {};
 
-            // Calcula minutos transcurridos desde fechaCreacion
-            function calcularMinutos(fechaCreacion) {
-                var ahora = new Date();
-                var creacion = new Date(fechaCreacion);
-                var diffMs = ahora - creacion;
-                return Math.floor(diffMs / 60000);
-            }
+        // ── Reloj del header ──
+        function actualizarReloj() {
+            var ahora = new Date();
+            var h = ahora.getHours();
+            var ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            var m = String(ahora.getMinutes()).padStart(2, '0');
+            var s = String(ahora.getSeconds()).padStart(2, '0');
+            document.getElementById('headerClock').textContent = h + ':' + m + ':' + s + ' ' + ampm;
+        }
+        setInterval(actualizarReloj, 1000);
+        actualizarReloj();
 
-            // Devuelve el texto a mostrar: "5 min" o "1h 12min"
-            function formatearTiempo(minutos) {
-                if (minutos < 60) {
-                    return minutos + " min";
+        // ── Actualizar timers localmente cada segundo ──
+        function actualizarTimers() {
+            var ahora = Date.now();
+            Object.keys(tiemposCreacion).forEach(function(id) {
+                var minutos = Math.floor((ahora - tiemposCreacion[id]) / 60000);
+                var el = document.getElementById('timer-' + id);
+                if (!el) return;
+
+                el.textContent = formatearTiempo(minutos);
+
+                var card = document.getElementById('pedido-' + id);
+                if (!card) return;
+                card.classList.remove('pedido-warning', 'pedido-alert');
+                if (minutos >= 60) card.classList.add('pedido-alert');
+                else if (minutos >= 18) card.classList.add('pedido-warning');
+            });
+        }
+        setInterval(actualizarTimers, 1000);
+
+        function formatearTiempo(minutos) {
+            if (minutos < 60) return minutos + ' min';
+            var h = Math.floor(minutos / 60);
+            var m = minutos % 60;
+            return h + 'h ' + m + 'min';
+        }
+
+        // ── Cargar datos desde servidor ──
+        function loadPedidos() {
+            // Pulsar el dot
+            var dot = document.getElementById('refreshDot');
+            dot.style.opacity = '0.2';
+            setTimeout(function() { dot.style.opacity = '1'; }, 400);
+
+            $.ajax({
+                url: '@Url.Action("ObtenerPedidosCocina", "Cocina")',
+                type: 'GET',
+                success: function(data) {
+                    renderPedidos(data);
+                },
+                error: function() {
+                    console.error('Error al cargar pedidos de cocina');
                 }
-                var horas = Math.floor(minutos / 60);
-                var mins = minutos % 60;
-                return horas + "h " + mins + "min";
+            });
+        }
+
+        function renderPedidos(items) {
+            var container = document.getElementById('pedidosContainer');
+            var ahora = Date.now();
+
+            document.getElementById('countNum').textContent = items.length;
+
+            // IDs activos para limpiar tiemposCreacion de los removidos
+            var idsActivos = items.map(function(i) { return String(i.id); });
+            Object.keys(tiemposCreacion).forEach(function(k) {
+                if (idsActivos.indexOf(k) === -1) delete tiemposCreacion[k];
+            });
+
+            if (items.length === 0) {
+                container.innerHTML = '<div id="emptyState">' +
+                    '<div class="empty-icon"><i class="fas fa-check-circle"></i></div>' +
+                    '<div class="empty-title">Todo al día</div>' +
+                    '<div class="empty-sub">No hay pedidos pendientes</div>' +
+                    '</div>';
+                return;
             }
 
-            function loadPedidos() {
-                $.ajax({
-                    url: '@Url.Action("ObtenerPedidosCocina", "Cocina")',
-                    type: 'GET',
-                    success: function (data) {
-                        renderPedidos(data);
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('Error al cargar pedidos: ' + error);
-                    }
-                });
-            }
+            // Actualizamos solo las tarjetas que cambiaron; insertamos/removemos las que no existen
+            var idsEnDOM = [];
+            container.querySelectorAll('.pedido').forEach(function(el) {
+                idsEnDOM.push(el.id.replace('pedido-', ''));
+            });
 
-            function renderPedidos(items) {
-                var container = $('#pedidosContainer');
-                container.empty();
+            // Remover tarjetas que ya no están
+            idsEnDOM.forEach(function(id) {
+                if (idsActivos.indexOf(id) === -1) {
+                    var el = document.getElementById('pedido-' + id);
+                    if (el) el.remove();
+                }
+            });
 
-                if (items.length === 0) {
-                    container.append('<p class="text-center w-100">No hay pedidos activos.</p>');
+            items.forEach(function(item) {
+                var idStr = String(item.id);
+                var creacion = new Date(item.fechaCreacion).getTime();
+                tiemposCreacion[idStr] = creacion;
+                var minutos = Math.floor((ahora - creacion) / 60000);
+
+                var urgencia = '';
+                if (minutos >= 60) urgencia = 'pedido-alert';
+                else if (minutos >= 18) urgencia = 'pedido-warning';
+
+                // ¿Ya existe la tarjeta?
+                var existente = document.getElementById('pedido-' + idStr);
+                if (existente) {
+                    // Solo actualizar clase de urgencia y timer
+                    existente.className = 'pedido ' + urgencia;
+                    var timerEl = document.getElementById('timer-' + idStr);
+                    if (timerEl) timerEl.textContent = formatearTiempo(minutos);
                     return;
                 }
 
-                $.each(items, function (index, item) {
-                    var minutos = calcularMinutos(item.fechaCreacion);
-                    var tiempoTexto = formatearTiempo(minutos);
+                // Construir items HTML
+                var itemsHTML = item.detalles.map(function(d) {
+                    var comentario = (d.comentario && d.comentario.trim())
+                        ? '<div class="item-comment">' + escHtml(d.comentario) + '</div>'
+                        : '';
+                    return '<div class="item-row">' +
+                        '<div class="item-qty">' + d.cantidadPendiente + '</div>' +
+                        '<div class="item-info">' +
+                            '<div class="item-name">' + escHtml(d.nombre) + '</div>' +
+                            comentario +
+                        '</div>' +
+                    '</div>';
+                }).join('');
 
-                    // Determinar clase de urgencia
-                    var claseUrgencia = '';
-                    var icono = '';
-                    if (minutos >= 60) {
-                        claseUrgencia = 'pedido-alert';
-                        icono = ' [!]';
-                    } else if (minutos >= 18) {
-                        claseUrgencia = 'pedido-warning';
-                        icono = ' [~]';
+                var html =
+                    '<div class="pedido ' + urgencia + '" id="pedido-' + idStr + '">' +
+                        '<div class="pedido-header">' +
+                            '<div class="pedido-mesa-block">' +
+                                '<div class="pedido-mesa">Mesa ' + item.numeroMesa + '</div>' +
+                                '<div class="pedido-id">Pedido #' + item.id + '</div>' +
+                            '</div>' +
+                            '<div class="pedido-timer">' +
+                                '<div class="timer-value" id="timer-' + idStr + '">' + formatearTiempo(minutos) + '</div>' +
+                                '<div class="timer-label">en cocina</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="pedido-items">' + itemsHTML + '</div>' +
+                        '<button class="btn-listo" onclick="marcarListo(' + item.id + ', this)">' +
+                            '<i class="fas fa-check mr-2"></i> MARCAR LISTO' +
+                        '</button>' +
+                    '</div>';
+
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function marcarListo(pedidoId, btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Enviando...';
+            $.ajax({
+                url: '@Url.Action("MarcarPedidoListo", "Cocina")',
+                type: 'POST',
+                data: { pedidoId: pedidoId },
+                success: function(response) {
+                    if (response.success) {
+                        loadPedidos();
+                    } else {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-check mr-2"></i> MARCAR LISTO';
                     }
+                },
+                error: function() {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check mr-2"></i> MARCAR LISTO';
+                }
+            });
+        }
 
-                    var pedidoDiv = $('<div class="pedido ' + claseUrgencia + '"></div>');
-                    pedidoDiv.append('<h3>Mesa ' + item.numeroMesa + '</h3>');
-                    pedidoDiv.append('<h4>Pedido ID: ' + item.id + '</h4>');
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
 
-                    // Bloque de tiempo transcurrido
-                    pedidoDiv.append('<div class="pedido-timer">Tiempo: ' + tiempoTexto + icono + '</div>');
-
-                    var itemsList = $('<div class="items-list"></div>');
-
-                    $.each(item.detalles, function (i, detalle) {
-                        var itemRow = $('<div class="item-row"></div>');
-                        var itemName = $('<div class="item-name"></div>').text(detalle.nombre);
-                        itemRow.append(itemName);
-
-                        if (detalle.comentario && detalle.comentario.trim() !== "") {
-                            var itemComment = $('<div class="item-comment"></div>').text(detalle.comentario);
-                            itemRow.append(itemComment);
-                        }
-
-                        var itemQuantity = $('<div class="item-quantity"></div>').text(detalle.cantidadPendiente);
-                        itemRow.append(itemQuantity);
-                        itemsList.append(itemRow);
-                    });
-
-                    pedidoDiv.append(itemsList);
-
-                    var botonListo = $('<button class="btn btn-success btn-listo">Marcar como Listo</button>');
-                    botonListo.click(function () {
-                        marcarPedidoListo(item.id);
-                    });
-                    pedidoDiv.append(botonListo);
-
-                    container.append(pedidoDiv);
-                });
-            }
-
-            function marcarPedidoListo(pedidoId) {
-                $.ajax({
-                    url: '@Url.Action("MarcarPedidoListo", "Cocina")',
-                    type: 'POST',
-                    data: { pedidoId: pedidoId },
-                    success: function (response) {
-                        if (response.success) {
-                            loadPedidos();
-                        } else {
-                            console.log('Error al marcar el pedido como listo.');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.log('Error: ' + error);
-                    }
-                });
-            }
-
-            loadPedidos();
-            setInterval(loadPedidos, 1000);
-        });
+        loadPedidos();
+        setInterval(loadPedidos, 15000);   // refrescar datos del servidor cada 15s
     </script>
 </body>
 </html>

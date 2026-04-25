@@ -273,6 +273,18 @@ namespace QuickTableProyect.Interface.Api
                 empleado.TarjetaUID = uidParaGuardar;
                 ctx.SaveChanges();
 
+                // Marcar código de sesión como confirmado para que el browser detecte el éxito
+                var codPendiente = ctx.Codigos2FA
+                    .FirstOrDefault(c => c.EmpleadoId == request.EmpleadoId &&
+                                        c.EsParaTarjetaEmpleado == true &&
+                                        !c.Confirmado &&
+                                        c.Expiracion > DateTime.Now);
+                if (codPendiente != null)
+                {
+                    codPendiente.Confirmado = true;
+                    ctx.SaveChanges();
+                }
+
                 return Ok(new
                 {
                     success = true,

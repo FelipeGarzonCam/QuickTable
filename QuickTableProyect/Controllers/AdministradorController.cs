@@ -927,6 +927,33 @@ namespace QuickTableProyect.Controllers
         // GESTIÓN DE TARJETAS NFC
 
         [HttpGet]
+        public JsonResult EstadoAsignacionTarjeta(int empleadoId, string codigo)
+        {
+            try
+            {
+                var codigo2fa = ctx.Codigos2FA
+                    .FirstOrDefault(c => c.EmpleadoId == empleadoId &&
+                                        c.Codigo == codigo &&
+                                        c.EsParaTarjetaEmpleado == true);
+
+                if (codigo2fa == null)
+                    return Json(new { estado = "error" });
+
+                if (codigo2fa.Confirmado)
+                    return Json(new { estado = "asignada" });
+
+                if (codigo2fa.Expiracion <= DateTime.Now)
+                    return Json(new { estado = "expirado" });
+
+                return Json(new { estado = "pendiente" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { estado = "error", mensaje = ex.Message });
+            }
+        }
+
+        [HttpGet]
         public IActionResult GestionarTarjetas()
         {
             var rol = HttpContext.Session.GetString("Rol");
@@ -968,7 +995,7 @@ namespace QuickTableProyect.Controllers
                 }
 
                 // Generar código de sesión (6 dígitos)
-                string codigoSesion = Math.Abs(HttpContext.Session.Id.GetHashCode()).ToString("000000").Substring(0, 6);
+                string codigoSesion = Random.Shared.Next(100000, 1000000).ToString();
 
                 // Crear registro temporal en tabla Codigos2FA (reutilizamos la tabla existente)
                 var codigoTemporal = new Codigo2FA

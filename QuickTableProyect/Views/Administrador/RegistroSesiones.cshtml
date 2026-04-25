@@ -124,8 +124,8 @@
                                             @jornada.Rol
                                         </span>
                                     </td>
-                                    <td>@jornada.Fecha.ToString("dd/MM/yyyy")</td>
-                                    <td>
+                                    <td data-order="@jornada.Fecha.ToString("yyyy-MM-dd")">@jornada.Fecha.ToString("dd/MM/yyyy")</td>
+                                    <td data-order="@(jornada.PrimeraEntrada.HasValue ? jornada.Fecha.ToString("yyyy-MM-dd") + " " + jornada.PrimeraEntrada.Value.ToString("HH:mm") : "9999-99-99 99:99")">
                                         @if (jornada.PrimeraEntrada.HasValue)
                                         {
                                             <i class="fas fa-sign-in-alt text-success"></i>
@@ -136,7 +136,7 @@
                                             <span class="text-muted">-</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td data-order="@(jornada.UltimaSalida.HasValue ? jornada.Fecha.ToString("yyyy-MM-dd") + " " + jornada.UltimaSalida.Value.ToString("HH:mm") : "9999-99-99 99:99")">
                                         @if (jornada.UltimaSalida.HasValue)
                                         {
                                             <i class="fas fa-sign-out-alt text-danger"></i>
@@ -147,7 +147,7 @@
                                             <span class="badge badge-warning">Sin salida</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td data-order="@((int)jornada.TiempoTrabajado.TotalMinutes)">
                                         @if (jornada.TiempoTrabajado.TotalMinutes > 0)
                                         {
                                             <strong>@((int)jornada.TiempoTrabajado.TotalHours)h @jornada.TiempoTrabajado.Minutes m</strong>

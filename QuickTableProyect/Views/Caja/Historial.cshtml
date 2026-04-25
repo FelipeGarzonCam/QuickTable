@@ -25,6 +25,13 @@
         margin-left: 1% !important;
         margin-right: 1% !important;
     }
+
+    /* Vista tabla */
+    #tablaHistorial { font-size: 0.88rem; }
+    #tablaHistorial .fila-pedido { cursor: pointer; }
+    #tablaHistorial .fila-pedido:hover { filter: brightness(0.96); }
+    #tablaHistorial .detalle-fila td { padding: 0; background: #f8f9fa; }
+    .btn-vista.active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.25); }
 </style>
 <div class="content-wrapper">
     <section class="content-header">
@@ -86,9 +93,37 @@
                 </div>
             </div>
 
-            <!-- Contenedor de Pedidos -->
-            <div class="row justify-content-center" id="pedidosContainer">
-                <!-- Los pedidos se cargarán aquí -->
+            <!-- Barra de vista -->
+            <div class="d-flex justify-content-end mb-2">
+                <div class="btn-group" role="group">
+                    <button id="btnVistaCards" class="btn btn-sm btn-primary btn-vista active" onclick="cambiarVista('cards')" title="Vista tarjetas">
+                        <i class="fas fa-th-large"></i> Tarjetas
+                    </button>
+                    <button id="btnVistaTabla" class="btn btn-sm btn-outline-primary btn-vista" onclick="cambiarVista('tabla')" title="Vista tabla">
+                        <i class="fas fa-table"></i> Tabla
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vista tarjetas -->
+            <div class="row justify-content-center" id="pedidosContainer"></div>
+
+            <!-- Vista tabla -->
+            <div id="tablaContainer" style="display:none; overflow-x:auto;">
+                <table class="table table-bordered table-hover table-sm mb-0" id="tablaHistorial">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Mesa</th>
+                            <th>Mesero</th>
+                            <th>Fecha / Hora</th>
+                            <th>Pago</th>
+                            <th class="text-right">Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaBody"></tbody>
+                </table>
             </div>
 
             <!-- Paginación -->
@@ -103,6 +138,25 @@
 
 @section Scripts {
     <script>
+        var _currentView = 'cards';
+
+        function cambiarVista(vista) {
+            _currentView = vista;
+            if (vista === 'cards') {
+                $('#pedidosContainer').show();
+                $('#tablaContainer').hide();
+                $('#btnVistaCards').removeClass('btn-outline-primary').addClass('btn-primary active');
+                $('#btnVistaTabla').removeClass('btn-primary active').addClass('btn-outline-primary');
+            } else {
+                $('#pedidosContainer').hide();
+                $('#tablaContainer').show();
+                $('#btnVistaTabla').removeClass('btn-outline-primary').addClass('btn-primary active');
+                $('#btnVistaCards').removeClass('btn-primary active').addClass('btn-outline-primary');
+            }
+            // re-render con los datos actuales si ya están cargados
+            if (window._ultimosDatos) renderPedidosGlobal(window._ultimosDatos);
+        }
+
         $(document).ready(function () {
             var pageNumber = 1;
             var pageSize = 8;
@@ -126,7 +180,8 @@
                     },
                     success: function (data) {
                         totalPedidos = data.totalPedidos;
-                        renderPedidos(data.pedidos);
+                        window._ultimosDatos = data.pedidos;
+                        renderPedidosGlobal(data.pedidos);
                         renderPagination();
                     },
                     error: function (xhr, status, error) {
@@ -136,7 +191,97 @@
                 });
             }
 
+            function parseFecha(item) {
+                if (!item.fechaHora) return 'Sin fecha';
+                var partes = item.fechaHora.split(' ');
+                var fechaPartes = partes[0].split('/');
+                var horaPartes = partes[1].split(':');
+                var d = new Date(
+                    parseInt(fechaPartes[2]),
+                    parseInt(fechaPartes[1]) - 1,
+                    parseInt(fechaPartes[0]),
+                    parseInt(horaPartes[0]),
+                    parseInt(horaPartes[1])
+                );
+                return d.toLocaleDateString('es-CO', { day:'2-digit', month:'2-digit', year:'numeric' })
+                     + ' ' + d.toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' });
+            }
+
+            function renderPedidosGlobal(items) {
+                if (_currentView === 'tabla') renderTabla(items);
+                else renderCards(items);
+            }
+
+            function renderTabla(items) {
+                var tbody = $('#tablaBody');
+                tbody.empty();
+                if (items.length === 0) {
+                    tbody.html('<tr><td colspan="7"><div class="alert alert-info mb-0"><i class="fas fa-info-circle"></i> No hay pedidos en el historial</div></td></tr>');
+                    return;
+                }
+                $.each(items, function(i, item) {
+                    var metodoPagoColor = item.metodoPago === 'Efectivo' ? 'success' :
+                                         item.metodoPago === 'Tarjeta'  ? 'info'    : 'primary';
+                    var total = parseFloat(item.total + item.propina).toLocaleString('es-CO');
+                    var fecha = parseFecha(item);
+
+                    // Detalle items
+                    var detalleItems = item.detalles.map(function(d) {
+                        return `<tr>
+                            <td>${d.nombre}</td>
+                            <td class="text-center">${d.cantidad}</td>
+                            <td class="text-right">$${parseFloat(d.valor).toLocaleString('es-CO')}</td>
+                            <td class="text-right">$${parseFloat(d.subtotal).toLocaleString('es-CO')}</td>
+                        </tr>`;
+                    }).join('');
+
+                    var propinaRow = item.propina > 0
+                        ? `<div class="row"><div class="col-6">Propina:</div><div class="col-6 text-right">$${parseFloat(item.propina).toLocaleString('es-CO')}</div></div>`
+                        : '';
+                    var efectivoRows = item.metodoPago === 'Efectivo'
+                        ? `<hr><div class="row"><div class="col-6">Efectivo recibido:</div><div class="col-6 text-right">$${parseFloat(item.efectivoRecibido).toLocaleString('es-CO')}</div></div>
+                           <div class="row"><div class="col-6">Cambio:</div><div class="col-6 text-right">$${parseFloat(item.cambio).toLocaleString('es-CO')}</div></div>`
+                        : '';
+
+                    tbody.append(`
+                        <tr class="fila-pedido" onclick="toggleFilaTabla(${item.id}, this)">
+                            <td><strong>#${item.id}</strong></td>
+                            <td>Mesa ${item.numeroMesa}</td>
+                            <td>${item.meseroNombre}</td>
+                            <td style="white-space:nowrap;">${fecha}</td>
+                            <td><span class="badge badge-${metodoPagoColor}">${item.metodoPago}</span></td>
+                            <td class="text-right text-success font-weight-bold">$${total}</td>
+                            <td class="text-center"><i class="fas fa-chevron-down text-muted" id="ico-t-${item.id}"></i></td>
+                        </tr>
+                        <tr class="detalle-fila" id="det-t-${item.id}" style="display:none;">
+                            <td colspan="7">
+                                <div class="p-3">
+                                    <table class="table table-sm table-hover mb-2">
+                                        <thead><tr><th>Plato</th><th class="text-center">Cant.</th><th class="text-right">Valor</th><th class="text-right">Subtotal</th></tr></thead>
+                                        <tbody>${detalleItems}</tbody>
+                                    </table>
+                                    <div class="row justify-content-end" style="font-size:0.9rem;">
+                                        <div class="col-auto text-right">
+                                            <div>Subtotal: <strong>$${parseFloat(item.subtotal).toLocaleString('es-CO')}</strong></div>
+                                            <div>IVA (19%): <strong>$${parseFloat(item.iva).toLocaleString('es-CO')}</strong></div>
+                                            ${propinaRow}
+                                            <hr class="my-1">
+                                            <div><strong>Total: <span class="text-success">$${total}</span></strong></div>
+                                            ${efectivoRows}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `);
+                });
+            }
+
             function renderPedidos(items) {
+                renderCards(items);
+            }
+
+            function renderCards(items) {
                 var container = $('#pedidosContainer');
 
                 // Guardar estados expandidos
@@ -158,34 +303,7 @@
                     var collapseId = 'historial-' + item.id;
                     var isExpanded = estadosExpandidos[collapseId] || false;
 
-                    var fecha = new Date(item.fechaHora);
-                    var fechaFormato = 'Fecha no válida';
-
-                    var fechaFormato = '';
-                        if (item.fechaHora) {
-                            var partes = item.fechaHora.split(' ');
-                            var fechaPartes = partes[0].split('/');
-                            var horaPartes = partes[1].split(':');
-
-                            var fecha = new Date(
-                                parseInt(fechaPartes[2]),
-                                parseInt(fechaPartes[1]) - 1,
-                                parseInt(fechaPartes[0]),
-                                parseInt(horaPartes[0]),
-                                parseInt(horaPartes[1])
-                            );
-
-                            fechaFormato = fecha.toLocaleDateString('es-CO', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                            }) + ' ' + fecha.toLocaleTimeString('es-CO', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                        } else {
-                            fechaFormato = 'Sin fecha';
-                        }
+                    var fechaFormato = parseFecha(item);
 
 
 
@@ -365,6 +483,18 @@
 
             loadPedidos();
         });
+
+        function toggleFilaTabla(id) {
+            var row = $('#det-t-' + id);
+            var ico = $('#ico-t-' + id);
+            if (row.is(':visible')) {
+                row.hide();
+                ico.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            } else {
+                row.show();
+                ico.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            }
+        }
     </script>
 
 }
