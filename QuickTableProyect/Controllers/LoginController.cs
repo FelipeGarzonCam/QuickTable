@@ -278,7 +278,11 @@ namespace QuickTableProyect.Interface
                         return Json(new { estado = "invalido" });
 
                     if (codigo.Confirmado)
+                    {
+                        HttpContext.Session.SetString("2FACompletado", "true");
                         return Json(new { estado = "confirmado" });
+                    }
+                       
 
                     return Json(new { estado = "pendiente" });
                 }

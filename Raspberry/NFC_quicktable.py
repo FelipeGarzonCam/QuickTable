@@ -15,6 +15,7 @@ import time
 import json
 import os
 import sys
+import base64
 
 # ============================================================================
 # SECCION 1: DETECCION DE HARDWARE RC522
@@ -502,38 +503,17 @@ class QuickTableControlAcceso:
                 btn.pack(side='left', padx=3)
     
     def on_config_key_press(self, key):
-        """Manejo de teclas del teclado tactil (INTACTO)"""
-        # Obtener campo activo
-        if self.active_entry_type == 'ip':
-            current_entry = self.server_ip_entry
-            self.active_indicator.config(text="Editando: IP", fg='#17a2b8')
-        else:
-            current_entry = self.server_port_entry  
-            self.active_indicator.config(text="Editando: Puerto", fg='#6f42c1')
-        
-        current = current_entry.get()
-        
-        if key == 'IP':
-            self.active_entry_type = 'ip'
-            self.server_ip_entry.focus()
-            self.server_ip_entry.icursor(tk.END)
-            self.active_indicator.config(text="Editando: IP", fg='#17a2b8')
-        elif key == 'Puerto':
-            self.active_entry_type = 'port'
-            self.server_port_entry.focus()
-            self.server_port_entry.icursor(tk.END)
-            self.active_indicator.config(text="Editando: Puerto", fg='#6f42c1')
-        elif key == 'Limpiar':
-            current_entry.delete(0, tk.END)
-        elif key == 'Borrar':
+        """Manejo de teclas del teclado tactil de configuracion de IP."""
+        current = self.server_ip_entry.get()
+        if key == 'Borrar':
             if current:
-                current_entry.delete(len(current)-1, tk.END)
-        elif key == 'Punto':
+                self.server_ip_entry.delete(len(current) - 1, tk.END)
+        elif key == '.':
             if len(current) < 15:
-                current_entry.insert(tk.END, '.')
+                self.server_ip_entry.insert(tk.END, '.')
         elif key.isdigit():
             if len(current) < 15:
-                current_entry.insert(tk.END, key)
+                self.server_ip_entry.insert(tk.END, key)
     
     def probar_conexion(self):
         """Probar conexion con IP y Puerto separados (INTACTO)"""
@@ -729,10 +709,14 @@ class QuickTableControlAcceso:
         self.status_label.place(x=0, y=270, width=800, height=40)
         
         # Boton volver
-        btn_volver = tk.Button(main_frame, text="Volver al Inicio", font=("Arial", 18, "bold"), bg='#6c757d', fg='white', command=self.mostrar_pantalla_principal)
+        def _volver():
+            self.leyendo_salida = False
+            self.mostrar_pantalla_principal()
+
+        btn_volver = tk.Button(main_frame, text="Volver al Inicio", font=("Arial", 18, "bold"), bg='#6c757d', fg='white', command=_volver)
         btn_volver.place(x=250, y=360, width=300, height=60)
-        
-        # Iniciar proceso de lectura en hilo separado
+
+        self.leyendo_salida = True
         threading.Thread(target=self.proceso_marcar_salida, daemon=True).start()
         # FIRMA: By Felipe Garzon
         tk.Label(self.root, 
@@ -741,6 +725,123 @@ class QuickTableControlAcceso:
                  fg='#555e66', 
                  bg='#212529').place(relx=1.0, rely=1.0, anchor='se', x=-20, y=-20)
     
+    def proceso_marcar_salida(self):
+        try:
+            while self.leyendo_salida:
+                self.root.after(0, lambda: self.status_label.config(
+                    text="Esperando tarjeta...", fg='#ffc107'))
+
+                uid_fisico = self.reader.read_card_uid(timeout=20)
+
+                if not self.leyendo_salida:
+                    break
+
+                if not uid_fisico:
+                    self.root.after(0, lambda: self.status_label.config(
+                        text="No se detecto tarjeta. Intenta de nuevo...", fg='#dc3545'))
+                    time.sleep(2)
+                    continue
+
+                self.root.after(0, lambda: self.status_label.config(
+                    text="Registrando salida...", fg='#17a2b8'))
+
+                uid_b64 = base64.b64encode(
+                    str(int(uid_fisico, 16)).encode('ascii')
+                ).decode('ascii')
+
+                response = requests.post(
+                    f"{self.server_url}/api/asistencia/marcar-salida",
+                    json={'uid': uid_b64},
+                    timeout=10
+                )
+
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get('success'):
+                        self.root.after(0, lambda d=data: self.mostrar_resultado_exitoso(d))
+                    else:
+                        error = data.get('message', 'Error desconocido')
+                        self.root.after(0, lambda e=error: self.status_label.config(
+                            text=f"Error: {e}", fg='#dc3545'))
+                else:
+                    self.root.after(0, lambda c=response.status_code: self.status_label.config(
+                        text=f"Error del servidor ({c})", fg='#dc3545'))
+
+                self.leyendo_salida = False
+                self.root.after(3000, self.mostrar_pantalla_principal)
+                break
+
+        except requests.Timeout:
+            if self.leyendo_salida:
+                self.root.after(0, lambda: self.status_label.config(
+                    text="Sin respuesta del servidor", fg='#dc3545'))
+                self.leyendo_salida = False
+                self.root.after(3000, self.mostrar_pantalla_principal)
+        except requests.ConnectionError:
+            if self.leyendo_salida:
+                self.root.after(0, lambda: self.status_label.config(
+                    text="No se pudo conectar al servidor", fg='#dc3545'))
+                self.leyendo_salida = False
+                self.root.after(3000, self.mostrar_pantalla_principal)
+        except Exception as e:
+            print(f"Error marcando salida: {e}")
+            if self.leyendo_salida:
+                self.root.after(0, lambda err=str(e): self.status_label.config(
+                    text=f"Error: {err[:40]}", fg='#dc3545'))
+                self.leyendo_salida = False
+                self.root.after(3000, self.mostrar_pantalla_principal)
+
+    def mostrar_resultado_exitoso(self, data):
+        """Pantalla de confirmacion de salida con todos los datos del empleado."""
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        main_frame = tk.Frame(self.root, bg='#212529', width=800, height=480)
+        main_frame.place(x=0, y=0)
+
+        # Banner superior verde
+        banner = tk.Frame(main_frame, bg='#28a745', width=800, height=80)
+        banner.place(x=0, y=0)
+        tk.Label(banner, text="✓  SALIDA REGISTRADA",
+                 font=('Arial', 26, 'bold'), fg='white', bg='#28a745').place(
+                 relx=0.5, rely=0.5, anchor='center')
+
+        # Datos del empleado
+        nombre = data.get('nombre', 'N/A')
+        rol = data.get('rol', 'N/A')
+        hora_ingreso = data.get('horaIngreso', 'N/A')
+        hora_salida = data.get('horaSalida', 'N/A')
+        tiempo = data.get('tiempoTrabajado', 'N/A')
+
+        info_frame = tk.Frame(main_frame, bg='#343a40', width=760, height=280)
+        info_frame.place(x=20, y=100)
+
+        filas = [
+            ("Empleado",       nombre),
+            ("Rol",            rol),
+            ("Hora de entrada", hora_ingreso),
+            ("Hora de salida",  hora_salida),
+            ("Tiempo trabajado", tiempo),
+        ]
+
+        for i, (etiqueta, valor) in enumerate(filas):
+            y_pos = 20 + i * 50
+            tk.Label(info_frame, text=f"{etiqueta}:",
+                     font=('Arial', 14, 'bold'), fg='#adb5bd', bg='#343a40',
+                     anchor='w', width=18).place(x=20, y=y_pos)
+            tk.Label(info_frame, text=valor,
+                     font=('Arial', 14), fg='#ffffff', bg='#343a40',
+                     anchor='w').place(x=260, y=y_pos)
+
+        # Boton volver + auto-regreso
+        tk.Button(main_frame, text="Volver al Inicio",
+                  font=('Arial', 16, 'bold'), bg='#6c757d', fg='white',
+                  width=20, height=2, border=0,
+                  command=self.mostrar_pantalla_principal).place(
+                  relx=0.5, rely=1.0, anchor='s', y=-20)
+
+        self.root.after(8000, self.mostrar_pantalla_principal)
+
    # ========================================================================
     # PANTALLA DE CODIGO DE SESION (Modo Admin/TI/Empleado)
     # ========================================================================

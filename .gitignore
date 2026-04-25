@@ -80,6 +80,7 @@ Instrucciones_TDE.txt
 # Carpetas específicas del proyecto
 **/PublicacionPortable/
 QuickTable/Raspberry/serverpython.py
+QuickTable/Raspberry/CLAUDE.md
 
 # .NET Core / .NET 8 
 [Bb]in/
