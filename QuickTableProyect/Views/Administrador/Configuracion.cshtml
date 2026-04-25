@@ -1,0 +1,198 @@
+@{
+    ViewData["Title"] = "Configuración";
+}
+
+@section Styles {
+    <style>
+        .config-wrapper {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .config-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .config-header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .config-header p {
+            font-size: 1rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .dark-mode .config-header p {
+            color: #adb5bd;
+        }
+
+        .config-card {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        .dark-mode .config-card {
+            background: #343a40;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+        }
+
+        .config-card-header {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .config-card-header i {
+            font-size: 1.6rem;
+            color: rgba(0,0,0,0.5);
+        }
+
+        .config-card-header span {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: rgba(0,0,0,0.7);
+        }
+
+        .config-card-body {
+            padding: 28px 24px 20px;
+        }
+
+        .config-card-body label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6c757d;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .dark-mode .config-card-body label {
+            color: #adb5bd;
+        }
+
+        .config-card-body input {
+            font-size: 1.15rem;
+            border-radius: 10px;
+            border: 2px solid #dee2e6;
+            padding: 12px 16px;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        .config-card-body input:focus {
+            border-color: #f7971e;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(247,151,30,0.15);
+        }
+
+        .dark-mode .config-card-body input {
+            background: #495057;
+            border-color: #6c757d;
+            color: #f8f9fa;
+        }
+
+        .config-card-footer {
+            padding: 0 24px 24px;
+        }
+
+        .btn-guardar {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            color: rgba(0,0,0,0.7);
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-guardar:hover { opacity: 0.9; }
+        .btn-guardar:active { transform: scale(0.98); }
+
+        .char-counter {
+            font-size: 0.78rem;
+            color: #adb5bd;
+            text-align: right;
+            margin-top: 6px;
+        }
+
+        @@media (max-width: 576px) {
+            .config-header h1 { font-size: 1.8rem; }
+        }
+    </style>
+}
+
+<div class="config-wrapper">
+    <div class="config-header">
+        <h1><i class="fas fa-store mr-2"></i>Configuración del Restaurante</h1>
+        <p>Personaliza cómo se identifica tu restaurante en el sistema</p>
+    </div>
+
+    <div class="config-card">
+        <div class="config-card-header">
+            <i class="fas fa-pen"></i>
+            <span>Nombre del Restaurante</span>
+        </div>
+        <div class="config-card-body">
+            <label for="nombreRestaurante">Nombre visible en el sistema</label>
+            <input type="text"
+                   id="nombreRestaurante"
+                   value="@ViewBag.NombreRestaurante"
+                   maxlength="100"
+                   placeholder="Ej: La Trattoria"
+                   oninput="actualizarContador()">
+            <div class="char-counter"><span id="charCount">@(((string)ViewBag.NombreRestaurante ?? "").Length)</span>/100</div>
+        </div>
+        <div class="config-card-footer">
+            <button class="btn-guardar" onclick="guardarConfig()">
+                <i class="fas fa-save mr-2"></i>Guardar cambios
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function actualizarContador() {
+            document.getElementById('charCount').textContent = document.getElementById('nombreRestaurante').value.length;
+        }
+
+        function guardarConfig() {
+            const nombre = document.getElementById('nombreRestaurante').value.trim();
+            if (!nombre) {
+                toastr.error('El nombre no puede estar vacío');
+                return;
+            }
+            $.post('@Url.Action("GuardarConfiguracion", "Administrador")',
+                { nombreRestaurante: nombre },
+                function (response) {
+                    if (response.success) {
+                        toastr.success('Nombre guardado correctamente');
+                        setTimeout(() => window.location.href = '@Url.Action("Index", "Administrador")', 1200);
+                    } else {
+                        toastr.error(response.message || 'Error al guardar');
+                    }
+                }
+            ).fail(function () {
+                toastr.error('Error de conexión');
+            });
+        }
+    </script>
+}

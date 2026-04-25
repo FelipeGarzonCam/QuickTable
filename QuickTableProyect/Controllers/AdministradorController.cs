@@ -1065,6 +1065,32 @@ namespace QuickTableProyect.Controllers
             }
         }
 
+        public IActionResult Configuracion()
+        {
+            if (HttpContext.Session.GetString("Rol") != "Admin")
+                return RedirectToAction("Index", "Login");
+            if (HttpContext.Session.GetString("2FACompletado") != "true")
+                return RedirectToAction("Index", "Login");
+
+            var svc = new QuickTableProyect.Aplicacion.ConfiguracionService();
+            ViewBag.NombreRestaurante = svc.GetNombreRestaurante();
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult GuardarConfiguracion(string nombreRestaurante)
+        {
+            if (HttpContext.Session.GetString("Rol") != "Admin")
+                return Json(new { success = false, message = "No autorizado" });
+
+            if (string.IsNullOrWhiteSpace(nombreRestaurante) || nombreRestaurante.Trim().Length > 100)
+                return Json(new { success = false, message = "Nombre inválido (máx. 100 caracteres)" });
+
+            var svc = new QuickTableProyect.Aplicacion.ConfiguracionService();
+            svc.ActualizarNombreRestaurante(nombreRestaurante.Trim());
+            return Json(new { success = true });
+        }
+
         // Liberar recursos del contexto
         protected override void Dispose(bool disposing)
         {

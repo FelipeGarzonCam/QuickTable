@@ -1,5 +1,7 @@
+@inject QuickTableProyect.Aplicacion.ConfiguracionService CocinaConfigService
 @{
     ViewData["Title"] = "Cocina";
+    var _cocinaRestaurant = CocinaConfigService.GetNombreRestaurante();
 }
 
 <!DOCTYPE html>
@@ -253,14 +255,28 @@
         .empty-icon  { font-size: 5rem; color: #21262d; margin-bottom: 20px; }
         .empty-title { font-size: 2rem; font-weight: 700; color: #30363d; }
         .empty-sub   { font-size: 1.1rem; color: #21262d; margin-top: 10px; }
+
+        .header-restaurant {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: rgba(255,255,255,0.55);
+            margin-left: 14px;
+            padding-left: 14px;
+            border-left: 1px solid rgba(255,255,255,0.2);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
     </style>
 </head>
 <body>
 
     <!-- ── HEADER ── -->
     <div id="headerBar">
-        <div class="header-title">
-            <i class="fas fa-fire"></i> COCINA
+        <div class="header-title" style="display:flex; align-items:center;">
+            <span><i class="fas fa-fire"></i> COCINA</span>
+            <span class="header-restaurant">@_cocinaRestaurant</span>
         </div>
         <div id="headerClock">00:00:00</div>
         <div id="headerCount">

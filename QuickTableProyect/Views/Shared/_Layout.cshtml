@@ -1,5 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor HttpContextAccessor
+@inject QuickTableProyect.Aplicacion.ConfiguracionService LayoutConfigService
+@{ var _restaurantName = LayoutConfigService.GetNombreRestaurante(); }
 
 <!DOCTYPE html>
 <html lang="es">
@@ -157,6 +159,16 @@
                         </li>
                     </ul>
                 }
+                else
+                {
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item d-flex align-items-center" style="padding-left:12px;">
+                            <span style="color:#fff; font-weight:700; font-size:1.05rem; white-space:nowrap;">
+                                <i class="fas fa-store mr-1"></i> @_restaurantName
+                            </span>
+                        </li>
+                    </ul>
+                }
 
                 <ul class="navbar-nav ml-auto">
                     <!-- Botón de Tema Oscuro/Claro con Switch -->
@@ -199,7 +211,7 @@
             <aside class="main-sidebar sidebar-dark-primary elevation-4">
                 <a href="@Url.Action("Index", rol == "Admin" ? "Administrador" : "TI")" class="brand-link">
                     <img id="sidebar-logo" src="~/img/LogoLight.png" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-                    <span class="brand-text font-weight-light">QuickTable</span>
+                    <span class="brand-text font-weight-light" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px; display:inline-block;">@_restaurantName</span>
                 </a>
 
 
@@ -236,6 +248,12 @@
                                     <a href="@Url.Action("HistorialPedidos", "Administrador")" class="nav-link">
                                         <i class="nav-icon fas fa-history"></i>
                                         <p>Historial De Pedidos</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="@Url.Action("Configuracion", "Administrador")" class="nav-link">
+                                        <i class="nav-icon fas fa-store"></i>
+                                        <p>Configuración</p>
                                     </a>
                                 </li>
                             }
@@ -412,6 +430,7 @@
                 '@Url.Action("ModificarEmpleados", "Administrador")',
                 '@Url.Action("RegistroSesiones", "Administrador")',
                 '@Url.Action("HistorialPedidos", "Administrador")',
+                '@Url.Action("Configuracion", "Administrador")',
                 '@Url.Action("Index", "TI")',
                 '@Url.Action("GestionTarjetas", "TI")',
                 '@Url.Action("GestionBackups", "TI")',

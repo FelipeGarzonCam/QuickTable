@@ -34,6 +34,7 @@ services.AddScoped<RegistroSesionService>();
 services.AddScoped<AsistenciaService>();
 services.AddScoped<TarjetaNFCService>();
 services.AddScoped<CryptoService>();
+services.AddScoped<ConfiguracionService>();
 
 // Agregar MVC
 services.AddControllersWithViews();

@@ -18,6 +18,7 @@ namespace QuickTableProyect.Infrastructure
                 var testConnection = ctx.Empleados.FirstOrDefault();
 
                 CrearUsuarioTIPorDefecto(ctx);
+                CrearTablaConfiguracion(ctx);
 
                 Console.WriteLine("Sistema QuickTable inicializado correctamente");
             }
@@ -25,6 +26,20 @@ namespace QuickTableProyect.Infrastructure
             {
                 Console.WriteLine($"Error inicializando el sistema: {ex.Message}");
             }
+        }
+
+        private static void CrearTablaConfiguracion(SistemaQuickTableContext ctx)
+        {
+            ctx.Database.ExecuteSqlCommand(@"
+                IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ConfiguracionSistema')
+                BEGIN
+                    CREATE TABLE ConfiguracionSistema (
+                        Id INT NOT NULL PRIMARY KEY,
+                        NombreRestaurante NVARCHAR(100) NOT NULL
+                    )
+                    INSERT INTO ConfiguracionSistema (Id, NombreRestaurante) VALUES (1, N'Mi Restaurante')
+                END
+            ");
         }
 
         private static void CrearUsuarioTIPorDefecto(SistemaQuickTableContext ctx)
