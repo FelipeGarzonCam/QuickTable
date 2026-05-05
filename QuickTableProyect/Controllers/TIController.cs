@@ -10,7 +10,7 @@ using QuickTableProyect.Aplicacion;
 
 namespace QuickTableProyect.Interface
 {
-    
+
     public class AdminRequest
     {
         public int adminId { get; set; }
@@ -40,14 +40,14 @@ namespace QuickTableProyect.Interface
             public string codigoSesion { get; set; }
         }
 
-        
+
         public IActionResult Index()
         {
             ViewBag.NombreEmpleado = HttpContext.Session.GetString("Nombre");
             return View();
         }
 
-        
+
         public IActionResult GestionTarjetas()
         {
             var tarjetas = _ctx.TarjetasRC.Include(t => t.Empleado)
@@ -57,7 +57,7 @@ namespace QuickTableProyect.Interface
         }
 
 
-       
+
         [HttpGet]
         public IActionResult CrearAdministrador() => View();
 

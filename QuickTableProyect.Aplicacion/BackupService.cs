@@ -46,14 +46,25 @@ namespace QuickTableProyect.Aplicacion
                     return (false, "No se pudo obtener la cadena de conexión", null);
                 }
 
-                string rutaBackup = rutaCompleta.Replace("\\", "\\\\");
+                string rutaBackup = rutaCompleta;
 
                 using (var connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
 
+                    // Crear el directorio desde SQL Server para que la cuenta de servicio tenga acceso
+                    try
+                    {
+                        using var cmdDir = new SqlCommand(
+                            $"EXEC master.dbo.xp_create_subdir N'{_backupPath.Replace("'", "''")}'",
+                            connection);
+                        cmdDir.CommandTimeout = 15;
+                        cmdDir.ExecuteNonQuery();
+                    }
+                    catch { /* xp_create_subdir puede no estar disponible o el directorio ya existe */ }
+
                     var backupCommand = $@"
-                        BACKUP DATABASE [{_databaseName}] 
+                        BACKUP DATABASE [{_databaseName}]
                         TO DISK = N'{rutaBackup}'
                         WITH FORMAT, INIT, NAME = 'QuickTable-Full Backup', SKIP, NOREWIND, NOUNLOAD;";
 
@@ -270,7 +281,7 @@ namespace QuickTableProyect.Aplicacion
                 System.Diagnostics.Debug.WriteLine($"Backups guardados en memoria: {backupsGuardados.Count}");
 
                 var connectionString = _configuration.GetConnectionString("DefaultConnection");
-                var rutaBackup = backup.RutaArchivo.Replace("\\", "\\\\");
+                var rutaBackup = backup.RutaArchivo;
 
                 //  PASO 2: CERRAR ENTITY FRAMEWORK 
                 try
@@ -507,14 +518,14 @@ namespace QuickTableProyect.Aplicacion
                     backup.RutaCertificado != "N/A" &&
                     File.Exists(backup.RutaCertificado))
                 {
-                    File.Delete(backup.RutaCertificado);
+                    try { File.Delete(backup.RutaCertificado); } catch { /* creado por SQL Server service account */ }
                 }
 
                 if (!string.IsNullOrEmpty(backup.RutaClavePrivada) &&
                     backup.RutaClavePrivada != "N/A" &&
                     File.Exists(backup.RutaClavePrivada))
                 {
-                    File.Delete(backup.RutaClavePrivada);
+                    try { File.Delete(backup.RutaClavePrivada); } catch { /* creado por SQL Server service account */ }
                 }
 
                 _context.HistorialBackups.Remove(backup);

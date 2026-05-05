@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Gestión de Backups";
 }
 
@@ -22,53 +22,36 @@
     <div class="container-fluid">
         <!-- Estadísticas -->
         <div class="row mb-4">
-            <!-- Espacio Disponible -->
             <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stats-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="stats-icon">
-                        <i class="fas fa-hdd"></i>
-                    </div>
+                    <div class="stats-icon"><i class="fas fa-hdd"></i></div>
                     <div class="stats-content">
                         <h6>Espacio Disponible</h6>
                         <h3 id="espacioDisponible">Cargando...</h3>
                     </div>
                 </div>
             </div>
-
-            <!-- Total Backups -->
             <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <div class="stats-icon">
-                        <i class="fas fa-save"></i>
-                    </div>
+                    <div class="stats-icon"><i class="fas fa-save"></i></div>
                     <div class="stats-content">
                         <h6>Total Backups</h6>
                         <h3 id="totalBackups">0</h3>
                     </div>
                 </div>
             </div>
-
-            <!-- Último Backup -->
             <div class="col-lg-3 col-md-6 mb-3">
                 <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                    <div class="stats-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
+                    <div class="stats-icon"><i class="fas fa-clock"></i></div>
                     <div class="stats-content">
                         <h6>Último Backup</h6>
-                        <div id="ultimoBackup">
-                            <small>Sin backups</small>
-                        </div>
+                        <div id="ultimoBackup"><small>Sin backups</small></div>
                     </div>
                 </div>
             </div>
-
-            <!-- Crear Backup -->
             <div class="col-lg-3 col-md-6 mb-3">
-                <div class="stats-card stats-card-action" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" onclick="crearBackup()">
-                    <div class="stats-icon">
-                        <i class="fas fa-plus-circle"></i>
-                    </div>
+                <div class="stats-card stats-card-action" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" data-toggle="modal" data-target="#modalCrearBackup">
+                    <div class="stats-icon"><i class="fas fa-plus-circle"></i></div>
                     <div class="stats-content">
                         <h6>Acción Rápida</h6>
                         <h4>Crear Backup</h4>
@@ -106,7 +89,7 @@
                         </thead>
                         <tbody id="backupsTableBody">
                             <tr>
-                                <td colspan="7" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
                                     <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
                                     <p class="mb-0">Cargando backups...</p>
                                 </td>
@@ -118,6 +101,147 @@
         </div>
     </div>
 </section>
+
+<!-- MODAL: Crear Backup -->
+<div class="modal fade" id="modalCrearBackup" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-dark">
+            <div class="modal-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); border: none;">
+                <h5 class="modal-title text-white font-weight-bold">
+                    <i class="fas fa-plus-circle mr-2"></i>Crear Backup
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Crear una copia de seguridad completa de la base de datos.</p>
+                <div class="form-group">
+                    <label for="observacionesBackup" class="font-weight-bold">
+                        <i class="fas fa-comment mr-1"></i> Observaciones (opcional)
+                    </label>
+                    <textarea id="observacionesBackup"
+                              class="form-control input-dark"
+                              rows="3"
+                              placeholder="Ej: Backup antes de actualización del sistema, backup semanal, etc."
+                              maxlength="500"></textarea>
+                    <small class="form-text text-muted">Máximo 500 caracteres</small>
+                </div>
+                <div id="crearBackupError" class="alert alert-danger d-none">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    <span id="crearBackupErrorMsg"></span>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #4a5568;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-success" id="btnConfirmarCrear" onclick="confirmarCrearBackup()">
+                    <i class="fas fa-check mr-1"></i> Crear Backup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- MODAL: Resultado genérico (éxito / error) -->
+<div class="modal fade" id="modalResultado" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-dark">
+            <div class="modal-header" id="modalResultadoHeader" style="border: none;">
+                <h5 class="modal-title text-white font-weight-bold" id="modalResultadoTitulo"></h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center py-3">
+                <i id="modalResultadoIcono" class="fa-3x mb-3 d-block"></i>
+                <p id="modalResultadoMensaje" class="mb-0"></p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #4a5568;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnCerrarResultado">
+                    <i class="fas fa-times mr-1"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Confirmar Restaurar -->
+<div class="modal fade" id="modalRestaurar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-dark">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); border: none;">
+                <h5 class="modal-title text-white font-weight-bold">
+                    <i class="fas fa-undo-alt mr-2"></i>Restaurar Backup
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Esta acción restaurará la base de datos a este punto.</p>
+                <div class="alert alert-warning mb-0">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Advertencia:</strong> Todos los cambios posteriores se perderán.
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #4a5568;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-warning" id="btnConfirmarRestaurar">
+                    <i class="fas fa-undo mr-1"></i> Sí, restaurar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Restaurando - Procesando -->
+<div class="modal fade" id="modalRestaurando" tabindex="-1" data-backdrop="static" data-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content modal-dark text-center py-4">
+            <div class="modal-body">
+                <i class="fas fa-spinner fa-spin fa-3x mb-3" style="color: #ffc107;"></i>
+                <p class="mb-0 font-weight-bold">Restaurando...</p>
+                <small class="text-muted">Este proceso puede tardar varios minutos</small>
+                <div class="progress mt-3">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Confirmar Eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-dark">
+            <div class="modal-header" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); border: none;">
+                <h5 class="modal-title text-white font-weight-bold">
+                    <i class="fas fa-trash mr-2"></i>Eliminar Backup
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">¿Está seguro? Esta acción no se puede deshacer.</p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid #4a5568;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarEliminar">
+                    <i class="fas fa-trash mr-1"></i> Sí, eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
     .stats-card {
@@ -236,18 +360,59 @@
         font-weight: 600;
     }
 
-    .card-dark {
+    /* Estilos modales oscuros */
+    .modal-dark {
         background: #2d3748;
+        color: #e2e8f0;
+        border: 1px solid #4a5568;
+        border-radius: 12px;
+    }
+
+        .modal-dark .modal-header {
+            border-radius: 11px 11px 0 0;
+        }
+
+        .modal-dark .close {
+            opacity: 0.8;
+            font-size: 1.5rem;
+        }
+
+            .modal-dark .close:hover {
+                opacity: 1;
+            }
+
+    .input-dark {
+        background-color: #1a202c;
+        border: 1px solid #4a5568;
+        color: #e2e8f0;
+        border-radius: 8px;
+    }
+
+        .input-dark:focus {
+            background-color: #1a202c;
+            border-color: #667eea;
+            color: #e2e8f0;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+    .modal-dark .text-muted {
+        color: #a0aec0 !important;
     }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     const nombreEmpleado = '@ViewBag.NombreEmpleado';
+    let backupIdAccion = null;
 
     document.addEventListener('DOMContentLoaded', function () {
         cargarBackups();
         cargarEspacioDisponible();
+
+        // Limpiar error al abrir modal crear
+        $('#modalCrearBackup').on('show.bs.modal', function () {
+            document.getElementById('observacionesBackup').value = '';
+            document.getElementById('crearBackupError').classList.add('d-none');
+        });
     });
 
     function cargarBackups() {
@@ -260,7 +425,7 @@
                 if (data.length === 0) {
                     tbody.innerHTML = `
                         <tr>
-                            <td colspan="7" class="text-center py-4">
+                            <td colspan="8" class="text-center py-4">
                                 <i class="fas fa-inbox fa-3x mb-3 text-muted"></i>
                                 <p class="mb-0">No hay backups disponibles</p>
                             </td>
@@ -298,26 +463,23 @@
                             <button class="btn btn-sm btn-info" onclick="descargarBackup(${backup.id})" title="Descargar">
                                 <i class="fas fa-download"></i>
                             </button>
-                            <button class="btn btn-sm btn-warning" onclick="restaurarBackup(${backup.id})" title="Restaurar">
+                            <button class="btn btn-sm btn-warning" onclick="abrirModalRestaurar(${backup.id})" title="Restaurar">
                                 <i class="fas fa-undo-alt"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger" onclick="eliminarBackup(${backup.id})" title="Eliminar">
+                            <button class="btn btn-sm btn-danger" onclick="abrirModalEliminar(${backup.id})" title="Eliminar">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     `;
-
                     tbody.appendChild(tr);
                 });
-
-
             })
             .catch(error => {
                 console.error('Error:', error);
                 const tbody = document.getElementById('backupsTableBody');
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="7" class="text-center text-danger py-4">
+                        <td colspan="8" class="text-center text-danger py-4">
                             <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
                             <p>Error al cargar los backups</p>
                         </td>
@@ -337,190 +499,147 @@
             });
     }
 
-        function crearBackup() {
-        Swal.fire({
-            title: 'Crear Backup',
-            html: `
-                <p class="mb-3">Crear una copia de seguridad completa de la base de datos</p>
-                <div class="form-group text-left">
-                    <label for="observacionesBackup" class="font-weight-bold">
-                        <i class="fas fa-comment mr-1"></i> Observaciones (opcional)
-                    </label>
-                    <textarea
-                        id="observacionesBackup"
-                        class="form-control"
-                        rows="3"
-                        placeholder="Ej: Backup antes de actualización del sistema, backup semanal, etc."
-                        maxlength="500"
-                    ></textarea>
-                    <small class="form-text text-muted">Máximo 500 caracteres</small>
-                </div>
-            `,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-check mr-1"></i> Crear Backup',
-            cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancelar',
-            showLoaderOnConfirm: true,
-            preConfirm: () => {
-                const observaciones = document.getElementById('observacionesBackup').value.trim();
 
-                return fetch(`/api/backup/crear`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        nombreEmpleado: nombreEmpleado,
-                        observaciones: observaciones
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.success) {
-                        throw new Error(data.message);
-                    }
-                    return data;
-                })
-                .catch(error => {
-                    Swal.showValidationMessage(`Error: ${error.message}`);
-                });
-            },
-            allowOutsideClick: () => !Swal.isLoading()
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Backup Creado',
-                    text: result.value.message,
-                    confirmButtonColor: '#28a745'
-                });
+            function confirmarCrearBackup() {
+        const observaciones = document.getElementById('observacionesBackup').value.trim();
+        const btnConfirmar = document.getElementById('btnConfirmarCrear');
+
+        document.getElementById('crearBackupError').classList.add('d-none');
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Creando...';
+
+        fetch('/api/backup/crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nombreEmpleado: nombreEmpleado,
+                observaciones: observaciones
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            $('#modalCrearBackup').modal('hide');
+            btnConfirmar.disabled = false;
+            btnConfirmar.innerHTML = '<i class="fas fa-check mr-1"></i> Crear Backup';
+
+            if (data.success) {
+                mostrarResultado('success', 'Backup Creado', data.message);
                 cargarBackups();
                 cargarEspacioDisponible();
+            } else {
+                mostrarResultado('error', 'Error', data.message);
             }
+        })
+        .catch(() => {
+            $('#modalCrearBackup').modal('hide');
+            btnConfirmar.disabled = false;
+            btnConfirmar.innerHTML = '<i class="fas fa-check mr-1"></i> Crear Backup';
+            mostrarResultado('error', 'Error de Conexion', 'No se pudo completar la operacion.');
         });
     }
-
-
-    function restaurarBackup(backupId) {
-        Swal.fire({
-            title: '¿Restaurar Backup?',
-            html: `
-                <p class="mb-3">Esta acción restaurará la base de datos a este punto.</p>
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    <strong>Advertencia:</strong> Todos los cambios posteriores se perderán. Evite relizar esta accion durante la jornada, los pedidos activos podrian quedar incompletos o perderse.
-                </div>
-            `,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ffc107',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-undo mr-1"></i> Sí, restaurar',
-            cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire({
-                    title: 'Restaurando...',
-                    html: `
-                        <i class="fas fa-spinner fa-spin fa-3x text-warning mb-3"></i>
-                        <p>Este proceso puede tardar varios minutos...</p>
-                        <div class="progress mt-3">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%"></div>
-                        </div>
-                    `,
-                    allowOutsideClick: false,
-                    showConfirmButton: false
-                });
-
-                fetch('/api/backup/restaurar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        backupId: backupId,
-                        nombreEmpleado: nombreEmpleado
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    Swal.close();
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Restauración Exitosa',
-                            html: `
-                                <p>${data.message}</p>
-                                <p class="text-warning mt-3">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    La aplicación se reiniciará automáticamente en 3 segundos...
-                                </p>
-                            `,
-                            confirmButtonColor: '#28a745',
-                            timer: 3000,
-                            timerProgressBar: true,
-                            showConfirmButton: false,
-                            allowOutsideClick: false
-                        }).then(() => {
-                            window.location.href = '/Login';
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message,
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-                })
-                .catch(error => {
-                    Swal.close();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error de Conexión',
-                        text: 'No se pudo completar la restauración.',
-                        confirmButtonColor: '#dc3545'
-                    });
-                });
-            }
-        });
+    
+    function abrirModalRestaurar(backupId) {
+        backupIdAccion = backupId;
+        $('#modalRestaurar').modal('show');
     }
 
-    function eliminarBackup(backupId) {
-        Swal.fire({
-            title: '¿Eliminar Backup?',
-            text: 'Esta acción no se puede deshacer',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-trash mr-1"></i> Sí, eliminar',
-            cancelButtonText: '<i class="fas fa-times mr-1"></i> Cancelar'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch(`/api/backup/eliminar/${backupId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Eliminado',
-                            text: data.message,
-                            confirmButtonColor: '#28a745'
-                        });
-                        cargarBackups();
-                        cargarEspacioDisponible();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message,
-                            confirmButtonColor: '#dc3545'
-                        });
-                    }
-                });
+    document.getElementById('btnConfirmarRestaurar').addEventListener('click', function () {
+        $('#modalRestaurar').modal('hide');
+        $('#modalRestaurando').modal('show');
+
+        fetch('/api/backup/restaurar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                backupId: backupIdAccion,
+                nombreEmpleado: nombreEmpleado
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            $('#modalRestaurando').modal('hide');
+
+            if (data.success) {
+                mostrarResultado(
+                    'success',
+                    'Restauracion Exitosa',
+                    data.message + ' La aplicacion se reiniciara en 3 segundos...',
+                    function () {
+                        window.location.href = '/Login';
+                    },
+                    3000
+                );
+            } else {
+                mostrarResultado('error', 'Error', data.message);
             }
+        })
+        .catch(() => {
+            $('#modalRestaurando').modal('hide');
+            mostrarResultado('error', 'Error de Conexion', 'No se pudo completar la restauracion.');
         });
+    });
+
+    function abrirModalEliminar(backupId) {
+        backupIdAccion = backupId;
+        $('#modalEliminar').modal('show');
+    }
+
+    document.getElementById('btnConfirmarEliminar').addEventListener('click', function () {
+        $('#modalEliminar').modal('hide');
+
+        fetch(`/api/backup/eliminar/${backupIdAccion}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                mostrarResultado('success', 'Eliminado', data.message);
+                cargarBackups();
+                cargarEspacioDisponible();
+            } else {
+                mostrarResultado('error', 'Error', data.message);
+            }
+        })
+        .catch(() => {
+            mostrarResultado('error', 'Error de Conexion', 'No se pudo eliminar el backup.');
+        });
+    });
+
+    function mostrarResultado(tipo, titulo, mensaje, callback, autoCloseMs) {
+        const header = document.getElementById('modalResultadoHeader');
+        const tituloEl = document.getElementById('modalResultadoTitulo');
+        const iconoEl = document.getElementById('modalResultadoIcono');
+        const mensajeEl = document.getElementById('modalResultadoMensaje');
+        const btnCerrar = document.getElementById('btnCerrarResultado');
+
+        tituloEl.textContent = titulo;
+        mensajeEl.textContent = mensaje;
+
+        if (tipo === 'success') {
+            header.style.background = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+            iconoEl.className = 'fas fa-check-circle fa-3x mb-3 d-block';
+            iconoEl.style.color = '#43e97b';
+        } else {
+            header.style.background = 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)';
+            iconoEl.className = 'fas fa-exclamation-circle fa-3x mb-3 d-block';
+            iconoEl.style.color = '#fa709a';
+        }
+
+        $('#modalResultado').modal('show');
+
+        if (autoCloseMs) {
+            setTimeout(function () {
+                $('#modalResultado').modal('hide');
+                if (callback) callback();
+            }, autoCloseMs);
+            btnCerrar.style.display = 'none';
+        } else {
+            btnCerrar.style.display = '';
+            btnCerrar.onclick = function () {
+                $('#modalResultado').modal('hide');
+                if (callback) callback();
+            };
+        }
     }
 
     function descargarBackup(backupId) {
