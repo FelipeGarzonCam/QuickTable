@@ -293,7 +293,7 @@
     <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // ── Tiempos de referencia: { pedidoId → timestamp ms } ──
+                // ── Tiempos de referencia: { pedidoId → timestamp ms } ──
         var tiemposCreacion = {};
 
         // ── Reloj del header ──
@@ -316,9 +316,7 @@
                 var minutos = Math.floor((ahora - tiemposCreacion[id]) / 60000);
                 var el = document.getElementById('timer-' + id);
                 if (!el) return;
-
                 el.textContent = formatearTiempo(minutos);
-
                 var card = document.getElementById('pedido-' + id);
                 if (!card) return;
                 card.classList.remove('pedido-warning', 'pedido-alert');
@@ -337,7 +335,6 @@
 
         // ── Cargar datos desde servidor ──
         function loadPedidos() {
-            // Pulsar el dot
             var dot = document.getElementById('refreshDot');
             dot.style.opacity = '0.2';
             setTimeout(function() { dot.style.opacity = '1'; }, 400);
@@ -360,7 +357,6 @@
 
             document.getElementById('countNum').textContent = items.length;
 
-            // IDs activos para limpiar tiemposCreacion de los removidos
             var idsActivos = items.map(function(i) { return String(i.id); });
             Object.keys(tiemposCreacion).forEach(function(k) {
                 if (idsActivos.indexOf(k) === -1) delete tiemposCreacion[k];
@@ -375,13 +371,11 @@
                 return;
             }
 
-            // Actualizamos solo las tarjetas que cambiaron; insertamos/removemos las que no existen
             var idsEnDOM = [];
             container.querySelectorAll('.pedido').forEach(function(el) {
                 idsEnDOM.push(el.id.replace('pedido-', ''));
             });
 
-            // Remover tarjetas que ya no están
             idsEnDOM.forEach(function(id) {
                 if (idsActivos.indexOf(id) === -1) {
                     var el = document.getElementById('pedido-' + id);
@@ -391,25 +385,32 @@
 
             items.forEach(function(item) {
                 var idStr = String(item.id);
-                var creacion = new Date(item.fechaCreacion).getTime();
-                tiemposCreacion[idStr] = creacion;
-                var minutos = Math.floor((ahora - creacion) / 60000);
+
+                var fechaReferencia;
+                if (item.fechaUltimaEdicion) {
+                    var parsedEdicion = new Date(item.fechaUltimaEdicion);
+                    fechaReferencia = isNaN(parsedEdicion.getTime())
+                        ? new Date(item.fechaCreacion).getTime()
+                        : parsedEdicion.getTime();
+                } else {
+                    fechaReferencia = new Date(item.fechaCreacion).getTime();
+                }
+                tiemposCreacion[idStr] = fechaReferencia;
+
+                var minutos = Math.floor((ahora - fechaReferencia) / 60000);
 
                 var urgencia = '';
                 if (minutos >= 60) urgencia = 'pedido-alert';
                 else if (minutos >= 18) urgencia = 'pedido-warning';
 
-                // ¿Ya existe la tarjeta?
                 var existente = document.getElementById('pedido-' + idStr);
                 if (existente) {
-                    // Solo actualizar clase de urgencia y timer
                     existente.className = 'pedido ' + urgencia;
                     var timerEl = document.getElementById('timer-' + idStr);
                     if (timerEl) timerEl.textContent = formatearTiempo(minutos);
                     return;
                 }
 
-                // Construir items HTML
                 var itemsHTML = item.detalles.map(function(d) {
                     var comentario = (d.comentario && d.comentario.trim())
                         ? '<div class="item-comment">' + escHtml(d.comentario) + '</div>'
@@ -423,12 +424,17 @@
                     '</div>';
                 }).join('');
 
+                var badgeEditado = (item.estado === 'Editado')
+                    ? '<div style="margin-top:4px;"><span style="background:#f0883e;color:#fff;font-size:0.75rem;padding:2px 8px;border-radius:10px;">EDITADO</span></div>'
+                    : '';
+
                 var html =
                     '<div class="pedido ' + urgencia + '" id="pedido-' + idStr + '">' +
                         '<div class="pedido-header">' +
                             '<div class="pedido-mesa-block">' +
                                 '<div class="pedido-mesa">Mesa ' + item.numeroMesa + '</div>' +
                                 '<div class="pedido-id">Pedido #' + item.id + '</div>' +
+                                badgeEditado +
                             '</div>' +
                             '<div class="pedido-timer">' +
                                 '<div class="timer-value" id="timer-' + idStr + '">' + formatearTiempo(minutos) + '</div>' +
@@ -476,7 +482,7 @@
         }
 
         loadPedidos();
-        setInterval(loadPedidos, 15000);   // refrescar datos del servidor cada 15s
+        setInterval(loadPedidos, 4000);
     </script>
 </body>
 </html>

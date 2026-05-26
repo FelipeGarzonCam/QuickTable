@@ -27,7 +27,8 @@ namespace QuickTableProyect.Interface
 
             return View();
         }
-
+ 
+        [HttpGet]
         [HttpGet]
         public IActionResult ObtenerPedidosCocina()
         {
@@ -36,7 +37,11 @@ namespace QuickTableProyect.Interface
                 {
                     id = p.Id,
                     numeroMesa = p.NumeroMesa,
-                    fechaCreacion = p.FechaCreacion,   
+                    fechaCreacion = p.FechaCreacion,
+                    fechaUltimaEdicion = p.FechaUltimaEdicion.HasValue
+                        ? (object)p.FechaUltimaEdicion.Value
+                        : null,
+                    estado = p.Estado,
                     detalles = p.Detalles
                         .Where(d => d.Cantidad > d.CantidadPreparada)
                         .Select(d => new

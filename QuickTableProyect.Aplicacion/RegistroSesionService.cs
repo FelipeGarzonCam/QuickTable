@@ -158,13 +158,9 @@ namespace QuickTableProyect.Aplicacion
                             marcoTarjetaSalida = ultimaSesion.MarcoTarjetaSalida;
 
                             if (marcoTarjetaSalida)
-                            {
                                 anotacion = "Jornada completada con tarjeta";
-                            }
                             else
-                            {
-                                anotacion = "Jornada completada manualmente";
-                            }
+                                anotacion = "Salida sin tarjeta NFC";
                         }
                     }
                     else if (ultimaSesion.FechaHoraDesconexion == "Error al cerrar sesión")

@@ -94,9 +94,17 @@ namespace QuickTableProyect.Aplicacion
                 pedidoExistente.EmpleadoNombre = pedido.EmpleadoNombre;
                 pedidoExistente.NumeroMesa = pedido.NumeroMesa;
 
-                if (pedidoExistente.Estado == "Listo")
+                if (pedidoExistente.Estado == EstadosPedido.Listo || pedidoExistente.Estado == EstadosPedido.Editado)
                 {
-                    pedidoExistente.Estado = "Editado";
+                    pedidoExistente.Estado = EstadosPedido.Editado;
+                    pedidoExistente.FechaUltimaEdicion = DateTime.Now;
+                    pedidoExistente.CocinaListoAt = null; // Resetear para nueva medicion
+                }
+                // Si estaba En Preparacion, solo marca la edicion pero no resetea tiempo
+                else if (pedidoExistente.Estado == EstadosPedido.EnPreparacion)
+                {
+                    pedidoExistente.Estado = EstadosPedido.Editado;
+                    pedidoExistente.FechaUltimaEdicion = DateTime.Now;
                 }
 
                 // Actualizar los detalles del pedido

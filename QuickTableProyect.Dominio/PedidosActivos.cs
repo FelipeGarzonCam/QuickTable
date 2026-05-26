@@ -18,7 +18,9 @@ namespace QuickTableProyect.Dominio
         public DateTime? CocinaListoAt { get; set; }
        
         public DateTime? MeseroAceptadoAt { get; set; }
-        public DateTime FechaCreacion { get; set; }    
+        public DateTime FechaCreacion { get; set; }
+
+        public DateTime? FechaUltimaEdicion { get; set; }
         public string MedioPago { get; set; }
 
     }

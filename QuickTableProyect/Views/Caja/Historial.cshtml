@@ -8,13 +8,9 @@
     }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
-
-    .collapse {
-        transition: height 0.35s ease;
-    }
 
     .clickable-card {
         cursor: pointer;
@@ -26,13 +22,178 @@
         margin-right: 1% !important;
     }
 
-    /* Vista tabla */
-    #tablaHistorial { font-size: 0.88rem; }
-    #tablaHistorial .fila-pedido { cursor: pointer; }
-    #tablaHistorial .fila-pedido:hover { filter: brightness(0.96); }
-    #tablaHistorial .detalle-fila td { padding: 0; background: #f8f9fa; }
-    .btn-vista.active { box-shadow: inset 0 2px 4px rgba(0,0,0,0.25); }
+    .btn-vista.active {
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.25);
+    }
+
+    /* ── TABLA PRINCIPAL ── */
+    #tablaHistorial {
+        font-size: 0.9rem;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        #tablaHistorial thead tr th {
+            background: linear-gradient(135deg, #1f6feb, #1a56db);
+            color: #fff;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border: none;
+            padding: 12px 14px;
+            white-space: nowrap;
+        }
+
+            #tablaHistorial thead tr th:first-child {
+                border-radius: 8px 0 0 0;
+            }
+
+            #tablaHistorial thead tr th:last-child {
+                border-radius: 0 8px 0 0;
+            }
+
+        #tablaHistorial tbody tr.fila-pedido {
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+
+            #tablaHistorial tbody tr.fila-pedido:hover {
+                background: rgba(31,111,235,0.07);
+                transform: translateX(2px);
+            }
+
+            #tablaHistorial tbody tr.fila-pedido td {
+                padding: 11px 14px;
+                vertical-align: middle;
+                border-top: none;
+                border-bottom: 1px solid rgba(0,0,0,0.06);
+            }
+
+    /* ── FILA DETALLE ── */
+    .detalle-fila td {
+        padding: 0 !important;
+        border: none !important;
+    }
+
+    .detalle-inner {
+        padding: 20px 24px;
+        background: #f0f4ff;
+        border-left: 4px solid #1f6feb;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .dark-mode .detalle-inner {
+        background: #1c2333;
+        border-color: #1f6feb;
+    }
+
+    /* ── TABLA INTERNA DE DETALLES ── */
+    .detalle-inner .tabla-items {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+    }
+
+        .detalle-inner .tabla-items thead th {
+            background: #1f6feb;
+            color: #fff;
+            padding: 8px 12px;
+            font-weight: 600;
+            border: none;
+        }
+
+        .detalle-inner .tabla-items tbody tr {
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+            transition: background 0.1s;
+        }
+
+            .detalle-inner .tabla-items tbody tr:hover {
+                background: rgba(31,111,235,0.06);
+            }
+
+        .detalle-inner .tabla-items tbody td {
+            padding: 8px 12px;
+            border: none;
+        }
+
+        .detalle-inner .tabla-items tbody tr:last-child {
+            border-bottom: none;
+        }
+
+    /* ── CARD RESUMEN ── */
+    .resumen-box {
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .dark-mode .resumen-box {
+        background: #212529;
+        border-color: #374151;
+    }
+
+    .resumen-box .resumen-header {
+        background: linear-gradient(135deg, #1f6feb, #1a56db);
+        color: #fff;
+        padding: 8px 14px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+    }
+
+    .resumen-box .resumen-body {
+        padding: 12px 14px;
+    }
+
+    .resumen-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 0;
+        font-size: 0.88rem;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .resumen-row:last-child {
+            border-bottom: none;
+        }
+
+        .resumen-row.total-row {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #28a745;
+            padding-top: 8px;
+            margin-top: 4px;
+            border-top: 2px solid #28a745;
+            border-bottom: none;
+        }
+
+    .dark-mode .resumen-row {
+        border-color: rgba(255,255,255,0.07);
+    }
+
+    /* ── BADGE METODO PAGO ── */
+    .badge-pago {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+    }
+
+    /* ── NUMERO PEDIDO ── */
+    .pedido-num {
+        display: inline-block;
+        background: linear-gradient(135deg, #1f6feb, #1a56db);
+        color: #fff;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
 </style>
+
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
@@ -52,7 +213,7 @@
 
     <section class="content">
         <div class="container-fluid">
-            <!-- Botón Volver -->
+
             <div class="row mb-3">
                 <div class="col-12">
                     <a href="@Url.Action("Index", "Caja")" class="btn btn-info">
@@ -66,7 +227,7 @@
                 <div class="col-12">
                     <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros de Búsqueda</h3>
+                            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros de Busqueda</h3>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -75,7 +236,7 @@
                                     <input type="date" class="form-control" id="fechaFiltro">
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="pedidoIdFiltro">Número de Pedido:</label>
+                                    <label for="pedidoIdFiltro">Numero de Pedido:</label>
                                     <input type="number" class="form-control" id="pedidoIdFiltro" min="1">
                                 </div>
                                 <div class="col-md-3">
@@ -109,28 +270,38 @@
             <div class="row justify-content-center" id="pedidosContainer"></div>
 
             <!-- Vista tabla -->
-            <div id="tablaContainer" style="display:none; overflow-x:auto;">
-                <table class="table table-bordered table-hover table-sm mb-0" id="tablaHistorial">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>#</th>
-                            <th>Mesa</th>
-                            <th>Mesero</th>
-                            <th>Fecha / Hora</th>
-                            <th>Pago</th>
-                            <th class="text-right">Total</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="tablaBody"></tbody>
-                </table>
+            <div id="tablaContainer" style="display:none;">
+                <div class="card card-outline card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-table mr-2"></i>Historial de Pedidos</h3>
+                        <div class="card-tools">
+                            <span class="badge badge-primary px-3 py-2" id="badgeTotalTabla">0 registros</span>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div style="overflow-x:auto;">
+                            <table class="table mb-0" id="tablaHistorial">
+                                <thead>
+                                    <tr>
+                                        <th style="width:70px;">Pedido</th>
+                                        <th>Mesa</th>
+                                        <th>Mesero</th>
+                                        <th>Fecha / Hora</th>
+                                        <th style="width:100px;">Pago</th>
+                                        <th class="text-right" style="width:130px;">Total</th>
+                                        <th style="width:40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Paginación -->
+            <!-- Paginacion -->
             <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center">
-                    <!-- Paginación se cargará aquí -->
-                </ul>
+                <ul class="pagination justify-content-center"></ul>
             </nav>
         </div>
     </section>
@@ -138,7 +309,7 @@
 
 @section Scripts {
     <script>
-        var _currentView = 'cards';
+               var _currentView = 'cards';
 
         function cambiarVista(vista) {
             _currentView = vista;
@@ -153,15 +324,226 @@
                 $('#btnVistaTabla').removeClass('btn-outline-primary').addClass('btn-primary active');
                 $('#btnVistaCards').removeClass('btn-primary active').addClass('btn-outline-primary');
             }
-            // re-render con los datos actuales si ya están cargados
             if (window._ultimosDatos) renderPedidosGlobal(window._ultimosDatos);
+        }
+
+        function renderPedidosGlobal(items) {
+            if (_currentView === 'tabla') renderTabla(items);
+            else renderCards(items);
+        }
+
+        function fmtPeso(val) {
+            return '$' + parseFloat(val).toLocaleString('es-CO');
+        }
+
+        function parseFecha(item) {
+            if (!item.fechaHora) return 'Sin fecha';
+            var partes = item.fechaHora.split(' ');
+            var fechaPartes = partes[0].split('/');
+            var horaPartes = partes[1].split(':');
+            var d = new Date(
+                parseInt(fechaPartes[2]),
+                parseInt(fechaPartes[1]) - 1,
+                parseInt(fechaPartes[0]),
+                parseInt(horaPartes[0]),
+                parseInt(horaPartes[1])
+            );
+            return d.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                 + ' ' + d.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+        }
+
+               function renderTabla(items) {
+            var tbody = $('#tablaBody');
+            tbody.empty();
+            $('#badgeTotalTabla').text(items.length + ' registros');
+
+            if (items.length === 0) {
+                tbody.html('<tr><td colspan="7"><div class="alert alert-info mb-0"><i class="fas fa-info-circle"></i> No hay pedidos en el historial</div></td></tr>');
+                return;
+            }
+
+            $.each(items, function (i, item) {
+                var metodoPagoColor = item.metodoPago === 'Efectivo' ? 'success' :
+                                      item.metodoPago === 'Tarjeta'  ? 'info'    : 'warning';
+                var total = fmtPeso(parseFloat(item.total) + parseFloat(item.propina));
+                var fecha = parseFecha(item);
+
+                var detalleRows = '';
+                $.each(item.detalles, function (j, d) {
+                    detalleRows += '<tr>' +
+                        '<td>' + d.nombre + '</td>' +
+                        '<td class="text-center"><span style="background:#1f6feb;color:#fff;border-radius:4px;padding:1px 7px;font-weight:700;">' + d.cantidad + '</span></td>' +
+                        '<td class="text-right">' + fmtPeso(d.valor) + '</td>' +
+                        '<td class="text-right font-weight-bold">' + fmtPeso(d.subtotal) + '</td>' +
+                        '</tr>';
+                });
+
+                var propinaRow = parseFloat(item.propina) > 0
+                    ? '<div class="resumen-row"><span>Propina:</span><span>' + fmtPeso(item.propina) + '</span></div>'
+                    : '';
+
+                var efectivoRows = item.metodoPago === 'Efectivo'
+                    ? '<div class="resumen-row"><span>Efectivo recibido:</span><span>' + fmtPeso(item.efectivoRecibido) + '</span></div>' +
+                      '<div class="resumen-row"><span>Cambio:</span><span class="text-warning font-weight-bold">' + fmtPeso(item.cambio) + '</span></div>'
+                    : '';
+
+                var fila = '<tr class="fila-pedido" onclick="toggleFilaTabla(' + item.id + ')">' +
+                    '<td><span class="pedido-num">#' + item.id + '</span></td>' +
+                    '<td><i class="fas fa-chair text-muted mr-1"></i>Mesa ' + item.numeroMesa + '</td>' +
+                    '<td><i class="fas fa-user text-muted mr-1"></i>' + item.meseroNombre + '</td>' +
+                    '<td style="white-space:nowrap;"><i class="fas fa-clock text-muted mr-1"></i>' + fecha + '</td>' +
+                    '<td><span class="badge badge-pago badge-' + metodoPagoColor + '">' + item.metodoPago + '</span></td>' +
+                    '<td class="text-right"><strong class="text-success" style="font-size:1rem;">' + total + '</strong></td>' +
+                    '<td class="text-center"><i class="fas fa-chevron-down text-muted" id="ico-t-' + item.id + '" style="transition:transform 0.2s;"></i></td>' +
+                    '</tr>';
+
+                var filaDetalle = '<tr class="detalle-fila" id="det-t-' + item.id + '" style="display:none;">' +
+                    '<td colspan="7">' +
+                        '<div class="detalle-inner">' +
+                            '<div class="row">' +
+                                '<div class="col-md-8 mb-3 mb-md-0">' +
+                                    '<p class="font-weight-bold mb-2" style="font-size:0.85rem;letter-spacing:0.05em;color:#1f6feb;"><i class="fas fa-list mr-1"></i>ITEMS DEL PEDIDO</p>' +
+                                    '<table class="tabla-items">' +
+                                        '<thead><tr><th>Plato</th><th class="text-center">Cant.</th><th class="text-right">Valor unit.</th><th class="text-right">Subtotal</th></tr></thead>' +
+                                        '<tbody>' + detalleRows + '</tbody>' +
+                                    '</table>' +
+                                '</div>' +
+                                '<div class="col-md-4">' +
+                                    '<div class="resumen-box">' +
+                                        '<div class="resumen-header"><i class="fas fa-receipt mr-1"></i>RESUMEN</div>' +
+                                        '<div class="resumen-body">' +
+                                            '<div class="resumen-row"><span>Subtotal:</span><span>' + fmtPeso(item.subtotal) + '</span></div>' +
+                                            '<div class="resumen-row"><span>IVA (19%):</span><span>' + fmtPeso(item.iva) + '</span></div>' +
+                                            propinaRow +
+                                            '<div class="resumen-row total-row"><span>Total:</span><span>' + total + '</span></div>' +
+                                            efectivoRows +
+                                        '</div>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>' +
+                    '</tr>';
+
+                tbody.append(fila + filaDetalle);
+            });
+        }
+
+        function renderCards(items) {
+            var estadosExpandidos = {};
+            var container = $('#pedidosContainer');
+
+            $('.collapse').each(function () {
+                var id = $(this).attr('id');
+                estadosExpandidos[id] = $(this).hasClass('show');
+            });
+
+            container.empty();
+
+            if (items.length === 0) {
+                container.append('<div class="col-12"><div class="alert alert-info"><i class="fas fa-info-circle"></i> No hay pedidos en el historial</div></div>');
+                return;
+            }
+
+            $.each(items, function (index, item) {
+                var metodoPagoColor = item.metodoPago === 'Efectivo' ? 'success' :
+                                      item.metodoPago === 'Tarjeta'  ? 'info'    : 'primary';
+                var collapseId = 'historial-' + item.id;
+                var isExpanded = estadosExpandidos[collapseId] || false;
+                var fechaFormato = parseFecha(item);
+                var totalFmt = fmtPeso(parseFloat(item.total) + parseFloat(item.propina));
+
+                var detalleRows = '';
+                $.each(item.detalles, function (j, d) {
+                    detalleRows += '<tr>' +
+                        '<td>' + d.nombre + '</td>' +
+                        '<td class="text-center">' + d.cantidad + '</td>' +
+                        '<td class="text-right">' + fmtPeso(d.valor) + '</td>' +
+                        '<td class="text-right">' + fmtPeso(d.subtotal) + '</td>' +
+                        '</tr>';
+                });
+
+                var propinaRow = parseFloat(item.propina) > 0
+                    ? '<div class="row"><div class="col-6">Propina:</div><div class="col-6 text-right">' + fmtPeso(item.propina) + '</div></div>'
+                    : '';
+
+                var efectivoRows = item.metodoPago === 'Efectivo'
+                    ? '<hr><div class="row"><div class="col-6">Efectivo Recibido:</div><div class="col-6 text-right">' + fmtPeso(item.efectivoRecibido) + '</div></div>' +
+                      '<div class="row"><div class="col-6">Cambio:</div><div class="col-6 text-right">' + fmtPeso(item.cambio) + '</div></div>'
+                    : '';
+
+                var card = '<div class="col-12 col-sm-6 col-lg-4 mb-3">' +
+                    '<div class="card card-info card-outline">' +
+                        '<div class="card-header clickable-card" data-historial-id="' + item.id + '">' +
+                            '<h3 class="card-title"><i class="fas fa-utensils"></i> Mesa ' + item.numeroMesa + '</h3>' +
+                            '<div class="card-tools">' +
+                                '<span class="badge badge-' + metodoPagoColor + '">' + item.metodoPago + '</span>' +
+                                '<button type="button" class="btn btn-tool toggle-icon">' +
+                                    '<i class="fas fa-angle-' + (isExpanded ? 'up' : 'down') + '"></i>' +
+                                '</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="card-body p-3 clickable-card" data-historial-id="' + item.id + '">' +
+                            '<dl class="row mb-0">' +
+                                '<dt class="col-5">Pedido #:</dt><dd class="col-7">' + item.id + '</dd>' +
+                                '<dt class="col-5">Mesero:</dt><dd class="col-7">' + item.meseroNombre + '</dd>' +
+                                '<dt class="col-5">Fecha:</dt><dd class="col-7">' + fechaFormato + '</dd>' +
+                                '<dt class="col-5">Total:</dt><dd class="col-7"><strong class="text-success">' + totalFmt + '</strong></dd>' +
+                            '</dl>' +
+                        '</div>' +
+                        '<div id="' + collapseId + '" class="collapse' + (isExpanded ? ' show' : '') + '">' +
+                            '<div class="card-body pt-0">' +
+                                '<hr>' +
+                                '<h6 class="text-bold">Detalles del Pedido:</h6>' +
+                                '<table class="table table-sm table-hover">' +
+                                    '<thead class="thead-light"><tr><th>Plato</th><th class="text-center">Cant.</th><th class="text-right">Valor</th><th class="text-right">Subtotal</th></tr></thead>' +
+                                    '<tbody>' + detalleRows + '</tbody>' +
+                                '</table>' +
+                                '<div class="row"><div class="col-6">Subtotal:</div><div class="col-6 text-right">' + fmtPeso(item.subtotal) + '</div></div>' +
+                                '<div class="row"><div class="col-6">IVA (19%):</div><div class="col-6 text-right">' + fmtPeso(item.iva) + '</div></div>' +
+                                propinaRow +
+                                '<hr>' +
+                                '<div class="row"><div class="col-6"><strong>Total Pagado:</strong></div><div class="col-6 text-right"><strong class="text-success">' + totalFmt + '</strong></div></div>' +
+                                efectivoRows +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+                container.append(card);
+            });
+
+            $('.clickable-card').off('click').on('click', function () {
+                var historialId = $(this).data('historial-id');
+                var collapseElement = $('#historial-' + historialId);
+                var toggleIcon = $(this).closest('.card').find('.toggle-icon i');
+                collapseElement.collapse('toggle');
+                setTimeout(function () {
+                    if (collapseElement.hasClass('show')) {
+                        toggleIcon.removeClass('fa-angle-down').addClass('fa-angle-up');
+                    } else {
+                        toggleIcon.removeClass('fa-angle-up').addClass('fa-angle-down');
+                    }
+                }, 100);
+            });
+        }
+
+        function toggleFilaTabla(id) {
+            var row = $('#det-t-' + id);
+            var ico = $('#ico-t-' + id);
+            if (row.is(':visible')) {
+                row.hide();
+                ico.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+            } else {
+                row.show();
+                ico.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+            }
         }
 
         $(document).ready(function () {
             var pageNumber = 1;
             var pageSize = 8;
             var totalPedidos = 0;
-            var estadosExpandidos = {};
 
             function loadPedidos() {
                 var fecha = $('#fechaFiltro').val();
@@ -186,238 +568,7 @@
                     },
                     error: function (xhr, status, error) {
                         console.log('Error al cargar datos: ' + error);
-                        toastr.error('Error al cargar el historial');
                     }
-                });
-            }
-
-            function parseFecha(item) {
-                if (!item.fechaHora) return 'Sin fecha';
-                var partes = item.fechaHora.split(' ');
-                var fechaPartes = partes[0].split('/');
-                var horaPartes = partes[1].split(':');
-                var d = new Date(
-                    parseInt(fechaPartes[2]),
-                    parseInt(fechaPartes[1]) - 1,
-                    parseInt(fechaPartes[0]),
-                    parseInt(horaPartes[0]),
-                    parseInt(horaPartes[1])
-                );
-                return d.toLocaleDateString('es-CO', { day:'2-digit', month:'2-digit', year:'numeric' })
-                     + ' ' + d.toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' });
-            }
-
-            function renderPedidosGlobal(items) {
-                if (_currentView === 'tabla') renderTabla(items);
-                else renderCards(items);
-            }
-
-            function renderTabla(items) {
-                var tbody = $('#tablaBody');
-                tbody.empty();
-                if (items.length === 0) {
-                    tbody.html('<tr><td colspan="7"><div class="alert alert-info mb-0"><i class="fas fa-info-circle"></i> No hay pedidos en el historial</div></td></tr>');
-                    return;
-                }
-                $.each(items, function(i, item) {
-                    var metodoPagoColor = item.metodoPago === 'Efectivo' ? 'success' :
-                                         item.metodoPago === 'Tarjeta'  ? 'info'    : 'primary';
-                    var total = parseFloat(item.total + item.propina).toLocaleString('es-CO');
-                    var fecha = parseFecha(item);
-
-                    // Detalle items
-                    var detalleItems = item.detalles.map(function(d) {
-                        return `<tr>
-                            <td>${d.nombre}</td>
-                            <td class="text-center">${d.cantidad}</td>
-                            <td class="text-right">$${parseFloat(d.valor).toLocaleString('es-CO')}</td>
-                            <td class="text-right">$${parseFloat(d.subtotal).toLocaleString('es-CO')}</td>
-                        </tr>`;
-                    }).join('');
-
-                    var propinaRow = item.propina > 0
-                        ? `<div class="row"><div class="col-6">Propina:</div><div class="col-6 text-right">$${parseFloat(item.propina).toLocaleString('es-CO')}</div></div>`
-                        : '';
-                    var efectivoRows = item.metodoPago === 'Efectivo'
-                        ? `<hr><div class="row"><div class="col-6">Efectivo recibido:</div><div class="col-6 text-right">$${parseFloat(item.efectivoRecibido).toLocaleString('es-CO')}</div></div>
-                           <div class="row"><div class="col-6">Cambio:</div><div class="col-6 text-right">$${parseFloat(item.cambio).toLocaleString('es-CO')}</div></div>`
-                        : '';
-
-                    tbody.append(`
-                        <tr class="fila-pedido" onclick="toggleFilaTabla(${item.id}, this)">
-                            <td><strong>#${item.id}</strong></td>
-                            <td>Mesa ${item.numeroMesa}</td>
-                            <td>${item.meseroNombre}</td>
-                            <td style="white-space:nowrap;">${fecha}</td>
-                            <td><span class="badge badge-${metodoPagoColor}">${item.metodoPago}</span></td>
-                            <td class="text-right text-success font-weight-bold">$${total}</td>
-                            <td class="text-center"><i class="fas fa-chevron-down text-muted" id="ico-t-${item.id}"></i></td>
-                        </tr>
-                        <tr class="detalle-fila" id="det-t-${item.id}" style="display:none;">
-                            <td colspan="7">
-                                <div class="p-3">
-                                    <table class="table table-sm table-hover mb-2">
-                                        <thead><tr><th>Plato</th><th class="text-center">Cant.</th><th class="text-right">Valor</th><th class="text-right">Subtotal</th></tr></thead>
-                                        <tbody>${detalleItems}</tbody>
-                                    </table>
-                                    <div class="row justify-content-end" style="font-size:0.9rem;">
-                                        <div class="col-auto text-right">
-                                            <div>Subtotal: <strong>$${parseFloat(item.subtotal).toLocaleString('es-CO')}</strong></div>
-                                            <div>IVA (19%): <strong>$${parseFloat(item.iva).toLocaleString('es-CO')}</strong></div>
-                                            ${propinaRow}
-                                            <hr class="my-1">
-                                            <div><strong>Total: <span class="text-success">$${total}</span></strong></div>
-                                            ${efectivoRows}
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                    `);
-                });
-            }
-
-            function renderPedidos(items) {
-                renderCards(items);
-            }
-
-            function renderCards(items) {
-                var container = $('#pedidosContainer');
-
-                // Guardar estados expandidos
-                $('.collapse').each(function() {
-                    var id = $(this).attr('id');
-                    estadosExpandidos[id] = $(this).hasClass('show');
-                });
-
-                container.empty();
-
-                if (items.length === 0) {
-                    container.append('<div class="col-12"><div class="alert alert-info"><i class="fas fa-info-circle"></i> No hay pedidos en el historial</div></div>');
-                    return;
-                }
-
-                $.each(items, function (index, item) {
-                    var metodoPagoColor = item.metodoPago === 'Efectivo' ? 'success' :
-                                         item.metodoPago === 'Tarjeta' ? 'info' : 'primary';
-                    var collapseId = 'historial-' + item.id;
-                    var isExpanded = estadosExpandidos[collapseId] || false;
-
-                    var fechaFormato = parseFecha(item);
-
-
-
-                    var card = `
-                        <div class="col-12 col-sm-6 col-lg-4 mb-3">
-                            <div class="card card-info card-outline">
-                                <div class="card-header clickable-card" data-historial-id="${item.id}">
-                                    <h3 class="card-title">
-                                        <i class="fas fa-utensils"></i> Mesa ${item.numeroMesa}
-                                    </h3>
-                                    <div class="card-tools">
-                                        <span class="badge badge-${metodoPagoColor}">${item.metodoPago}</span>
-                                        <button type="button" class="btn btn-tool toggle-icon">
-                                            <i class="fas fa-angle-${isExpanded ? 'up' : 'down'}"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body p-3 clickable-card" data-historial-id="${item.id}">
-                                    <dl class="row mb-0">
-                                        <dt class="col-5">Pedido #:</dt>
-                                        <dd class="col-7">${item.id}</dd>
-
-                                        <dt class="col-5">ID Mesero:</dt>
-                                        <dd class="col-7">${item.meseroId}</dd>
-
-                                        <dt class="col-5">Mesero:</dt>
-                                        <dd class="col-7">${item.meseroNombre}</dd>
-
-                                        <dt class="col-5">Fecha:</dt>
-                                        <dd class="col-7">${fechaFormato}</dd>
-
-                                        <dt class="col-5">Total:</dt>
-                                        <dd class="col-7"><strong class="text-lg">$${parseFloat(item.total + item.propina).toLocaleString('es-CO')}</strong></dd>
-                                    </dl>
-                                </div>
-                                <div id="${collapseId}" class="collapse ${isExpanded ? 'show' : ''}">
-                                    <div class="card-body pt-0">
-                                        <hr>
-                                        <h6 class="text-bold">Detalles del Pedido:</h6>
-                                        <table class="table table-sm table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Plato</th>
-                                                    <th class="text-center">Cant.</th>
-                                                    <th class="text-right">Valor</th>
-                                                    <th class="text-right">Subtotal</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                ${item.detalles.map(d => `
-                                                    <tr>
-                                                        <td>${d.nombre}</td>
-                                                        <td class="text-center">${d.cantidad}</td>
-                                                        <td class="text-right">$${parseFloat(d.valor).toLocaleString('es-CO')}</td>
-                                                        <td class="text-right">$${parseFloat(d.subtotal).toLocaleString('es-CO')}</td>
-                                                    </tr>
-                                                `).join('')}
-                                            </tbody>
-                                        </table>
-                                        <div class="totales">
-                                            <div class="row">
-                                                <div class="col-6">Subtotal:</div>
-                                                <div class="col-6 text-right">$${parseFloat(item.subtotal).toLocaleString('es-CO')}</div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-6">IVA (19%):</div>
-                                                <div class="col-6 text-right">$${parseFloat(item.iva).toLocaleString('es-CO')}</div>
-                                            </div>
-                                            ${item.propina > 0 ? `
-                                            <div class="row">
-                                                <div class="col-6">Propina:</div>
-                                                <div class="col-6 text-right">$${parseFloat(item.propina).toLocaleString('es-CO')}</div>
-                                            </div>
-                                            ` : ''}
-                                            <hr>
-                                            <div class="row">
-                                                <div class="col-6"><strong>Total Pagado:</strong></div>
-                                                <div class="col-6 text-right"><strong class="text-lg">$${parseFloat(item.total + item.propina).toLocaleString('es-CO')}</strong></div>
-                                            </div>
-                                            ${item.metodoPago === 'Efectivo' ? `
-                                            <hr>
-                                            <div class="row">
-                                                <div class="col-6">Efectivo Recibido:</div>
-                                                <div class="col-6 text-right">$${parseFloat(item.efectivoRecibido).toLocaleString('es-CO')}</div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-6">Cambio:</div>
-                                                <div class="col-6 text-right">$${parseFloat(item.cambio).toLocaleString('es-CO')}</div>
-                                            </div>
-                                            ` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    container.append(card);
-                });
-
-                // Event listeners para acordeón
-                $('.clickable-card').off('click').on('click', function(e) {
-                    var historialId = $(this).data('historial-id');
-                    var collapseElement = $('#historial-' + historialId);
-                    var toggleIcon = $(this).closest('.card').find('.toggle-icon i');
-
-                    collapseElement.collapse('toggle');
-
-                    setTimeout(function() {
-                        if (collapseElement.hasClass('show')) {
-                            toggleIcon.removeClass('fa-angle-down').addClass('fa-angle-up');
-                        } else {
-                            toggleIcon.removeClass('fa-angle-up').addClass('fa-angle-down');
-                        }
-                    }, 100);
                 });
             }
 
@@ -427,74 +578,32 @@
                 pagination.empty();
 
                 var firstPageItem = $('<li class="page-item ' + (pageNumber === 1 ? 'disabled' : '') + '"><a class="page-link" href="#">Primera</a></li>');
-                firstPageItem.click(function () {
-                    if (pageNumber !== 1) {
-                        pageNumber = 1;
-                        loadPedidos();
-                    }
-                });
+                firstPageItem.click(function () { if (pageNumber !== 1) { pageNumber = 1; loadPedidos(); } });
                 pagination.append(firstPageItem);
 
                 var prevPageItem = $('<li class="page-item ' + (pageNumber === 1 ? 'disabled' : '') + '"><a class="page-link" href="#">Anterior</a></li>');
-                prevPageItem.click(function () {
-                    if (pageNumber > 1) {
-                        pageNumber--;
-                        loadPedidos();
-                    }
-                });
+                prevPageItem.click(function () { if (pageNumber > 1) { pageNumber--; loadPedidos(); } });
                 pagination.append(prevPageItem);
 
-                var maxPagesToShow = 5;
-                var startPage = Math.max(1, pageNumber - Math.floor(maxPagesToShow / 2));
-                var endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-
+                var startPage = Math.max(1, pageNumber - 2);
+                var endPage = Math.min(totalPages, startPage + 4);
                 for (var i = startPage; i <= endPage; i++) {
                     var li = $('<li class="page-item ' + (i === pageNumber ? 'active' : '') + '"><a class="page-link" href="#">' + i + '</a></li>');
-                    li.click(function () {
-                        pageNumber = parseInt($(this).text());
-                        loadPedidos();
-                    });
+                    li.click(function () { pageNumber = parseInt($(this).find('a').text()); loadPedidos(); });
                     pagination.append(li);
                 }
 
                 var nextPageItem = $('<li class="page-item ' + (pageNumber === totalPages ? 'disabled' : '') + '"><a class="page-link" href="#">Siguiente</a></li>');
-                nextPageItem.click(function () {
-                    if (pageNumber < totalPages) {
-                        pageNumber++;
-                        loadPedidos();
-                    }
-                });
+                nextPageItem.click(function () { if (pageNumber < totalPages) { pageNumber++; loadPedidos(); } });
                 pagination.append(nextPageItem);
 
-                var lastPageItem = $('<li class="page-item ' + (pageNumber === totalPages ? 'disabled' : '') + '"><a class="page-link" href="#">Última</a></li>');
-                lastPageItem.click(function () {
-                    if (pageNumber !== totalPages) {
-                        pageNumber = totalPages;
-                        loadPedidos();
-                    }
-                });
+                var lastPageItem = $('<li class="page-item ' + (pageNumber === totalPages ? 'disabled' : '') + '"><a class="page-link" href="#">Ultima</a></li>');
+                lastPageItem.click(function () { if (pageNumber !== totalPages) { pageNumber = totalPages; loadPedidos(); } });
                 pagination.append(lastPageItem);
             }
 
-            $('#btnBuscar').click(function () {
-                pageNumber = 1;
-                loadPedidos();
-            });
-
+            $('#btnBuscar').click(function () { pageNumber = 1; loadPedidos(); });
             loadPedidos();
         });
-
-        function toggleFilaTabla(id) {
-            var row = $('#det-t-' + id);
-            var ico = $('#ico-t-' + id);
-            if (row.is(':visible')) {
-                row.hide();
-                ico.removeClass('fa-chevron-up').addClass('fa-chevron-down');
-            } else {
-                row.show();
-                ico.removeClass('fa-chevron-down').addClass('fa-chevron-up');
-            }
-        }
     </script>
-
 }

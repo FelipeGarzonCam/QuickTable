@@ -331,29 +331,21 @@ namespace QuickTableProyect.Interface
                                      !c.Usado &&
                                      c.Expiracion > DateTime.Now);
 
-       
-        public IActionResult Logout()
-        {
-            int? regId = HttpContext.Session.GetInt32("RegistroSesionId");
-            if (regId.HasValue) _sesionService.RegistrarDesconexion(regId.Value);
 
-            // Limpiar códigos 2FA pendientes del usuario al hacer logout
+        public IActionResult Logout()
+        {         
             string empIdString = HttpContext.Session.GetString("Id");
             if (int.TryParse(empIdString, out int empId))
             {
                 var codigosPendientes = _ctx.Codigos2FA
                     .Where(c => c.EmpleadoId == empId && !c.Confirmado)
                     .ToList();
-
-                foreach (var codigo in codigosPendientes)
-                {
-                    codigo.Usado = true;
-                }
+                _ctx.Codigos2FA.RemoveRange(codigosPendientes);
                 _ctx.SaveChanges();
             }
 
             HttpContext.Session.Clear();
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Login");
         }
 
         //  Limpieza mejorada de códigos vencidos
