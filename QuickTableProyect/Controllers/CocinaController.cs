@@ -27,26 +27,22 @@ namespace QuickTableProyect.Interface
 
             return View();
         }
- 
-        [HttpGet]
+
         [HttpGet]
         public IActionResult ObtenerPedidosCocina()
         {
             var pedidos = _pedidoService.ObtenerPedidosPendientesCocina()
+                .OrderByDescending(p => p.FechaCreacion)
                 .Select(p => new
                 {
                     id = p.Id,
                     numeroMesa = p.NumeroMesa,
                     fechaCreacion = p.FechaCreacion,
-                    fechaUltimaEdicion = p.FechaUltimaEdicion.HasValue
-                        ? (object)p.FechaUltimaEdicion.Value
-                        : null,
-                    estado = p.Estado,
                     detalles = p.Detalles
                         .Where(d => d.Cantidad > d.CantidadPreparada)
                         .Select(d => new
                         {
-                            d.Nombre,
+                            nombre = d.Nombre,
                             comentario = d.Comentario,
                             cantidadPendiente = d.Cantidad - d.CantidadPreparada
                         })

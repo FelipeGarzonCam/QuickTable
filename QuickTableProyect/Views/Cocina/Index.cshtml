@@ -287,13 +287,13 @@
     </div>
 
     <!-- ── GRID ── -->
-    <div id="pedidosContainer"></div>
+    <div id="pedidosContainer"></div>    
 
     <script src="~/AdminLTE/plugins/jquery/jquery.min.js"></script>
     <script src="~/AdminLTE/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-
+    <script src="~/AdminLTE/dist/js/adminlte.min.js"></script>
+    <script src="~/AdminLTE/plugins/fontawesome-free/js/all.min.js"></script>
     <script>
-                // ── Tiempos de referencia: { pedidoId → timestamp ms } ──
         var tiemposCreacion = {};
 
         // ── Reloj del header ──
@@ -304,24 +304,24 @@
             h = h % 12 || 12;
             var m = String(ahora.getMinutes()).padStart(2, '0');
             var s = String(ahora.getSeconds()).padStart(2, '0');
-            document.getElementById('headerClock').textContent = h + ':' + m + ':' + s + ' ' + ampm;
+            var el = document.getElementById('headerClock');
+            if (el) el.textContent = h + ':' + m + ':' + s + ' ' + ampm;
         }
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // ── Actualizar timers localmente cada segundo ──
+        // ── Timers locales cada segundo ──
         function actualizarTimers() {
             var ahora = Date.now();
-            Object.keys(tiemposCreacion).forEach(function(id) {
+            Object.keys(tiemposCreacion).forEach(function (id) {
                 var minutos = Math.floor((ahora - tiemposCreacion[id]) / 60000);
-                var el = document.getElementById('timer-' + id);
-                if (!el) return;
-                el.textContent = formatearTiempo(minutos);
+                var timerEl = document.getElementById('timer-' + id);
+                if (timerEl) timerEl.textContent = formatearTiempo(minutos);
                 var card = document.getElementById('pedido-' + id);
                 if (!card) return;
-                card.classList.remove('pedido-warning', 'pedido-alert');
-                if (minutos >= 60) card.classList.add('pedido-alert');
-                else if (minutos >= 18) card.classList.add('pedido-warning');
+                card.className = 'pedido';
+                if (minutos >= 60) card.className = 'pedido pedido-alert';
+                else if (minutos >= 18) card.className = 'pedido pedido-warning';
             });
         }
         setInterval(actualizarTimers, 1000);
@@ -333,21 +333,39 @@
             return h + 'h ' + m + 'min';
         }
 
-        // ── Cargar datos desde servidor ──
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function buildItemsHTML(detalles) {
+            return detalles.map(function (d) {
+                var comentario = (d.comentario && d.comentario.trim())
+                    ? '<div class="item-comment">' + escHtml(d.comentario) + '</div>'
+                    : '';
+                return '<div class="item-row">' +
+                    '<div class="item-qty">' + d.cantidadPendiente + '</div>' +
+                    '<div class="item-info">' +
+                        '<div class="item-name">' + escHtml(d.nombre) + '</div>' +
+                        comentario +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        // ── Cargar desde servidor ──
         function loadPedidos() {
             var dot = document.getElementById('refreshDot');
-            dot.style.opacity = '0.2';
-            setTimeout(function() { dot.style.opacity = '1'; }, 400);
+            if (dot) { dot.style.opacity = '0.2'; setTimeout(function () { dot.style.opacity = '1'; }, 400); }
 
             $.ajax({
                 url: '@Url.Action("ObtenerPedidosCocina", "Cocina")',
                 type: 'GET',
-                success: function(data) {
-                    renderPedidos(data);
-                },
-                error: function() {
-                    console.error('Error al cargar pedidos de cocina');
-                }
+                success: function (data) { renderPedidos(data); },
+                error: function () { console.error('Error al cargar pedidos de cocina'); }
             });
         }
 
@@ -355,11 +373,18 @@
             var container = document.getElementById('pedidosContainer');
             var ahora = Date.now();
 
-            document.getElementById('countNum').textContent = items.length;
+            var countEl = document.getElementById('countNum');
+            if (countEl) countEl.textContent = items.length;
 
-            var idsActivos = items.map(function(i) { return String(i.id); });
-            Object.keys(tiemposCreacion).forEach(function(k) {
-                if (idsActivos.indexOf(k) === -1) delete tiemposCreacion[k];
+            var idsActivos = items.map(function (i) { return String(i.id); });
+
+            // Eliminar cards que ya no esten activas
+            Object.keys(tiemposCreacion).forEach(function (k) {
+                if (idsActivos.indexOf(k) === -1) {
+                    delete tiemposCreacion[k];
+                    var el = document.getElementById('pedido-' + k);
+                    if (el) el.remove();
+                }
             });
 
             if (items.length === 0) {
@@ -371,79 +396,49 @@
                 return;
             }
 
-            var idsEnDOM = [];
-            container.querySelectorAll('.pedido').forEach(function(el) {
-                idsEnDOM.push(el.id.replace('pedido-', ''));
-            });
+            // Limpiar empty state si existe
+            var empty = document.getElementById('emptyState');
+            if (empty) empty.remove();
 
-            idsEnDOM.forEach(function(id) {
-                if (idsActivos.indexOf(id) === -1) {
-                    var el = document.getElementById('pedido-' + id);
-                    if (el) el.remove();
-                }
-            });
-
-            items.forEach(function(item) {
+            items.forEach(function (item) {
                 var idStr = String(item.id);
+                var fechaRef = new Date(item.fechaCreacion).getTime();
+                tiemposCreacion[idStr] = fechaRef;
 
-                var fechaReferencia;
-                if (item.fechaUltimaEdicion) {
-                    var parsedEdicion = new Date(item.fechaUltimaEdicion);
-                    fechaReferencia = isNaN(parsedEdicion.getTime())
-                        ? new Date(item.fechaCreacion).getTime()
-                        : parsedEdicion.getTime();
-                } else {
-                    fechaReferencia = new Date(item.fechaCreacion).getTime();
-                }
-                tiemposCreacion[idStr] = fechaReferencia;
-
-                var minutos = Math.floor((ahora - fechaReferencia) / 60000);
-
+                var minutos = Math.floor((ahora - fechaRef) / 60000);
                 var urgencia = '';
                 if (minutos >= 60) urgencia = 'pedido-alert';
                 else if (minutos >= 18) urgencia = 'pedido-warning';
 
                 var existente = document.getElementById('pedido-' + idStr);
                 if (existente) {
+                    // Actualizar clase de urgencia
                     existente.className = 'pedido ' + urgencia;
+                    // Actualizar timer
                     var timerEl = document.getElementById('timer-' + idStr);
                     if (timerEl) timerEl.textContent = formatearTiempo(minutos);
+                    // Actualizar items (cubre ediciones)
+                    var itemsDiv = existente.querySelector('.pedido-items');
+                    if (itemsDiv) itemsDiv.innerHTML = buildItemsHTML(item.detalles);
                     return;
                 }
 
-                var itemsHTML = item.detalles.map(function(d) {
-                    var comentario = (d.comentario && d.comentario.trim())
-                        ? '<div class="item-comment">' + escHtml(d.comentario) + '</div>'
-                        : '';
-                    return '<div class="item-row">' +
-                        '<div class="item-qty">' + d.cantidadPendiente + '</div>' +
-                        '<div class="item-info">' +
-                            '<div class="item-name">' + escHtml(d.nombre) + '</div>' +
-                            comentario +
-                        '</div>' +
-                    '</div>';
-                }).join('');
-
-                var badgeEditado = (item.estado === 'Editado')
-                    ? '<div style="margin-top:4px;"><span style="background:#f0883e;color:#fff;font-size:0.75rem;padding:2px 8px;border-radius:10px;">EDITADO</span></div>'
-                    : '';
-
+                // Construir card nueva con las clases exactas del CSS actual
                 var html =
                     '<div class="pedido ' + urgencia + '" id="pedido-' + idStr + '">' +
                         '<div class="pedido-header">' +
                             '<div class="pedido-mesa-block">' +
                                 '<div class="pedido-mesa">Mesa ' + item.numeroMesa + '</div>' +
                                 '<div class="pedido-id">Pedido #' + item.id + '</div>' +
-                                badgeEditado +
                             '</div>' +
                             '<div class="pedido-timer">' +
                                 '<div class="timer-value" id="timer-' + idStr + '">' + formatearTiempo(minutos) + '</div>' +
                                 '<div class="timer-label">en cocina</div>' +
                             '</div>' +
                         '</div>' +
-                        '<div class="pedido-items">' + itemsHTML + '</div>' +
-                        '<button class="btn-listo" onclick="marcarListo(' + item.id + ', this)">' +
-                            '<i class="fas fa-check mr-2"></i> MARCAR LISTO' +
+                        '<div class="pedido-items">' + buildItemsHTML(item.detalles) + '</div>' +
+                        '<button class="btn-listo" id="btn-' + idStr + '" onclick="marcarListo(' + item.id + ', this)">' +
+                            '<i class="fas fa-check"></i> MARCAR LISTO' +
                         '</button>' +
                     '</div>';
 
@@ -453,36 +448,28 @@
 
         function marcarListo(pedidoId, btn) {
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Enviando...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
             $.ajax({
                 url: '@Url.Action("MarcarPedidoListo", "Cocina")',
                 type: 'POST',
                 data: { pedidoId: pedidoId },
-                success: function(response) {
+                success: function (response) {
                     if (response.success) {
                         loadPedidos();
                     } else {
                         btn.disabled = false;
-                        btn.innerHTML = '<i class="fas fa-check mr-2"></i> MARCAR LISTO';
+                        btn.innerHTML = '<i class="fas fa-check"></i> MARCAR LISTO';
                     }
                 },
-                error: function() {
+                error: function () {
                     btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check mr-2"></i> MARCAR LISTO';
+                    btn.innerHTML = '<i class="fas fa-check"></i> MARCAR LISTO';
                 }
             });
         }
 
-        function escHtml(str) {
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-        }
-
         loadPedidos();
-        setInterval(loadPedidos, 4000);
+        setInterval(loadPedidos, 2000);
     </script>
 </body>
 </html>

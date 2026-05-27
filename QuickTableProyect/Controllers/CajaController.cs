@@ -93,6 +93,7 @@ namespace QuickTableProyect.Interface
         public IActionResult ObtenerPedidosActivos()
         {
             var pedidos = _pedidoService.ObtenerPedidosActivos()
+                .OrderByDescending(p => p.FechaCreacion)
                 .Select(p => new
                 {
                     id = p.Id,
@@ -115,6 +116,7 @@ namespace QuickTableProyect.Interface
 
             return Json(pedidos);
         }
+
         [HttpPost]
         public IActionResult FinalizarPedido(int pedidoId, decimal propina, string metodoPago, decimal? efectivoRecibido, decimal? cambio)
         {

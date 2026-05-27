@@ -7,13 +7,13 @@ namespace QuickTableProyect.Persistencia.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
-    public sealed partial class PrimeraNOBORAR : IMigrationMetadata
+    public sealed partial class PrimeraNOBORRAR : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(PrimeraNOBORAR));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(PrimeraNOBORRAR));
         
         string IMigrationMetadata.Id
         {
-            get { return "202605262032556_PrimeraNOBORAR"; }
+            get { return "202605272145162_PrimeraNOBORRAR"; }
         }
         
         string IMigrationMetadata.Source
